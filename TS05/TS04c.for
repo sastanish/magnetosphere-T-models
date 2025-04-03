@@ -1,16 +1,23 @@
-
 c
 c====================================================================================
 c
 c
       SUBROUTINE T04_s (IOPT,PARMOD,PS,X,Y,Z,BX,BY,BZ)
 c
-c  ASSEMBLED:  MARCH 28, 2025;
-
-c  Purpose: This code is a python compliant wrapper for the TS04c magnetospheric
-c       code of N. A. Tsyganeko.  Minimal modification has been preformed in
-c       order to allow the subroutine T04_s to be used within python to
-c       cacluclate the magnetic field pointwise.  
+c  ASSEMBLED:  MARCH 25, 2004;
+C  UPDATED:  AUGUST 2 & 31, DECEMBER 27, 2004.
+c  LATEST MODIFICATIONS/BUGS REMOVED:
+c
+C  (1) MARCH 14, 2005:  79 -> 69  (LINE 94; might cause compilation problems with some Fortran compilers)
+c
+C  (2) JUNE 24, 2006:  REPLACED COEFFICIENTS IN
+c       (i)   DATA statement in FUNCTION AP,
+C       (ii)  DATA C_SY statement in SUBROUTINE FULL_RC, and
+c       (iii) DATA A statement in SUBROUTINE T04_s.
+C  This correction was needed due to a bug found in the symmetric ring current module.
+c   Its impact can be significant (up to ~20 nT) only in the innermost magnetosphere (R<=2)
+c      and only for strongly disturbed conditions; otherwise, the change in the model field
+c      does not exceed a few percent.
 c
 c--------------------------------------------------------------------
 C   A DATA-BASED MODEL OF THE EXTERNAL (I.E., WITHOUT EARTH'S CONTRIBUTION) PART OF THE
@@ -73,11 +80,6 @@ C
      * 0.581168,1.15070,0.843004,0.394732,0.846509,0.916555,0.550920,
      * 0.180725,0.898772,0.387365,2.26596,1.29123,0.436819,1.28211,
      * 1.33199,.405553,1.6229,.699074,1.26131,2.42297,.537116,.619441/
-
-!!!!!!!!!!!!! This block informs the numpy wrapper of the correct in/out !!!!!!
-!f2py intent(in) IOPT,PARMOD,PS,X,Y,Z
-!f2py intent(out) BX,BY,BZ
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
       DATA IOPGEN,IOPTT,IOPB,IOPR/0,0,0,0/
 C

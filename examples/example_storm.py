@@ -9,7 +9,7 @@ from multiprocessing import Pool
 # All of the computation is done in serial, parallization only allows is to 
 # compute many different times at once
 
-Nproc = 2
+Nproc = 1
 
 # The fortran codes are loaded through the Tsyganenko_wrapper module.
 ##########
@@ -162,11 +162,13 @@ def compute(line):
     # If you wish to calculate the reconnection metrics, uncomment
     # the following function call
 
-    recon_metrics(ds)
+#    recon_metrics(ds)
 
     return
 
+compute(omni_data[10])
+
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-with Pool(Nproc) as comp_pool:
-    comp_pool.map(compute,omni_data[0:8])
+#with Pool(Nproc) as comp_pool:
+#    comp_pool.map(compute,omni_data[0:8])

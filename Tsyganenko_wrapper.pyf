@@ -19,7 +19,7 @@ python module Tsyganenko_wrapper ! in
                 integer, optional,check(shape(z, 0) == nz),depend(z), intent(hide) :: nz=shape(z, 0)
             end subroutine run_ts05
             subroutine run_igrf_dipole(iyear,iday,ihour,imin,isec,vx_gse,vy_gse,vz_gse,x_gsw,y_gsw,z_gsw,hx_gsw,hy_gsw,hz_gsw,nx,ny,nz) ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90:models
-                use geopack, only : igrf_gsw_08,recalc_08
+                use geopack_dipoles, only : recalc_08, igrf_gsw_08
                 integer, intent(in) :: iyear
                 integer, intent(in) :: iday
                 integer, intent(in) :: ihour
@@ -39,7 +39,7 @@ python module Tsyganenko_wrapper ! in
                 integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw), intent(hide) :: nz=shape(z_gsw, 0)
             end subroutine run_igrf_dipole
             subroutine run_dipole(iyear,iday,ihour,imin,isec,vx_gse,vy_gse,vz_gse,x_gsw,y_gsw,z_gsw,hx_gsw,hy_gsw,hz_gsw,nx,ny,nz) ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90:models
-                use geopack, only : dip_08,recalc_08
+                use geopack, only : dip_08, recalc_08
                 integer, intent(in) :: iyear
                 integer, intent(in) :: iday
                 integer, intent(in) :: ihour

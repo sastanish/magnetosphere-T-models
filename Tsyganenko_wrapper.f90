@@ -34,7 +34,7 @@ contains
   subroutine run_igrf_dipole(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse, &
                              x_gsw, y_gsw, z_gsw, hx_gsw, hy_gsw, hz_gsw, nx, ny, nz)
 
-    use geopack, only : IGRF_GSW_08, RECALC_08
+    use geopack, only : RECALC_08, IGRF_GSW_08
 
     integer :: nx, ny, nz
     integer :: i, j, k
@@ -43,12 +43,11 @@ contains
     real(8) :: xx,yy,zz,hhx,hhy,hhz !dummy variables
     real(8) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
     real(8) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
-
-    call RECALC_08(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse)
-
+    
     hhx = 0.0
     hhy = 0.0
     hhz = 0.0
+    call RECALC_08(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse)
     do i = 1,nx
       xx = x_gsw(i)
       do j = 1,ny
@@ -78,11 +77,10 @@ contains
     real(8) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
     real(8) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
 
-    call RECALC_08(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse)
-
     hhx = 0.0
     hhy = 0.0
     hhz = 0.0
+    call RECALC_08(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse)
     do i = 1,nx
       xx = x_gsw(i)
       do j = 1,ny

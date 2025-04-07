@@ -52,9 +52,9 @@ c  documentation file GEOPACK-2008.DOC.
 c
 c----------------------------------------------------------------------------------
 c
+c
       MODULE GEOPACK
       CONTAINS
-
       SUBROUTINE IGRF_GSW_08 (XGSW,YGSW,ZGSW,HXGSW,HYGSW,HZGSW)
 c
 C  CALCULATES COMPONENTS OF THE MAIN (INTERNAL) GEOMAGNETIC FIELD IN THE GEOCENTRIC SOLAR-WIND

@@ -12,6 +12,8 @@ This collection of files is a bare-bones python wrapper of the TS05 solar field 
     - The original [TS04c.for](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/magnetic_field/ts05/) model code.  The only modification was  to wrap the included subroutines inside a Module interface.
  - *geopack.f*
     - As above, this is the original [geopack.f](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/coordinate_systems/geopack) file. The only modification was to wrap the included subroutines inside a Module interface.
+ - *reconnection_metrics.f90*
+    - An alternative implementation of the reconnection metrics computation written purely in fortran F90.  Requires the netcdf fortran library to work.
 
 ## How to compile/install
 
@@ -28,3 +30,5 @@ python -m numpy.f2py -c TS04c.for geopack.f Tsyganenko_wrapper.pyf Tsyganenko_wr
 within this directory.  This should generate a module file entitled *Tsyganenko_wrapper.cpython-313-x86_64-linux-gnu.so* or something similar. This module file can now be imported into python. For how to use, see the example storm directory.
 
 **NOTE:** Do not move this file around. If you wish to call this package in another directory, use a system link to point to this file in place.  Ie, *ln -s PATH_TO_MODULE CURRENT_DIR/.*
+
+To compile the *reconnection_metrics.f90* module, use ``` nf-config --fflags --flibs ``` to find links to netcdf-fortran libraries.  The ```calculate_metrics(filename)``` can then be used to read in a netcdf file from the *Tsynenko Wrapper* and then write out the current and first three terms of the reconnection metric.  See the examples directory for an example of a fortran code that loops through a timeseries of field data.

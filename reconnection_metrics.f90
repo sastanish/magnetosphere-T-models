@@ -7,6 +7,31 @@ module reconnection_metrics
 
 contains
 
+  subroutine init_no_file(xin,yin,zin,bxin,byin,bzin)
+    real(8), dimension(:,:,:), intent(in) :: bxin,byin,bzin
+    real(8), dimension(:), intent(in) :: xin,yin,zin
+
+    nx = size(xin)
+    ny = size(yin)
+    nz = size(zin)
+
+    ! Allocate data in ram
+    allocate(x(nx))
+    allocate(y(ny))
+    allocate(z(nz))
+    allocate(bx(nz,ny,nx))
+    allocate(by(nz,ny,nx))
+    allocate(bz(nz,ny,nx))
+
+    x = xin
+    y = yin
+    z = zin
+    bx = bxin
+    by = byin
+    bz = bzin
+
+  end subroutine init_no_file
+
   subroutine read_netcdf_field_file(filename)
     ! Note, this subroutine assumes that the layout of the netcdf file
     ! as generated from the Tsynenko model.
@@ -51,22 +76,22 @@ contains
 
   end subroutine read_netcdf_field_file
 
-  subroutine write_netcdf_metric_file(filename,dat_name,datx,daty,datz,magdat)
+  subroutine write_netcdf_vector(filename,dat_name,datx,daty,datz)
     ! Assumes you wish to write out some calculated vector quantity and it's magnitude
     ! on the same mesh as the original magnetic field file.  
 
     use netcdf
 
-    real(8), dimension(nz,ny,nx), intent(in) :: datx,daty,datz,magdat
+    real(8), dimension(nz,ny,nx), intent(in) :: datx,daty,datz
     character(*), intent(in) :: filename
     character(*), intent(in) :: dat_name
     integer :: nc_id
 
     integer :: id_nc,xdim_id,ydim_id,zdim_id
-    integer :: x_id,y_id,z_id,dx_id,dy_id,dz_id,dm_id
+    integer :: x_id,y_id,z_id,dx_id,dy_id,dz_id
     integer, dimension(3) :: dim_ids
 
-    call check(nf90_create(filename, NF90_CLOBBER, id_nc))
+    call check(nf90_create(filename, NF90_NETCDF4, id_nc))
 
     ! setup dimensions
     call check(nf90_def_dim(id_nc, "x", nx, xdim_id))
@@ -80,10 +105,9 @@ contains
 
     dim_ids = (/ zdim_id,ydim_id,xdim_id /)
 
-    call check(nf90_def_var(id_nc, dat_name//"x", NF90_DOUBLE, dim_ids, dx_id))
-    call check(nf90_def_var(id_nc, dat_name//"y", NF90_DOUBLE, dim_ids, dy_id))
-    call check(nf90_def_var(id_nc, dat_name//"z", NF90_DOUBLE, dim_ids, dz_id))
-    call check(nf90_def_var(id_nc, "mag_"//dat_name, NF90_DOUBLE, dim_ids, dm_id))
+    call check(nf90_def_var(id_nc, dat_name//"x", NF90_DOUBLE, dim_ids, dx_id, deflate_level=7))
+    call check(nf90_def_var(id_nc, dat_name//"y", NF90_DOUBLE, dim_ids, dy_id, deflate_level=7))
+    call check(nf90_def_var(id_nc, dat_name//"z", NF90_DOUBLE, dim_ids, dz_id, deflate_level=7))
 
     call check(nf90_enddef(id_nc))
 
@@ -95,310 +119,509 @@ contains
     call check(nf90_put_var(id_nc, dx_id, datx))
     call check(nf90_put_var(id_nc, dy_id, daty))
     call check(nf90_put_var(id_nc, dz_id, datz))
-    call check(nf90_put_var(id_nc, dm_id, magdat))
 
     call check(nf90_close(id_nc))
 
-  end subroutine write_netcdf_metric_file
+  end subroutine write_netcdf_vector
 
-  subroutine compute_current(filename, jx,jy,jz,mag_j)
+  subroutine write_netcdf_scalar(filename,data_name,data)
+    ! Writes a scalar quantity on the same mesh as the 
+    ! original magnetic field file.  
 
-    real(8), intent(inout), dimension(nz,ny,nx) :: jx, jy, jz, mag_j
+    use netcdf
 
-    integer :: ix, iy, iz
-    integer :: ixp, ixm, iyp, iym, izp, izm
-    real(8) :: hx, hy, hz
+    real(8), dimension(nz,ny,nx), intent(in) :: data
+    character(*), intent(in) :: filename, data_name
+    integer :: nc_id
+
+    integer :: id_nc,xdim_id,ydim_id,zdim_id
+    integer :: x_id,y_id,z_id,data_id
+    integer, dimension(3) :: dim_ids
+
+    call check(nf90_create(filename, NF90_NETCDF4, id_nc))
+
+    ! setup dimensions
+    call check(nf90_def_dim(id_nc, "x", nx, xdim_id))
+    call check(nf90_def_dim(id_nc, "y", ny, ydim_id))
+    call check(nf90_def_dim(id_nc, "z", nz, zdim_id))
+
+    ! create variables for data
+    call check(nf90_def_var(id_nc, "x", NF90_DOUBLE, xdim_id, x_id))
+    call check(nf90_def_var(id_nc, "y", NF90_DOUBLE, ydim_id, y_id))
+    call check(nf90_def_var(id_nc, "z", NF90_DOUBLE, zdim_id, z_id))
+
+    dim_ids = (/ zdim_id,ydim_id,xdim_id /)
+
+    call check(nf90_def_var(id_nc, data_name, NF90_DOUBLE, dim_ids, data_id,deflate_level=7))
+
+    call check(nf90_enddef(id_nc))
+
+    ! Write data
+
+    call check(nf90_put_var(id_nc, x_id, x))
+    call check(nf90_put_var(id_nc, y_id, y))
+    call check(nf90_put_var(id_nc, z_id, z))
+    call check(nf90_put_var(id_nc, data_id, data))
+
+    call check(nf90_close(id_nc))
+
+  end subroutine write_netcdf_scalar
+
+  subroutine compute_current(filename,jx,jy,jz,write_data)
 
     character(*), intent(in) :: filename
+    logical, optional, intent(inout) :: write_data
+
+    real(8), dimension(:,:,:), intent(out) :: jx, jy, jz
+
+    integer :: ix, iy, iz
+    real(8) :: hx, hy, hz
+    integer :: r(3,3) !9-point stencil
+
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
 
     ! We assume that the grid spacing is uniform
     hx = abs(x(2) - x(1))
     hy = abs(y(2) - y(1))
     hz = abs(z(2) - z(1))
 
-    ! compute current via second order central diff
+    ! compute internal current via second order central diff
     do ix = 1,nx
-      if (ix==1)  then; ixm=ix; else; ixm=ix-1; endif
-      if (ix==nx) then; ixp=ix; else; ixp=ix+1; endif
+      if (ix==1) then; r(:,3) = [1, 2, 3];
+      else if (ix==nx) then; r(:,3) = [nx-2, nx-1, nx];
+      else; r(:,3) = [ix-1, ix, ix+1];
+      end if
+
       do iy = 1,ny
-        if (iy==1)  then; iym=iy; else; iym=iy-1; endif
-        if (iy==ny) then; iyp=iy; else; iyp=iy+1; endif
+        if (iy==1) then; r(:,2) = [1, 2, 3];
+        else if (iy==ny) then; r(:,2) = [ny-2, ny-1, ny];
+        else; r(:,2) = [iy-1, iy, iy+1];
+        end if
+
         do iz = 1,nz
-          if (iz==1)  then; izm=iz; else; izm=iz-1; endif
-          if (iz==nz) then; izp=iz; else; izp=iz+1; endif
+          if (iz==1) then; r(:,1) = [1, 2, 3];
+          else if (iz==nz) then; r(:,1) = [nz-2, nz-1, nz];
+          else; r(:,1) = [iz-1, iz, iz+1];
+          end if
 
-          ! compute
-          jx(iz,iy,ix) = o2_central_diff(hy,bz(iz ,iyp,ix ),bz(iz,iy,ix),bz(iz ,iym,ix ))&
-                       - o2_central_diff(hz,by(izp,iy ,ix ),by(iz,iy,ix),by(izm,iy ,ix ))
-          jy(iz,iy,ix) = o2_central_diff(hz,bx(izp,iy ,ix ),bx(iz,iy,ix),bx(izm,iy ,ix ))&
-                       - o2_central_diff(hx,bz(iz ,iy ,ixp),bz(iz,iy,ix),bz(iz ,iy ,ixm))
-          jz(iz,iy,ix) = o2_central_diff(hx,by(iz ,iy ,ixp),by(iz,iy,ix),by(iz ,iy ,ixm))&
-                       - o2_central_diff(hy,bx(iz ,iyp,ix ),bx(iz,iy,ix),bx(iz ,iym,ix ))
-          mag_j(iz,iy,ix) = sqrt(jx(iz ,iy ,ix)**2 + jy(iz ,iy ,ix)**2 + jz(iz ,iy ,ix)**2 )
+          ! compute J=curl(B)
+          jx(iz,iy,ix) = (bz(r(2,1),r(3,2),r(2,3))     &
+                         -bz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
+                       - (by(r(3,1),r(2,2),r(2,3))     &
+                         -by(r(1,1),r(2,2),r(2,3)))/(2*hz)
 
+          jy(iz,iy,ix) = (bx(r(3,1),r(2,2),r(2,3))     &
+                         -bx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
+                       - (bz(r(2,1),r(2,2),r(3,3))     &
+                         -bz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
+
+          jz(iz,iy,ix) = (by(r(2,1),r(2,2),r(3,3))     &
+                         -by(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+                       - (bx(r(2,1),r(3,2),r(2,3))     &
+                         -bx(r(2,1),r(1,2),r(2,3)))/(2*hy)
         end do
       end do
     end do
 
-    ix = len(filename) !reusing variable here
-    call write_netcdf_metric_file(trim(filename(1:ix-3))//"_j.nc","j",jx,jy,jz,mag_j)
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_vector(trim(filename(1:ix-3))//"_j.nc","j",jx,jy,jz)
+    end if
 
   end subroutine compute_current
 
-  subroutine compute_first_term(filename, jx,jy,jz, mag_j)
+  subroutine compute_lorrenz(filename, jx,jy,jz, write_data)
 
-    real(8), intent(in), dimension(nz,ny,nx) :: jx, jy, jz, mag_j
+    ! Takes the field current as input. Note, this subroutine modifies
+    ! the current arrays as output
+
     character(*), intent(in) :: filename
+    real(8), intent(inout) :: jx(:,:,:), jy(:,:,:), jz(:,:,:)
+    logical, optional, intent(inout) :: write_data
 
-    real(8), dimension(nz,ny,nx) :: cx, cy, cz, mag_c
+    integer :: ix, iy, iz
+    real(8) :: dx, dy, dz !Dummy variables for writing jx,y,z
 
-    integer :: ix, iy, iz, ixp, ixm, iyp, iym, izp, izm
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
+
+    ! F = J cross B (writes back out to jx,y,z)
+    do ix = 1,nx
+      do iy = 1,ny
+        do iz = 1,nz
+
+          dx = jx(iz,iy,ix)
+          dy = jy(iz,iy,ix)
+          dz = jz(iz,iy,ix)
+
+          jx(iz,iy,ix) = dy * bz(iz,iy,ix) - dz * by(iz,iy,ix)
+          jy(iz,iy,ix) = dz * bx(iz,iy,ix) - dx * bz(iz,iy,ix)
+          jz(iz,iy,ix) = dx * by(iz,iy,ix) - dy * bx(iz,iy,ix)
+
+        end do
+      end do
+    end do
+
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_vector(trim(filename(1:ix-3))//"_F.nc","F",jx,jy,jz)
+    end if
+
+  end subroutine compute_lorrenz
+
+  subroutine compute_B_fp(filename, Fx, Fy, Fz, write_data)
+
+    ! Takes the lorrenz force as input. Note, this subroutine modifies
+    ! the Lorrenz arrays as output
+
+    character(*), intent(in) :: filename
+    real(8), intent(inout) :: Fx(:,:,:), Fy(:,:,:), Fz(:,:,:)
+    logical, optional, intent(inout) :: write_data
+
+    integer :: ix, iy, iz
+    real(8) :: hx, hy, hz, mag_F
+    real(8) :: dx, dy, dz !Dummy variables for writing jx,y,z
+
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
+
+    ! We assume that the grid spacing is uniform
+    hx = abs(x(2) - x(1))
+    hy = abs(y(2) - y(1))
+    hz = abs(z(2) - z(1))
+
+    ! B_fperp = B cross F/|F| (writes back out to jx,y,z)
+    do ix = 1,nx
+      do iy = 1,ny
+        do iz = 1,nz
+
+          dx = Fx(iz,iy,ix)
+          dy = Fy(iz,iy,ix)
+          dz = Fz(iz,iy,ix)
+
+          mag_F = sqrt(dx**2 + dy**2 + dz**2)
+
+          Fx(iz,iy,ix) = (dz * by(iz,iy,ix) - dy * bz(iz,iy,ix))/mag_F
+          Fy(iz,iy,ix) = (dx * bz(iz,iy,ix) - dz * bx(iz,iy,ix))/mag_F
+          Fz(iz,iy,ix) = (dy * bx(iz,iy,ix) - dx * by(iz,iy,ix))/mag_F
+
+        end do
+      end do
+    end do
+
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_vector(trim(filename(1:ix-3))//"_B_fp.nc","B_fp",Fx,Fy,Fz)
+    end if
+
+  end subroutine compute_B_fp
+
+  subroutine compute_c2_t1_coeff(filename,c2_t1,write_data)
+
+    character(*), intent(in) :: filename
+    real(8), intent(out) :: c2_t1(nz,ny,nx)
+    logical, optional, intent(inout) :: write_data
+
+    real(8), dimension(nz,ny,nx) :: jx, jy, jz
+    real(8), dimension(nz,ny,nx) :: Fx, Fy, Fz
+    real(8), dimension(nz,ny,nx) :: B_fpx, B_fpy, B_fpz
+
+    integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
-    real(8) :: mag_b
-    real(8) :: Fx, Fy, Fz, mag_F
-    real(8) :: B_fpx, B_fpy, B_fpz, B_fpx_xm, B_fpy_xm, B_fpz_xm, B_fpx_xp, B_fpy_xp, B_fpz_xp, B_fpx_ym, B_fpy_ym, B_fpz_ym, B_fpx_yp, B_fpy_yp, B_fpz_yp, B_fpx_zm, B_fpy_zm, B_fpz_zm, B_fpx_zp, B_fpy_zp, B_fpz_zp
+    real(8) :: mag_b(nz,ny,nx), mag_F(nz,ny,nx), lambda(nz,ny,nx)
     real(8) :: curl_B_fpx, curl_B_fpy, curl_B_fpz
-    real(8) :: lambda, lambda_zp, lambda_zm, lambda_yp, lambda_ym, lambda_xp, lambda_xm
-    real(8) :: omega_1, coeff
+    logical :: dummy
+
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
+
+    dummy = .false.
+
+    call compute_current(filename,jx,jy,jz,dummy)
+    Fx = jx
+    Fy = jy
+    Fz = jz
+    call compute_lorrenz(filename,Fx,Fy,Fz,dummy)
+    B_fpx = Fx
+    B_fpy = Fy
+    B_fpz = Fz
+    call compute_B_fp(filename,B_fpx,B_fpy,B_fpz,dummy)
 
     ! We assume that the grid spacing is uniform
     hx = abs(x(2) - x(1))
     hy = abs(y(2) - y(1))
     hz = abs(z(2) - z(1))
 
-    ! compute current via second order central diff
+    mag_b = sqrt(bx**2 + by**2 + bz**2)
+    mag_F = sqrt(Fx**2 + Fy**2 + Fz**2)
+    lambda = (jx*B_fpx + jy*B_fpy + jz*B_fpz)/mag_b**2
+
     do ix = 1,nx
-      if (ix==1)  then; ixm=ix; else; ixm=ix-1; endif
-      if (ix==nx) then; ixp=ix; else; ixp=ix+1; endif
+      if (ix==1) then; r(:,3) = [1, 2, 3];
+      else if (ix==nx) then; r(:,3) = [nx-2, nx-1, nx];
+      else; r(:,3) = [ix-1, ix, ix+1];
+      end if
+
       do iy = 1,ny
-        if (iy==1)  then; iym=iy; else; iym=iy-1; endif
-        if (iy==ny) then; iyp=iy; else; iyp=iy+1; endif
+        if (iy==1) then; r(:,2) = [1, 2, 3];
+        else if (iy==ny) then; r(:,2) = [ny-2, ny-1, ny];
+        else; r(:,2) = [iy-1, iy, iy+1];
+        end if
+
         do iz = 1,nz
-          if (iz==1)  then; izm=iz; else; izm=iz-1; endif
-          if (iz==nz) then; izp=iz; else; izp=iz+1; endif
+          if (iz==1) then; r(:,1) = [1, 2, 3];
+          else if (iz==nz) then; r(:,1) = [nz-2, nz-1, nz];
+          else; r(:,1) = [iz-1, iz, iz+1];
+          end if
 
-          ! compute
-          Fx = jy(iz,iy,ix) * bz(iz,iy,ix) - jz(iz,iy,ix) * by(iz,iy,ix)
-          Fy = jz(iz,iy,ix) * bx(iz,iy,ix) - jx(iz,iy,ix) * bz(iz,iy,ix)
-          Fz = jx(iz,iy,ix) * by(iz,iy,ix) - jy(iz,iy,ix) * bx(iz,iy,ix)
-          mag_F = sqrt(Fx**2 + Fy**2 + Fz**2)
-          mag_b = sqrt(bx(iz ,iy ,ix)**2 + by(iz ,iy ,ix)**2 + bz(iz ,iy ,ix)**2 )
+          !curl(B_fperp)
+          curl_B_fpx = (B_fpz(r(2,1),r(3,2),r(2,3))     &
+                       -B_fpz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
+                     - (B_fpy(r(3,1),r(2,2),r(2,3))     &
+                       -B_fpy(r(1,1),r(2,2),r(2,3)))/(2*hz)
 
-          B_fpx = (by(iz,iy,ix)*Fz - bz(iz,iy,ix)*Fy)/mag_F
-          B_fpy = (bz(iz,iy,ix)*Fx - bx(iz,iy,ix)*Fz)/mag_F
-          B_fpz = (bx(iz,iy,ix)*Fy - by(iz,iy,ix)*Fx)/mag_F
+          curl_B_fpy = (B_fpx(r(3,1),r(2,2),r(2,3))     &
+                       -B_fpx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
+                     - (B_fpz(r(2,1),r(2,2),r(3,3))     &
+                       -B_fpz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
 
-          B_fpx_zp = (by(izp,iy,ix)*Fz - bz(izp,iy,ix)*Fy)/mag_F
-          B_fpx_zm = (by(izm,iy,ix)*Fz - bz(izm,iy,ix)*Fy)/mag_F
-          B_fpx_yp = (by(iz,iyp,ix)*Fz - bz(iz,iyp,ix)*Fy)/mag_F
-          B_fpx_ym = (by(iz,iym,ix)*Fz - bz(iz,iym,ix)*Fy)/mag_F
-          B_fpy_zp = (bz(izp,iy,ix)*Fx - bx(izp,iy,ix)*Fz)/mag_F
-          B_fpy_zm = (bz(izm,iy,ix)*Fx - bx(izm,iy,ix)*Fz)/mag_F
-          B_fpy_xp = (bz(iz,iy,ixp)*Fx - bx(iz,iy,ixp)*Fz)/mag_F
-          B_fpy_xm = (bz(iz,iy,ixm)*Fx - bx(iz,iy,ixm)*Fz)/mag_F
-          B_fpz_yp = (bx(iz,iyp,ix)*Fy - by(iz,iyp,ix)*Fx)/mag_F
-          B_fpz_ym = (bx(iz,iym,ix)*Fy - by(iz,iym,ix)*Fx)/mag_F
-          B_fpz_xp = (bx(iz,iy,ixp)*Fy - by(iz,iy,ixp)*Fx)/mag_F
-          B_fpz_xm = (bx(iz,iy,ixm)*Fy - by(iz,iy,ixm)*Fx)/mag_F
+          curl_B_fpz = (B_fpy(r(2,1),r(2,2),r(3,3))     &
+                       -B_fpy(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+                     - (B_fpx(r(2,1),r(3,2),r(2,3))     &
+                       -B_fpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
-          curl_B_fpx = o2_central_diff(hy,B_fpz_yp,B_fpz,B_fpz_ym)&
-                     - o2_central_diff(hz,B_fpy_zp,B_fpy,B_fpy_zm)
-          curl_B_fpy = o2_central_diff(hz,B_fpx_zp,B_fpx,B_fpx_zm)&
-                     - o2_central_diff(hx,B_fpz_xp,B_fpz,B_fpz_xm)
-          curl_B_fpz = o2_central_diff(hx,B_fpy_xp,B_fpy,B_fpy_xm)&
-                     - o2_central_diff(hy,B_fpx_yp,B_fpx,B_fpx_ym)
-
-          lambda = (jx(iz,iy,ix)*B_fpx + jy(iz,iy,ix)*B_fpy + jz(iz,iy,ix)*B_fpz )/mag_b**2
-          lambda_zp = (jx(izp,iy,ix)*B_fpx + jy(izp,iy,ix)*B_fpy + jz(izp,iy,ix)*B_fpz )/mag_b**2
-          lambda_zm = (jx(izm,iy,ix)*B_fpx + jy(izm,iy,ix)*B_fpy + jz(izm,iy,ix)*B_fpz )/mag_b**2
-          lambda_yp = (jx(iz,iyp,ix)*B_fpx + jy(iz,iyp,ix)*B_fpy + jz(iz,iyp,ix)*B_fpz )/mag_b**2
-          lambda_ym = (jx(iz,iym,ix)*B_fpx + jy(iz,iym,ix)*B_fpy + jz(iz,iym,ix)*B_fpz )/mag_b**2
-          lambda_xp = (jx(iz,iy,ixp)*B_fpx + jy(iz,iy,ixp)*B_fpy + jz(iz,iy,ixp)*B_fpz )/mag_b**2
-          lambda_xm = (jx(iz,iy,ixm)*B_fpx + jy(iz,iy,ixm)*B_fpy + jz(iz,iy,ixm)*B_fpz )/mag_b**2
-
-          omega_1 = (curl_B_fpx*Fx + curl_B_fpy*Fy + curl_B_fpz*Fz)/mag_F
-
-          coeff = lambda*omega_1 - (&
-                    o2_central_diff(hx,lambda_xp,lambda,lambda_xm)*bx(ix,iy,iz)&
-                  + o2_central_diff(hy,lambda_yp,lambda,lambda_ym)*by(ix,iy,iz)&
-                  + o2_central_diff(hz,lambda_zp,lambda,lambda_zm)*bz(ix,iy,iz))
-
-          cx(iz,iy,ix) = coeff* Fx/(mag_F*mag_b)
-          cy(iz,iy,ix) = coeff* Fy/(mag_F*mag_b)
-          cz(iz,iy,ix) = coeff* Fz/(mag_F*mag_b)
-          mag_c(iz,iy,ix) = coeff
-
+          ! (lambda * curl(B_fperp) dot F/|F| - Grad(lambda) dot B)/|B|
+          c2_t1(iz,iy,ix) = (&
+                            lambda(iz,iy,ix)*(curl_B_fpx*Fx(iz,iy,ix) + curl_B_fpy*Fy(iz,iy,ix) + curl_B_fpz*Fz(iz,iy,ix))/mag_F(iz,iy,ix)&
+                          - ((lambda(r(2,1),r(2,2),r(3,3)) - lambda(r(2,1),r(2,2),r(1,3)))/(2*hx)*bx(iz,iy,ix) &
+                            +(lambda(r(2,1),r(3,2),r(2,3)) - lambda(r(2,1),r(1,2),r(2,3)))/(2*hy)*by(iz,iy,ix) &
+                            +(lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hz)*bz(iz,iy,ix) &
+                            )&
+                            )/mag_b(iz,iy,ix)
         end do
       end do
     end do
 
-    ix = len(filename)! reusing variable here
-    call write_netcdf_metric_file(trim(filename(1:ix-3))//"_C2_t1.nc","t1",cx,cy,cz,mag_c)
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_scalar(trim(filename(1:ix-3))//"_c2_t1.nc","c2_t1",c2_t1)
+    end if
 
-  end subroutine compute_first_term
+  end subroutine compute_c2_t1_coeff
 
-  subroutine compute_second_term(filename, jx,jy,jz, mag_j)
+  subroutine compute_c2_t2_coeff(filename,c2_t2,write_data)
 
-    real(8), intent(in), dimension(nz,ny,nx) :: jx, jy, jz, mag_j
     character(*), intent(in) :: filename
+    real(8), intent(out) :: c2_t2(nz,ny,nx)
+    logical, optional, intent(inout) :: write_data
 
-    real(8), dimension(nz,ny,nx) :: cx, cy, cz, mag_c
+    real(8), dimension(nz,ny,nx) :: jx, jy, jz
+    real(8), dimension(nz,ny,nx) :: Fx, Fy, Fz
+    real(8), dimension(nz,ny,nx) :: B_fpx, B_fpy, B_fpz
 
-    integer :: ix, iy, iz, ixp, ixm, iyp, iym, izp, izm
+    integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
-    real(8) :: mag_b
-    real(8) :: Fx, Fy, Fz, mag_F
-    real(8) :: B_fpx, B_fpy, B_fpz, B_fpx_xm, B_fpy_xm, B_fpz_xm, B_fpx_xp, B_fpy_xp, B_fpz_xp, B_fpx_ym, B_fpy_ym, B_fpz_ym, B_fpx_yp, B_fpy_yp, B_fpz_yp, B_fpx_zm, B_fpy_zm, B_fpz_zm, B_fpx_zp, B_fpy_zp, B_fpz_zp
+    real(8) :: mag_b(nz,ny,nx), mag_F(nz,ny,nx), lambda(nz,ny,nx), alpha(nz,ny,nx)
     real(8) :: curl_B_fpx, curl_B_fpy, curl_B_fpz
-    real(8) :: omega_2, coeff, alpha, lambda
+    logical :: dummy
+
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
+
+    dummy = .false.
+
+    call compute_current(filename,jx,jy,jz,dummy)
+    Fx = jx
+    Fy = jy
+    Fz = jz
+    call compute_lorrenz(filename,Fx,Fy,Fz,dummy)
+    B_fpx = Fx
+    B_fpy = Fy
+    B_fpz = Fz
+    call compute_B_fp(filename,B_fpx,B_fpy,B_fpz,dummy)
 
     ! We assume that the grid spacing is uniform
     hx = abs(x(2) - x(1))
     hy = abs(y(2) - y(1))
     hz = abs(z(2) - z(1))
 
-    ! compute current via second order central diff
+    mag_b = sqrt(bx**2 + by**2 + bz**2)
+    mag_F = sqrt(Fx**2 + Fy**2 + Fz**2)
+    lambda = (jx*B_fpx + jy*B_fpy + jz*B_fpz)/mag_b**2
+    alpha = (jx*bx + jy*by + jz*bz)/mag_b**2
+
     do ix = 1,nx
-      if (ix==1)  then; ixm=ix; else; ixm=ix-1; endif
-      if (ix==nx) then; ixp=ix; else; ixp=ix+1; endif
+      if (ix==1) then; r(:,3) = [1, 2, 3];
+      else if (ix==nx) then; r(:,3) = [nx-2, nx-1, nx];
+      else; r(:,3) = [ix-1, ix, ix+1];
+      end if
+
       do iy = 1,ny
-        if (iy==1)  then; iym=iy; else; iym=iy-1; endif
-        if (iy==ny) then; iyp=iy; else; iyp=iy+1; endif
+        if (iy==1) then; r(:,2) = [1, 2, 3];
+        else if (iy==ny) then; r(:,2) = [ny-2, ny-1, ny];
+        else; r(:,2) = [iy-1, iy, iy+1];
+        end if
+
         do iz = 1,nz
-          if (iz==1)  then; izm=iz; else; izm=iz-1; endif
-          if (iz==nz) then; izp=iz; else; izp=iz+1; endif
+          if (iz==1) then; r(:,1) = [1, 2, 3];
+          else if (iz==nz) then; r(:,1) = [nz-2, nz-1, nz];
+          else; r(:,1) = [iz-1, iz, iz+1];
+          end if
 
-          ! compute
-          Fx = jy(iz,iy,ix) * bz(iz,iy,ix) - jz(iz,iy,ix) * by(iz,iy,ix)
-          Fy = jz(iz,iy,ix) * bx(iz,iy,ix) - jx(iz,iy,ix) * bz(iz,iy,ix)
-          Fz = jx(iz,iy,ix) * by(iz,iy,ix) - jy(iz,iy,ix) * bx(iz,iy,ix)
-          mag_F = sqrt(Fx**2 + Fy**2 + Fz**2)
-          mag_b = sqrt(bx(iz ,iy ,ix)**2 + by(iz ,iy ,ix)**2 + bz(iz ,iy ,ix)**2 )
+          !curl(B_fperp)
+          curl_B_fpx = (B_fpz(r(2,1),r(3,2),r(2,3))     &
+                       -B_fpz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
+                     - (B_fpy(r(3,1),r(2,2),r(2,3))     &
+                       -B_fpy(r(1,1),r(2,2),r(2,3)))/(2*hz)
 
-          B_fpx = (by(iz,iy,ix)*Fz - bz(iz,iy,ix)*Fy)/mag_F
-          B_fpy = (bz(iz,iy,ix)*Fx - bx(iz,iy,ix)*Fz)/mag_F
-          B_fpz = (bx(iz,iy,ix)*Fy - by(iz,iy,ix)*Fx)/mag_F
+          curl_B_fpy = (B_fpx(r(3,1),r(2,2),r(2,3))     &
+                       -B_fpx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
+                     - (B_fpz(r(2,1),r(2,2),r(3,3))     &
+                       -B_fpz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
 
-          B_fpx_zp = (by(izp,iy,ix)*Fz - bz(izp,iy,ix)*Fy)/mag_F
-          B_fpx_zm = (by(izm,iy,ix)*Fz - bz(izm,iy,ix)*Fy)/mag_F
-          B_fpx_yp = (by(iz,iyp,ix)*Fz - bz(iz,iyp,ix)*Fy)/mag_F
-          B_fpx_ym = (by(iz,iym,ix)*Fz - bz(iz,iym,ix)*Fy)/mag_F
-          B_fpy_zp = (bz(izp,iy,ix)*Fx - bx(izp,iy,ix)*Fz)/mag_F
-          B_fpy_zm = (bz(izm,iy,ix)*Fx - bx(izm,iy,ix)*Fz)/mag_F
-          B_fpy_xp = (bz(iz,iy,ixp)*Fx - bx(iz,iy,ixp)*Fz)/mag_F
-          B_fpy_xm = (bz(iz,iy,ixm)*Fx - bx(iz,iy,ixm)*Fz)/mag_F
-          B_fpz_yp = (bx(iz,iyp,ix)*Fy - by(iz,iyp,ix)*Fx)/mag_F
-          B_fpz_ym = (bx(iz,iym,ix)*Fy - by(iz,iym,ix)*Fx)/mag_F
-          B_fpz_xp = (bx(iz,iy,ixp)*Fy - by(iz,iy,ixp)*Fx)/mag_F
-          B_fpz_xm = (bx(iz,iy,ixm)*Fy - by(iz,iy,ixm)*Fx)/mag_F
+          curl_B_fpz = (B_fpy(r(2,1),r(2,2),r(3,3))     &
+                       -B_fpy(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+                     - (B_fpx(r(2,1),r(3,2),r(2,3))     &
+                       -B_fpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
-          curl_B_fpx = o2_central_diff(hy,B_fpz_yp,B_fpz,B_fpz_ym)&
-                     - o2_central_diff(hz,B_fpy_zp,B_fpy,B_fpy_zm)
-          curl_B_fpy = o2_central_diff(hz,B_fpx_zp,B_fpx,B_fpx_zm)&
-                     - o2_central_diff(hx,B_fpz_xp,B_fpz,B_fpz_xm)
-          curl_B_fpz = o2_central_diff(hx,B_fpy_xp,B_fpy,B_fpy_xm)&
-                     - o2_central_diff(hy,B_fpx_yp,B_fpx,B_fpx_ym)
-
-          lambda = (jx(iz,iy,ix)*B_fpx + jy(iz,iy,ix)*B_fpy + jz(iz,iy,ix)*B_fpz )/mag_b**2
-          alpha  = (jx(iz,iy,ix) *bx(iz,iy,ix)  + jy(iz,iy,ix) *by(iz,iy,ix)  + jz(iz,iy,ix) * bz(iz,iy,ix) )/mag_b**2
-
-          omega_2 = (curl_B_fpx*B_fpx + curl_B_fpy*B_fpy + curl_B_fpz*B_fpz)/mag_b**2
-
-          coeff = lambda*(alpha + omega_2)
-
-          cx(iz,iy,ix) = coeff* B_fpx/mag_b
-          cy(iz,iy,ix) = coeff* B_fpy/mag_b
-          cz(iz,iy,ix) = coeff* B_fpz/mag_b
-          mag_c(iz,iy,ix) = coeff
-
+          ! lambda (curl(B_fperp) dot B_fperp/|B|^2 + alpha)/|B|
+          c2_t2(iz,iy,ix) = lambda(iz,iy,ix)*( &
+                  ( curl_B_fpx*B_fpx(iz,iy,ix) &
+                  + curl_B_fpy*B_fpy(iz,iy,ix) &
+                  + curl_B_fpz*B_fpz(iz,iy,ix) )/mag_b(iz,iy,ix)**2 &
+              + alpha(iz,iy,ix))/mag_b(iz,iy,ix)
         end do
       end do
     end do
 
-    ix = len(filename)! reusing variable here
-    call write_netcdf_metric_file(trim(filename(1:ix-3))//"_C2_t2.nc","t2",cx,cy,cz,mag_c)
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_scalar(trim(filename(1:ix-3))//"_c2_t2.nc","c2_t2",c2_t2)
+    end if
 
-  end subroutine compute_second_term
+  end subroutine compute_c2_t2_coeff
 
-  subroutine compute_third_term(filename, jx,jy,jz, mag_j)
+  subroutine compute_c2_t3_coeff(filename,c2_t3,write_data)
 
-    real(8), intent(in), dimension(nz,ny,nx) :: jx, jy, jz, mag_j
     character(*), intent(in) :: filename
+    real(8), intent(out) :: c2_t3(nz,ny,nx)
+    logical, optional, intent(inout) :: write_data
 
-    real(8), dimension(nz,ny,nx) :: cx, cy, cz, mag_c
+    real(8), dimension(nz,ny,nx) :: jx, jy, jz
+    real(8), dimension(nz,ny,nx) :: Fx, Fy, Fz
+    real(8), dimension(nz,ny,nx) :: B_fpx, B_fpy, B_fpz
 
-    integer :: ix, iy, iz, ixp, ixm, iyp, iym, izp, izm
+    integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
-    real(8) :: mag_b
-    real(8) :: alpha, alpha_zp, alpha_zm, alpha_yp, alpha_ym, alpha_xp, alpha_xm
+    real(8) :: mag_b(nz,ny,nx), mag_F(nz,ny,nx), lambda(nz,ny,nx), alpha(nz,ny,nx)
+    real(8) :: alpha_dx(nz,ny,nx), alpha_dy(nz,ny,nx), alpha_dz(nz,ny,nx)
+    logical :: dummy
+
+    ! Check for writing data flag
+    if (.not.present(write_data)) then
+      write_data = .false.
+    end if
+
+    dummy = .false.
+
+    call compute_current(filename,jx,jy,jz,dummy)
+    Fx = jx
+    Fy = jy
+    Fz = jz
+    call compute_lorrenz(filename,Fx,Fy,Fz,dummy)
+    B_fpx = Fx
+    B_fpy = Fy
+    B_fpz = Fz
+    call compute_B_fp(filename,B_fpx,B_fpy,B_fpz,dummy)
 
     ! We assume that the grid spacing is uniform
     hx = abs(x(2) - x(1))
     hy = abs(y(2) - y(1))
     hz = abs(z(2) - z(1))
 
-    ! compute current via second order central diff
+    mag_b = sqrt(bx**2 + by**2 + bz**2)
+    alpha = (jx*bx + jy*by + jz*bz)/mag_b**2
+
     do ix = 1,nx
-      if (ix==1)  then; ixm=ix; else; ixm=ix-1; endif
-      if (ix==nx) then; ixp=ix; else; ixp=ix+1; endif
+      if (ix==1) then; r(:,3) = [1, 2, 3];
+      else if (ix==nx) then; r(:,3) = [nx-2, nx-1, nx];
+      else; r(:,3) = [ix-1, ix, ix+1];
+      end if
+
       do iy = 1,ny
-        if (iy==1)  then; iym=iy; else; iym=iy-1; endif
-        if (iy==ny) then; iyp=iy; else; iyp=iy+1; endif
+        if (iy==1) then; r(:,2) = [1, 2, 3];
+        else if (iy==ny) then; r(:,2) = [ny-2, ny-1, ny];
+        else; r(:,2) = [iy-1, iy, iy+1];
+        end if
+
         do iz = 1,nz
-          if (iz==1)  then; izm=iz; else; izm=iz-1; endif
-          if (iz==nz) then; izp=iz; else; izp=iz+1; endif
+          if (iz==1) then; r(:,1) = [1, 2, 3];
+          else if (iz==nz) then; r(:,1) = [nz-2, nz-1, nz];
+          else; r(:,1) = [iz-1, iz, iz+1];
+          end if
 
-          mag_b = sqrt(bx(iz ,iy ,ix)**2 + by(iz ,iy ,ix)**2 + bz(iz ,iy ,ix)**2 )
-
-          alpha =    (jx(iz,iy,ix) *bx(iz,iy,ix)  + jy(iz,iy,ix) *by(iz,iy,ix)  + jz(iz,iy,ix) * bz(iz,iy,ix) )/mag_b**2
-          alpha_zp = (jx(izp,iy,ix)*bx(izp,iy,ix) + jy(izp,iy,ix)*by(izp,iy,ix) + jz(izp,iy,ix)* bz(izp,iy,ix))/mag_b**2
-          alpha_zm = (jx(izm,iy,ix)*bx(izm,iy,ix) + jy(izm,iy,ix)*by(izm,iy,ix) + jz(izm,iy,ix)* bz(izm,iy,ix))/mag_b**2
-          alpha_yp = (jx(iz,iyp,ix)*bx(iz,iyp,ix) + jy(iz,iyp,ix)*by(iz,iyp,ix) + jz(iz,iyp,ix)* bz(iz,iyp,ix))/mag_b**2
-          alpha_ym = (jx(iz,iym,ix)*bx(iz,iym,ix) + jy(iz,iym,ix)*by(iz,iym,ix) + jz(iz,iym,ix)* bz(iz,iym,ix))/mag_b**2
-          alpha_xp = (jx(iz,iy,ixp)*bx(iz,iy,ixp) + jy(iz,iy,ixp)*by(iz,iy,ixp) + jz(iz,iy,ixp)* bz(iz,iy,ixp))/mag_b**2
-          alpha_xm = (jx(iz,iy,ixm)*bx(iz,iy,ixm) + jy(iz,iy,ixm)*by(iz,iy,ixm) + jz(iz,iy,ixm)* bz(iz,iy,ixm))/mag_b**2
-
-          cx(iz,iy,ix) =( o2_central_diff(hy,alpha_yp,alpha,alpha_ym)*bz(iz,iy,ix)&
-                        - o2_central_diff(hz,alpha_zp,alpha,alpha_zm)*by(iz,iy,ix))/mag_b**2
-          cy(iz,iy,ix) =( o2_central_diff(hz,alpha_zp,alpha,alpha_zm)*bx(iz,iy,ix)&
-                        - o2_central_diff(hx,alpha_xp,alpha,alpha_xm)*bz(iz,iy,ix))/mag_b**2
-          cz(iz,iy,ix) =( o2_central_diff(hx,alpha_xp,alpha,alpha_xm)*by(iz,iy,ix)&
-                        - o2_central_diff(hy,alpha_yp,alpha,alpha_ym)*bx(iz,iy,ix))/mag_b**2
-          mag_c(iz,iy,iz) = sqrt(cx(iz ,iy ,ix)**2 + cy(iz ,iy ,ix)**2 + cz(iz ,iy ,ix)**2 )
+          alpha_dx(iz,iy,ix) = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hx)
+          alpha_dy(iz,iy,ix) = (alpha(r(2,1),r(3,2),r(2,3))-alpha(r(2,1),r(1,2),r(2,3)))/(2*hy)
+          alpha_dz(iz,iy,ix) = (alpha(r(3,1),r(2,2),r(2,3))-alpha(r(1,1),r(2,2),r(2,3)))/(2*hz)
 
         end do
       end do
     end do
 
-    ix = len(filename)! reusing variable here
-    call write_netcdf_metric_file(trim(filename(1:ix-3))//"_C2_t3.nc","t3",cx,cy,cz,mag_c)
+    c2_t3 = sqrt( (alpha_dy*bz-alpha_dz*by)**2 + (alpha_dz*bx-alpha_dx*bz)**2 + (alpha_dx*by-alpha_dy*bx)**2 )/mag_b
 
-  end subroutine compute_third_term
+    if (write_data) then
+      ix = len(filename) !reusing variable here
+      call write_netcdf_scalar(trim(filename(1:ix-3))//"_c2_t3.nc","c2_t3",c2_t3)
+    end if
+
+  end subroutine compute_c2_t3_coeff
 
   subroutine calculate_metrics(filename)
 
     character(*), intent(in) :: filename
-    real(8), dimension(:,:,:), allocatable :: jx, jy, jz, mag_j
+    real(8), dimension(:,:,:), allocatable :: c2_t1, c2_t2, c2_t3
+   !real(8), dimension(:,:,:), allocatable :: jx,jy,jz
+    logical :: write_data
 
     call read_netcdf_field_file(filename)
 
-    allocate(jx(nz,ny,nx))
-    allocate(jy(nz,ny,nx))
-    allocate(jz(nz,ny,nx))
-    allocate(mag_j(nz,ny,nx))
+    allocate(c2_t1(nz,ny,nx))
+    allocate(c2_t2(nz,ny,nx))
+    allocate(c2_t3(nz,ny,nx))
 
-    call compute_current(filename,jx,jy,jz,mag_j)
+    write_data = .true.
 
-    call compute_first_term(filename, jx, jy, jz, mag_j)
-    call compute_second_term(filename, jx, jy, jz, mag_j)
-    call compute_third_term(filename, jx, jy, jz, mag_j)
+    call compute_c2_t1_coeff(filename,c2_t1,write_data)
+    call compute_c2_t2_coeff(filename,c2_t2,write_data)
+    call compute_c2_t3_coeff(filename,c2_t3,write_data)
 
-    deallocate(jx)
-    deallocate(jy)
-    deallocate(jz)
-    deallocate(mag_j)
+    deallocate(c2_t1)
+    deallocate(c2_t2)
+    deallocate(c2_t3)
+    call cleanup
 
   end subroutine calculate_metrics
+
+  subroutine cleanup()
+    deallocate(bx)
+    deallocate(by)
+    deallocate(bz)
+    deallocate(x)
+    deallocate(y)
+    deallocate(z)
+  end subroutine cleanup
 
   subroutine check(istatus)
     use netcdf
@@ -409,12 +632,4 @@ contains
     end if
   end subroutine check
 
-  function o2_central_diff(h,fp,f,fm)
-    real(8), intent(in) :: h, fp, f, fm
-    real(8) :: o2_central_diff
-
-    o2_central_diff = (fp - 2.0*f + fm) / ( h**2 )
-    
-  end function o2_central_diff
-    
 end module reconnection_metrics

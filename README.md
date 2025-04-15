@@ -31,4 +31,4 @@ within this directory.  This should generate a module file entitled *Tsyganenko_
 
 **NOTE:** Do not move this file around. If you wish to call this package in another directory, use a system link to point to this file in place.  Ie, *ln -s PATH_TO_MODULE CURRENT_DIR/.*
 
-To compile the *reconnection_metrics.f90* module, use ``` nf-config --fflags --flibs ``` to find links to netcdf-fortran libraries.  The ```calculate_metrics(filename)``` can then be used to read in a netcdf file from the *Tsynenko Wrapper* and then write out the current and first three terms of the reconnection metric.  See the examples directory for an example of a fortran code that loops through a timeseries of field data.
+To compile the *reconnection_metrics.f90* module, use ``` nf-config --fflags --flibs ``` to find links to netcdf-fortran libraries.  The ```calculate_metrics(filename)``` can then be used to read in a netcdf file from the *Tsynenko Wrapper* and then write out the current and first three terms of the reconnection metric.  See the examples directory for an example of its use.

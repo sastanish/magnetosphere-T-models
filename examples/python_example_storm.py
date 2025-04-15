@@ -68,24 +68,18 @@ def compute(line):
                       },
                     attrs={"time":time}
                )
-    ds.to_netcdf(f"data/{time}.nc")#,mode='w',format="NETCDF4", 
-#                engine='h5netcdf', encoding={
-#                    "bx":{"zlib":True, "complevel": 7},
-#                    "by":{"zlib":True, "complevel": 7},
-#                    "bz":{"zlib":True, "complevel": 7}}
-#                    )
+    ds.to_netcdf(f"data/{time}.nc",mode='w',format="NETCDF4", 
+                 engine='h5netcdf', encoding={
+                     "bx":{"zlib":True, "complevel": 7},
+                     "by":{"zlib":True, "complevel": 7},
+                     "bz":{"zlib":True, "complevel": 7}}
+                     )
 
     print(time)
 
-    # If you wish to calculate the reconnection metrics, uncomment
-    # the following function call
-
-#    recon_metrics(ds)
-
     return
 
-compute(omni_data[1])
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-#with Pool(Nproc) as comp_pool:
-#    comp_pool.map(compute,omni_data[0:2])
+with Pool(Nproc) as comp_pool:
+    comp_pool.map(compute,omni_data)

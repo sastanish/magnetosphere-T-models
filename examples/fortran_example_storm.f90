@@ -71,8 +71,9 @@ program main
 
     parmod = [pdyn, symh, by_in, bz_in, w1, w2, w3, w4, w5, w6]
 
-    isec = 0.0
+    isec = 0
     !adjust v
+    vy_in = vy_in + 29.78
 
     call RECALC_08(iyear, iday, ihour, imin, isec, vx_in, vy_in, vz_in)
 

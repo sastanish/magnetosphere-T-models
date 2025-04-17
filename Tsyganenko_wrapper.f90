@@ -1,6 +1,36 @@
 module models
 contains
 
+  subroutine run_TA16(parmod,ps,x,y,z,Bx,By,Bz,nx,ny,nz)
+
+    use TA16, only : RBF_MODEL_2016
+
+    integer :: nx, ny, nz
+    integer :: i, j, k
+    real(8) :: xx,yy,zz,bbx,bby,bbz !dummy variables
+    real(8) :: x(nx), y(ny), z(nz)
+    real(8) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
+    real(8) :: parmod(10), ps
+
+    bbx = 0.0
+    bby = 0.0
+    bbz = 0.0
+    do i = 1,nx
+      xx = x(i)
+      do j = 1,ny
+        yy = y(j)
+        do k = 1,nz
+          zz = z(k)
+          call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,bbx,bby,bbz)
+          Bx(i,j,k) = bbx
+          By(i,j,k) = bby
+          Bz(i,j,k) = bbz
+        end do
+      end do
+    end do
+    
+  end subroutine run_TA16
+
   subroutine run_TS05(parmod,ps,x,y,z,Bx,By,Bz,nx,ny,nz)
 
     use TS04c, only : T04_s

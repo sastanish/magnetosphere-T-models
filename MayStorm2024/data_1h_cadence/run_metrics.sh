@@ -13,16 +13,16 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=16 --nodes=1
+#SBATCH --ntasks=2 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=02:00:00
+#SBATCH --time=01:00:00
 #
 # Job name
-#SBATCH --job-name=MayStorm2024
+#SBATCH --job-name=MayStorm2024Metrics
 #
 # Output file
-#SBATCH --output=%j-MayStorm2024-5min-cadence.out
+#SBATCH --output=%j-metrics.output
 #======================================================
 
 module purge
@@ -30,7 +30,7 @@ module purge
 #Example module load command. 
 #Load any modules appropriate for your program's requirements
 
-module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/intel-2020.4/4.5.4
+module load intel/intel-2020.4 netcdf-fortran/intel-2020.4/4.5.4
 
 #======================================================
 # Prologue script to record job details
@@ -39,9 +39,7 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-conda activate magnetosphere
-
-python storm.py
+./run_metrics.out
 
 #======================================================
 # Epilogue script to record job endtime and runtime

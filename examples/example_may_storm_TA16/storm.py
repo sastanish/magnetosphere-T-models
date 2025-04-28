@@ -16,7 +16,7 @@ Nproc = 2
 
 # Read data
 
-omni_data = np.genfromtxt('test_may_2024_storm_with_TS16_vars.dat',dtype=None)
+omni_data = np.genfromtxt('selected_may_storm_times.dat',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 

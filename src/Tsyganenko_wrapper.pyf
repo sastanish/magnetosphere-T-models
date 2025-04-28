@@ -4,6 +4,20 @@
 python module Tsyganenko_wrapper ! in 
     interface  ! in :Tsyganenko_wrapper
         module models ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90
+            subroutine run_ta16(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90:models
+                use ta16, only : rbf_model_2016
+                real(kind=8) dimension(10), intent(in) :: parmod
+                real(kind=8), intent(in) :: ps
+                real(kind=8) dimension(nx), intent(in) :: x
+                real(kind=8) dimension(ny), intent(in) :: y
+                real(kind=8) dimension(nz), intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bx
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: by
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bz
+                integer, optional,check(shape(x, 0) == nx),depend(x), intent(hide) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y), intent(hide) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z), intent(hide) :: nz=shape(z, 0)
+            end subroutine run_ta16
             subroutine run_ts05(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90:models
                 use ts04c, only : t04_s
                 real(kind=8) dimension(10), intent(in) :: parmod

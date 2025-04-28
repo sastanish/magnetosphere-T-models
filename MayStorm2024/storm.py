@@ -4,20 +4,20 @@ import xarray as xr
 import Tsyganenko_wrapper as wrap
 from multiprocessing import Pool
 
-Nproc = 16
+Nproc = 32
 
 # Read data from truncated MayStorm2024 file.
 
-omni_data = np.genfromtxt('may11_09h-15h_5min_cadence.dat',dtype=None)
+omni_data = np.genfromtxt('may10_15-24hrs_5min_cadence.dat',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 # with a resolution of 15 cells per earth radi
 
-(nx, ny, nz) = (10*30, 10*30, 6*30)
-x0 = -10
-x1 = 0
-y0 = -5
-y1 = 5
+(nx, ny, nz) = (15*30, 8*30, 6*30)
+x0 = -17
+x1 = -2
+y0 = -4
+y1 = 4
 z0 = -2
 z1 = 4
 

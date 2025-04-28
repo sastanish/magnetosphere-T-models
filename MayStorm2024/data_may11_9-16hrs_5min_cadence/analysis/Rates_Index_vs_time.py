@@ -29,7 +29,7 @@ for i,line in enumerate(omni_data):
     rate[i,2] = np.abs(ds_t3.c2_t3).max().values
 
     # Record SymH index
-    symh[i] = line[10]
+    symh[i] = line[12]
 
     ds_t1.close()
     ds_t2.close()

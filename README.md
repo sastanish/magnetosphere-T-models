@@ -29,7 +29,7 @@ To use these subroutines in python, all the fortran codes need compiled via the 
 
 You will also need a fortran compiler.  Ensure that you python environment is active and run,
 ```
-python -m numpy.f2py -c TS04c.for geopack.f Tsyganenko_wrapper.pyf Tsyganenko_wrapper.f90
+python -m numpy.f2py -c TS04c.for TA16_RBF.f geopack.f Tsyganenko_wrapper.pyf Tsyganenko_wrapper.f90
 ```
 within the src directory.  This should generate a module file entitled *Tsyganenko_wrapper.cpython-313-x86_64-linux-gnu.so* or something similar. This module file can now be imported into python. For how to use, see the example storm directory.
 

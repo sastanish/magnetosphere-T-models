@@ -134,7 +134,6 @@ contains
     integer :: nx, ny, nz
     real(8), intent(in) :: x(nx),y(ny),z(nz)
     real(8), intent(in),  dimension(nx,ny,nz) :: bx, by, bz
-
     real(8), intent(out), dimension(nx,ny,nz) :: c2_t1, c2_t2, c2_t3
 
 
@@ -142,7 +141,6 @@ contains
     call compute_c2_t1_coeff("no",c2_t1)! I should fix this so filename is an optional parameter
     call compute_c2_t2_coeff("no",c2_t2)
     call compute_c2_t3_coeff("no",c2_t3)
-    call cleanup
 
   end subroutine calculate_metrics
 

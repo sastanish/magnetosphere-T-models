@@ -41,7 +41,8 @@ module load anaconda/python-3.10.9/2023.03
 
 conda activate magnetosphere
 
-python TotalRate_Symh_Dst_Kp_vs_time.py
+#python TotalRate_Symh_Dst_Kp_vs_time.py
+python check_div_b.py
 #python compare_TA16_and_TS05_slices.py 
 
 #======================================================

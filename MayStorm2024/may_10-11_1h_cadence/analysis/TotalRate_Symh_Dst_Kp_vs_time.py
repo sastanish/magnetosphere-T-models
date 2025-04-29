@@ -12,9 +12,9 @@ def calculate_total_rate(filename):
         for i,term in enumerate(["c2_t1", "c2_t2", "c2_t3"]):
             ds = xr.open_dataset(f"../{model}/metrics/" + term + "_" + filename ,engine = "netcdf4",decode_cf=False,decode_times=False)
             if i == 0:
-                rate = ds[term].where(np.sqrt(ds.x**2 + ds.y**2 + ds.z**2) > 1).sel(y=0,method='nearest')
+                rate = ds[term].sel(x=slice(-14,-3)).sel(y=0,method='nearest')
             else:
-                rate += ds[term].where(np.sqrt(ds.x**2 + ds.y**2 + ds.z**2) > 1).sel(y=0,method='nearest')
+                rate += ds[term].sel(x=slice(-14,-3)).sel(y=0,method='nearest')
             ds.close()
         rates[m] = rate.max()
     return rates

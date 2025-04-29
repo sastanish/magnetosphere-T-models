@@ -72,6 +72,21 @@ python module Tsyganenko_wrapper ! in
                 integer, optional,check(shape(y_gsw, 0) == ny),depend(y_gsw), intent(hide) :: ny=shape(y_gsw, 0)
                 integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw), intent(hide) :: nz=shape(z_gsw, 0)
              end subroutine run_dipole
+             subroutine calculate_metrics(x,y,z,bx,by,bz,nx,ny,nz,c2_t1,c2_t2,c2_t3) ! in :Tsyganenko_wrapper:Tsyganenko_wrapper.f90:models
+                use reconnection_metrics, only : init_no_file, compute_c2_t1_coeff, compute_c2_t2_coeff, compute_c2_t3_coeff
+                real(kind=8) dimension(nx), intent(in) :: x
+                real(kind=8) dimension(ny), intent(in) :: y
+                real(kind=8) dimension(nz), intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(in) :: bx
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(in) :: by
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(in) :: bz
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: c2_t1
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: c2_t2
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: c2_t3
+                integer, optional,check(shape(x, 0) == nx),depend(x), intent(hide) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y), intent(hide) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z), intent(hide) :: nz=shape(z, 0)
+            end subroutine calculate_metrics
         end module models
     end interface 
 end python module Tsyganenko_wrapper

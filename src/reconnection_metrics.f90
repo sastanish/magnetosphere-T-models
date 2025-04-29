@@ -588,32 +588,6 @@ contains
 
   end subroutine compute_c2_t3_coeff
 
-  subroutine calculate_metrics(filename)
-
-    character(*), intent(in) :: filename
-    real(8), dimension(:,:,:), allocatable :: c2_t1, c2_t2, c2_t3
-   !real(8), dimension(:,:,:), allocatable :: jx,jy,jz
-    logical :: write_data
-
-    call read_netcdf_field_file(filename)
-
-    allocate(c2_t1(nz,ny,nx))
-    allocate(c2_t2(nz,ny,nx))
-    allocate(c2_t3(nz,ny,nx))
-
-    write_data = .true.
-
-    call compute_c2_t1_coeff(filename,c2_t1,write_data)
-    call compute_c2_t2_coeff(filename,c2_t2,write_data)
-    call compute_c2_t3_coeff(filename,c2_t3,write_data)
-
-    deallocate(c2_t1)
-    deallocate(c2_t2)
-    deallocate(c2_t3)
-    call cleanup
-
-  end subroutine calculate_metrics
-
   subroutine cleanup()
     deallocate(bx)
     deallocate(by)

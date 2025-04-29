@@ -127,5 +127,23 @@ contains
     
   end subroutine run_dipole
 
+  subroutine calculate_metrics(x,y,z,bx,by,bz,nx,ny,nz,c2_t1,c2_t2,c2_t3)
+
+    use reconnection_metrics, only : init_no_file, compute_c2_t1_coeff, compute_c2_t2_coeff, compute_c2_t3_coeff
+
+    integer :: nx, ny, nz
+    real(8), intent(in) :: x(nx),y(ny),z(nz)
+    real(8), intent(in),  dimension(nx,ny,nz) :: bx, by, bz
+
+    real(8), intent(out), dimension(nx,ny,nz) :: c2_t1, c2_t2, c2_t3
+
+
+    call init_no_file(x,y,z,bx,by,bz)
+    call compute_c2_t1_coeff("no",c2_t1)! I should fix this so filename is an optional parameter
+    call compute_c2_t2_coeff("no",c2_t2)
+    call compute_c2_t3_coeff("no",c2_t3)
+    call cleanup
+
+  end subroutine calculate_metrics
 
 end module

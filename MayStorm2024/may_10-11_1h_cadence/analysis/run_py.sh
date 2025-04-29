@@ -13,13 +13,13 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=2 --nodes=1
+#SBATCH --ntasks=4 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:05:00
+#SBATCH --time=00:15:00
 #
 # Job name
-#SBATCH --job-name=graph_rates
+#SBATCH --job-name=graph_diffs
 #
 # Output file
 #SBATCH --output=%j-py.out
@@ -41,8 +41,8 @@ module load anaconda/python-3.10.9/2023.03
 
 conda activate magnetosphere
 
-#python TotalRate_Symh_Dst_Kp_vs_time.py
-python Rates_Index_vs_time.py
+python TotalRate_Symh_Dst_Kp_vs_time.py
+#python compare_TA16_and_TS05_slices.py 
 
 #======================================================
 # Epilogue script to record job endtime and runtime

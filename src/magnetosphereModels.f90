@@ -8,45 +8,37 @@ module MagnetosphereModels
   real(8), allocatable, dimension(:,:,:) :: c2_t1_x, c2_t1_y, c2_t1_z
   real(8), allocatable, dimension(:,:,:) :: c2_t2_x, c2_t2_y, c2_t2_z
   real(8), allocatable, dimension(:,:,:) :: c2_t3_x, c2_t3_y, c2_t3_z
+  real(8), allocatable, dimension(:,:,:) :: alpha, lambda
 
-  public :: run_models
+  public :: run_models, cleanup
 
   contains
 
     ! First function that gets called from main program
-    subroutine run_models(inData,controlParams,gridDims)
-      real(8), dimension(:), intent(in) :: inData
-      real(8), dimension(:), intent(in) :: gridDims
+    subroutine run_models(xin,yin,zin,parmod,ps,controlParams,outFileName)
+      real(8), dimension(:), intent(in) :: xin, yin, zin
+      real(8), dimension(:), intent(in) :: parmod
+      real(8), intent(in) :: ps
       integer, dimension(:), intent(in) :: controlParams
+      character(:), intent(in) :: outFileName
 
-      call
+      allocate(x(SIZE(xin)))
+      allocate(y(SIZE(yin)))
+      allocate(z(SIZE(zin)))
 
+      x = xin
+      y = yin
+      z = zin
+
+      call init_data_vars(controlParams(4:))
+      call compute_field(parmod,ps,controlParams)
+      if (sum(controlParams(4:)) > 10) call compute_secondary_vars
+      if (sum(controlParams(4:)) > 200) call compute_reconnection_metrics
+      call write_data(controlParams,outFileName)
 
     end subroutine run_models
 
-    subroutine init_coordinates(nx,ny,nz,xp,xm,yp,ym,zp,zm)
-
-      integer, intent(in) :: nx,ny,nz
-      real(8), intent(in) :: xp,xm,yp,ym,zp,zm
-      integer :: i
-
-      allocate(x(nx))
-      allocate(y(ny))
-      allocate(z(nz))
-
-      do i = 1,nx
-        x(i) = xm + ((xp-xm)/nx) * (i-1)
-      end do
-      do i = 1,ny
-        y(i) = ym + ((yp-ym)/ny) * (i-1)
-      end do
-      do i = 1,nz
-        z(i) = zm + ((zp-zm)/nz) * (i-1)
-      end do
-
-    end subroutine init_coordinates
-
-    subroutine init_data_vars(nx,ny,nz,target_vars)
+    subroutine init_data_vars(target_vars)
 
       integer, intent(in) :: nx,ny,nz
       integer, intent(in) :: target_vars(:)
@@ -62,17 +54,23 @@ module MagnetosphereModels
         if (target_vars(id) == 21) allocate(fx(nx,ny,nz))
         if (target_vars(id) == 22) allocate(fy(nx,ny,nz))
         if (target_vars(id) == 23) allocate(fz(nx,ny,nz))
-        if (target_vars(id) == 101) allocate(c2_t1_x(nx,ny,nz))
-        if (target_vars(id) == 102) allocate(c2_t1_y(nx,ny,nz))
-        if (target_vars(id) == 103) allocate(c2_t1_z(nx,ny,nz))
-        if (target_vars(id) == 201) allocate(c2_t2_x(nx,ny,nz))
-        if (target_vars(id) == 202) allocate(c2_t2_y(nx,ny,nz))
-        if (target_vars(id) == 203) allocate(c2_t2_z(nx,ny,nz))
-        if (target_vars(id) == 301) allocate(c2_t3_x(nx,ny,nz))
-        if (target_vars(id) == 302) allocate(c2_t3_y(nx,ny,nz))
-        if (target_vars(id) == 303) allocate(c2_t3_z(nx,ny,nz))
+        if (target_vars(id) == 201) allocate(c2_t1_x(nx,ny,nz))
+        if (target_vars(id) == 202) allocate(c2_t1_y(nx,ny,nz))
+        if (target_vars(id) == 203) allocate(c2_t1_z(nx,ny,nz))
+        if (target_vars(id) == 301) allocate(c2_t2_x(nx,ny,nz))
+        if (target_vars(id) == 302) allocate(c2_t2_y(nx,ny,nz))
+        if (target_vars(id) == 303) allocate(c2_t2_z(nx,ny,nz))
+        if (target_vars(id) == 401) allocate(c2_t3_x(nx,ny,nz))
+        if (target_vars(id) == 402) allocate(c2_t3_y(nx,ny,nz))
+        if (target_vars(id) == 403) allocate(c2_t3_z(nx,ny,nz))
       end do
 
     end subroutine init_data_vars
+
+    subroutine cleanup
+
+      ! free all allocated arrays
+
+    end subroutine cleanup
 
 end module magnetosphereModels

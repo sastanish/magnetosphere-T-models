@@ -1,76 +1,68 @@
-module MagnetosphereModels
+module magnetosphereModels
 
   implicit none
 
-  real(8), allocatable, dimension(:,:,:) :: x, y, z
-  real(8), allocatable, dimension(:,:,:) :: Bfpx, Bfpy, Bfpz, bx, by, bz
-  real(8), allocatable, dimension(:,:,:) :: Fx, Fy, Fz, jx, jy, jz
-  real(8), allocatable, dimension(:,:,:) :: c2_t1_x, c2_t1_y, c2_t1_z
-  real(8), allocatable, dimension(:,:,:) :: c2_t2_x, c2_t2_y, c2_t2_z
-  real(8), allocatable, dimension(:,:,:) :: c2_t3_x, c2_t3_y, c2_t3_z
-  real(8), allocatable, dimension(:,:,:) :: alpha, lambda
+contains
 
-  public :: run_models, cleanup
+  subroutine compute_field(x,y,z,dateInfo,velocity,parmod,ps,modelNumber,dipoleNumber,bx,by,bz)
 
-  contains
+    use TA16, only : RBF_MODEL_2016
+    use TS05, only : T04_s
+    use geopack, only : RECALC_08, IGRF_GSW_08, DIP_08
 
-    ! First function that gets called from main program
-    subroutine run_models(xin,yin,zin,parmod,ps,controlParams,outFileName)
-      real(8), dimension(:), intent(in) :: xin, yin, zin
-      real(8), dimension(:), intent(in) :: parmod
-      real(8), intent(in) :: ps
-      integer, dimension(:), intent(in) :: controlParams
-      character(:), intent(in) :: outFileName
+    real(8), dimension(:), intent(in) :: x,y,z
 
-      allocate(x(SIZE(xin)))
-      allocate(y(SIZE(yin)))
-      allocate(z(SIZE(zin)))
+    integer, dimension(:), intent(in) :: dateInfo ! [year, dayNumber, hour, min, sec]
+    real(8), dimension(:), intent(in) :: velocity ! GSW Solar wind components [vx, vy, vz]
+    real(8), dimension(:), intent(in) :: parmod
+    real(8), intent(in) :: ps ! Geo-dipole tilt angle (in radians)
+    integer, intent(in) :: modelNumber, dipoleNumber
+    ! control parameters, modelNumber = 5 (TS05), 16 (TA16)
+    !                     dipoleNumber = 1 (DIP_08), 2(IGRF_GSW_08)
+    
+    real(8), intent(out), dimension(:,:,:) :: bx,by,bz
 
-      x = xin
-      y = yin
-      z = zin
+    ! dummy vars
+    real(8) :: xx,yy,zz,ebx,eby,ebz,ibx,iby,ibz
+    integer :: i, j, k, nx, ny, nz
 
-      call init_data_vars(controlParams(4:))
-      call compute_field(parmod,ps,controlParams)
-      if (sum(controlParams(4:)) > 10) call compute_secondary_vars
-      if (sum(controlParams(4:)) > 200) call compute_reconnection_metrics
-      call write_data(controlParams,outFileName)
+    integer :: iyear, iday, ihour, imin, isec
+    real(8) :: vx, vy, vz
 
-    end subroutine run_models
+    nx = SIZE(x)
+    ny = SIZE(y)
+    nz = SIZE(z)
 
-    subroutine init_data_vars(target_vars)
+    iyear = dateInfo(1)
+    iday = dateInfo(2)
+    ihour = dateInfo(3)
+    isec = dateInfo(4)
 
-      integer, intent(in) :: nx,ny,nz
-      integer, intent(in) :: target_vars(:)
-      integer :: id
+    vx = velocity(1)
+    vy = velocity(2)
+    vz = velocity(3)
+  
+    call RECALC_08(iyear, iday, ihour, imin, isec, vx, vy, vz)
+    do k = 1,nz
+      zz = z(k)
+      do j = 1,ny
+        yy = y(j)
+        do i = 1,nx
+          xx = x(i)
 
-      do id = 1,size(target_vars)
-        if (target_vars(id) == 1) allocate(bx(nx,ny,nz))
-        if (target_vars(id) == 2) allocate(by(nx,ny,nz))
-        if (target_vars(id) == 3) allocate(bz(nx,ny,nz))
-        if (target_vars(id) == 11) allocate(jx(nx,ny,nz))
-        if (target_vars(id) == 12) allocate(jy(nx,ny,nz))
-        if (target_vars(id) == 13) allocate(jz(nx,ny,nz))
-        if (target_vars(id) == 21) allocate(fx(nx,ny,nz))
-        if (target_vars(id) == 22) allocate(fy(nx,ny,nz))
-        if (target_vars(id) == 23) allocate(fz(nx,ny,nz))
-        if (target_vars(id) == 201) allocate(c2_t1_x(nx,ny,nz))
-        if (target_vars(id) == 202) allocate(c2_t1_y(nx,ny,nz))
-        if (target_vars(id) == 203) allocate(c2_t1_z(nx,ny,nz))
-        if (target_vars(id) == 301) allocate(c2_t2_x(nx,ny,nz))
-        if (target_vars(id) == 302) allocate(c2_t2_y(nx,ny,nz))
-        if (target_vars(id) == 303) allocate(c2_t2_z(nx,ny,nz))
-        if (target_vars(id) == 401) allocate(c2_t3_x(nx,ny,nz))
-        if (target_vars(id) == 402) allocate(c2_t3_y(nx,ny,nz))
-        if (target_vars(id) == 403) allocate(c2_t3_z(nx,ny,nz))
+          if ( dipoleNumber == 1 ) call DIP_08(xx,yy,zz,ibx,iby,ibz)
+          if ( dipoleNumber == 2 ) call IGRF_GSW_08(xx,yy,zz,ibx,iby,ibz)
+          if ( modelNumber == 5  ) call T04_s(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
+          if ( modelNumber == 16 ) call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
+
+          bx(i,j,k) = ibx+ebx
+          by(i,j,k) = iby+eby
+          bz(i,j,k) = ibz+ebz
+
+        end do
       end do
+    end do
 
-    end subroutine init_data_vars
-
-    subroutine cleanup
-
-      ! free all allocated arrays
-
-    end subroutine cleanup
+  end subroutine compute_field
 
 end module magnetosphereModels

@@ -1,0 +1,44 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module TsyganenkoWrapper ! in 
+    interface  ! in :TsyganenkoWrapper
+        module tsyganenkowrapper ! in :TsyganenkoWrapper:wrapper.f90
+            subroutine field(x,y,z,dateinfo,velocity,parmod,ps,modelnumber,dipolenumber,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:wrapper.f90:tsyganenkowrapper
+                use magnetospheremodels, only: compute_field
+                real(kind=8) dimension(nx),intent(in) :: x
+                real(kind=8) dimension(ny),intent(in) :: y
+                real(kind=8) dimension(nz),intent(in) :: z
+                integer dimension(5),intent(in) :: dateinfo
+                real(kind=8) dimension(3),intent(in) :: velocity
+                real(kind=8) dimension(10),intent(in) :: parmod
+                real(kind=8) intent(in) :: ps
+                integer intent(in) :: modelnumber
+                integer intent(in) :: dipolenumber
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bz
+                integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
+            end subroutine field
+            subroutine metrics(x,y,z,bx,by,bz,mout,nx,ny,nz) ! in :TsyganenkoWrapper:wrapper.f90:tsyganenkowrapper
+                use reconnectionmetrics, only: compute_all_metrics
+                real(kind=8) dimension(nx),intent(in) :: x
+                real(kind=8) dimension(ny),intent(in) :: y
+                real(kind=8) dimension(nz),intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bz
+                real(kind=8) dimension(14,nx,ny,nz),intent(out),depend(ny,nx,nz) :: mout
+                integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
+            end subroutine metrics
+        end module tsyganenkowrapper
+    end interface 
+end python module TsyganenkoWrapper
+
+! This file was auto-generated with f2py (version:2.2.4).
+! See:
+! https://web.archive.org/web/20140822061353/http://cens.ioc.ee/projects/f2py2e

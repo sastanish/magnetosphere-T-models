@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-import Tsyganenko_wrapper as wrap
+import TsyganenkoWrapper as TS
 from multiprocessing import Pool
 
 ## NOTE ##
@@ -11,7 +11,7 @@ from multiprocessing import Pool
 
 Nproc = 2
 
-# The fortran codes are loaded through the Tsyganenko_wrapper module.
+# The fortran codes are loaded through the TsyganenkoWrapper module.
 ##########
 
 # Read data
@@ -51,20 +51,16 @@ def compute(line):
     ihour = line[2]
     imin = line[3]
     isec = 0
+    modelNumber = 16 # TA16 model
+    dipoleNumber = 2 # IGRF_GSW_08 dipole
 
     # External field
-    [bx, by, bz] = wrap.models.run_ta16(parmod,ps,x,y,z)
-    # Internal field via igrf
-    [in_bx, in_by, in_bz] = wrap.models.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
-    # Full field
-    bx = bx+in_bx
-    by = by+in_by
-    bz = bz+in_bz
+    (bx, by, bz) = TS.compute.field(x,y,z, (iyear, iday, ihour, imin, isec), (vgsex, vgsey, vgsez), parmod, ps, modelNumber, dipoleNumber)
 
     print("trying metrics")
 
-    # Reconnection Metrics
-    [c2_t1, c2_t2, c2_t3] = wrap.models.calculate_metrics(x,y,z,bx,by,bz)
+    output_metrics = np.zeros( (14, nx, ny, nz) )
+    output_metrics = TS.compute.metrics(x,y,z,bx,by,bz)
 
     time = str(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M")).replace(" ","_")
 
@@ -75,9 +71,9 @@ def compute(line):
                           "bx": (["x", "y", "z"], bx),
                           "by": (["x", "y", "z"], by),
                           "bz": (["x", "y", "z"], bz),
-                          "c2_t1": (["x", "y", "z"], c2_t1),
-                          "c2_t2": (["x", "y", "z"], c2_t2),
-                          "c2_t3": (["x", "y", "z"], c2_t3),
+                          "c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
+                          "c2_t2": (["x", "y", "z"], output_metrics[12,:,:,:]),
+                          "c2_t3": (["x", "y", "z"], output_metrics[13,:,:,:]),
                           },
                    coords={
                               "x": x,

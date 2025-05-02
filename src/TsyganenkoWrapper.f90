@@ -1,4 +1,4 @@
-module TsyganenkoWrapper
+module compute
 
   implicit none
 
@@ -36,4 +36,4 @@ contains
 
   end subroutine metrics
 
-end module TsyganenkoWrapper
+end module compute

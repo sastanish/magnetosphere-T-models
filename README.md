@@ -1,6 +1,6 @@
 ## Summary
 
-This collection of files is a bare-bones python wrapper of the TS05 solar field model and dipole codes by N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This directory contains:
+This collection of files is a python wrapper of the TS05 solar field model and dipole codes by N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This directory contains:
 
  - *README.md* 
     - This file

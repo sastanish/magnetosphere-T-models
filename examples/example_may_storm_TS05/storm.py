@@ -49,9 +49,13 @@ def compute(line):
     isec = 0
 
     # External field
-    [ex_bx, ex_by, ex_bz] = TS.compute.run_ts05(parmod,ps,x,y,z)
+    [bx, by, bz] = TS.compute.run_ts05(parmod,ps,x,y,z)
     # Internal field via igrf
     [in_bx, in_by, in_bz] = TS.compute.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
+
+    bx += in_bx
+    by += in_by
+    bz += in_bz
 
     # Reconnection Metrics
     # Pass in a grid and field and this method will return the following 
@@ -64,9 +68,9 @@ def compute(line):
 
     # Create and write dataset
     ds = xr.Dataset(data_vars={
-                          "bx": (["x", "y", "z"], ex_bx + in_bx),
-                          "by": (["x", "y", "z"], ex_by + in_by),
-                          "bz": (["x", "y", "z"], ex_bz + in_bz),
+                          "bx": (["x", "y", "z"], bx),
+                          "by": (["x", "y", "z"], by),
+                          "bz": (["x", "y", "z"], bz),
                           "c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
                           "c2_t2": (["x", "y", "z"], output_metrics[12,:,:,:]),
                           "c2_t3": (["x", "y", "z"], output_metrics[13,:,:,:]),
@@ -97,5 +101,6 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-with Pool(Nproc) as comp_pool:
-    comp_pool.map(compute,omni_data)
+#with Pool(Nproc) as comp_pool:
+#    comp_pool.map(compute,omni_data)
+compute(omni_data[0])

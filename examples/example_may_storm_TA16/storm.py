@@ -20,12 +20,12 @@ omni_data = np.genfromtxt('selected_may_storm_times.dat',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 
-(nx, ny, nz) = (15*10, 8*10, 6*10)
-x0 = -17
-x1 = -2
+(nx, ny, nz) = (8*15, 8*15, 8*15)
+x0 = -4
+x1 = 4
 y0 = -4
 y1 = 4
-z0 = -2
+z0 = -4
 z1 = 4
 
 x = np.linspace(x0, x1, nx)
@@ -57,14 +57,13 @@ def compute(line):
     # External field
     (bx, by, bz) = TS.compute.field(x,y,z, (iyear, iday, ihour, imin, isec), (vgsex, vgsey, vgsez), parmod, ps, modelNumber, dipoleNumber)
 
-    print("trying metrics")
-
+    # Reconnection Metrics
+    # First dimension is [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz,&
+    #                     alpha, lambda, c2_t1, c2_t2, c2_t3]
     output_metrics = np.zeros( (14, nx, ny, nz) )
     output_metrics = TS.compute.metrics(x,y,z,bx,by,bz)
 
     time = str(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M")).replace(" ","_")
-
-    print("now writing metrics")
 
     # Create and write dataset
     ds = xr.Dataset(data_vars={
@@ -98,5 +97,6 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-with Pool(Nproc) as comp_pool:
-    comp_pool.map(compute,omni_data)
+#with Pool(Nproc) as comp_pool:
+#    comp_pool.map(compute,omni_data)
+compute(omni_data[0])

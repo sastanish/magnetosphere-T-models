@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-import Tsyganenko_wrapper as wrap
+import TsyganenkoWrapper as TS
 from multiprocessing import Pool
 
 ## NOTE ##
@@ -20,13 +20,13 @@ omni_data = np.genfromtxt('may_2024_storm_with_TS05_vars.dat',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 
-(nx, ny, nz) = (400, 100, 100)
-x0 = -20
-x1 = 2
-y0 = -4
-y1 = 4
-z0 = -4
-z1 = 4
+(nx, ny, nz) = (400, 400, 400)
+x0 = -8
+x1 = 8
+y0 = -8
+y1 = 8
+z0 = -8
+z1 = 8
 
 x = np.linspace(x0, x1, nx)
 y = np.linspace(y0, y1, ny)
@@ -47,19 +47,28 @@ def compute(line):
     ihour = line[2]
     imin = line[3]
     isec = 0
+    modelNumber = 5 # TS05 model
+    dipoleNumber = 1 # Dipole model
 
     # External field
-    [ex_bx, ex_by, ex_bz] = wrap.models.run_ts05(parmod,ps,x,y,z)
-    # Internal field via igrf
-    [in_bx, in_by, in_bz] = wrap.models.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
+    (bx, by, bz) = TS.compute.field(x,y,z, (iyear, iday, ihour, imin, isec), (vgsex, vgsey, vgsez), parmod, ps, modelNumber, dipoleNumber)
+
+    # Reconnection Metrics
+    # First dimension is [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz,&
+    #                     alpha, lambda, c2_t1, c2_t2, c2_t3]
+    output_metrics = np.zeros( (14, nx, ny, nz) )
+    output_metrics = TS.compute.metrics(x,y,z,bx,by,bz)
 
     time = str(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M")).replace(" ","_")
 
     # Create and write dataset
     ds = xr.Dataset(data_vars={
-                          "bx": (["x", "y", "z"], ex_bx + in_bx),
-                          "by": (["x", "y", "z"], ex_by + in_by),
-                          "bz": (["x", "y", "z"], ex_bz + in_bz),
+                          "bx": (["x", "y", "z"], bx),
+                          "by": (["x", "y", "z"], by),
+                          "bz": (["x", "y", "z"], bz),
+                          "c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
+                          "c2_t2": (["x", "y", "z"], output_metrics[12,:,:,:]),
+                          "c2_t3": (["x", "y", "z"], output_metrics[13,:,:,:]),
                           },
                    coords={
                               "x": x,
@@ -72,7 +81,10 @@ def compute(line):
                  engine='h5netcdf', encoding={
                      "bx":{"zlib":True, "complevel": 7},
                      "by":{"zlib":True, "complevel": 7},
-                     "bz":{"zlib":True, "complevel": 7}}
+                     "bz":{"zlib":True, "complevel": 7},
+                     "c2_t1":{"zlib":True, "complevel": 7},
+                     "c2_t2":{"zlib":True, "complevel": 7},
+                     "c2_t3":{"zlib":True, "complevel": 7}}
                      )
 
     print(time)
@@ -81,5 +93,7 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-with Pool(Nproc) as comp_pool:
-    comp_pool.map(compute,omni_data)
+#with Pool(Nproc) as comp_pool:
+#    comp_pool.map(compute,omni_data)
+
+compute(omni_data[1])

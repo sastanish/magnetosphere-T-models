@@ -57,6 +57,7 @@ contains
 
     call compute_c2_t3(x,y,z,bx,by,bz,Mout(10,:,:,:),Mout(14,:,:,:))
     
+
   end subroutine compute_all_metrics
 
   subroutine compute_forces(x,y,z,bx,by,bz,jx,jy,jz,fx,fy,fz)
@@ -103,23 +104,23 @@ contains
           ! compute J=curl(B)
           jjx = (bz(r(2,1),r(3,2),r(2,3))     &
                 -bz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
-              - (by(r(3,1),r(2,2),r(2,3))     &
-                -by(r(1,1),r(2,2),r(2,3)))/(2*hz)
+              - (by(r(2,1),r(2,2),r(3,3))     &
+                -by(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
-          jjy = (bx(r(3,1),r(2,2),r(2,3))     &
-                -bx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
-              - (bz(r(2,1),r(2,2),r(3,3))     &
-                -bz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
+          jjy = (bx(r(2,1),r(2,2),r(3,3))     &
+                -bx(r(2,1),r(2,2),r(1,3)))/(2*hz) &
+              - (bz(r(3,1),r(2,2),r(2,3))     &
+                -bz(r(1,1),r(2,2),r(2,3)))/(2*hx) 
 
-          jjz = (by(r(2,1),r(2,2),r(3,3))     &
-                -by(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+          jjz = (by(r(3,1),r(2,2),r(2,3))     &
+                -by(r(1,1),r(2,2),r(2,3)))/(2*hx) &
               - (bx(r(2,1),r(3,2),r(2,3))     &
                 -bx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
           ! compute F= J cross B
-          fx(iz,iy,ix) = jjy * bz(ix,iy,iz) - jjz * by(ix,iy,iz)
-          fy(iz,iy,ix) = jjz * bx(ix,iy,iz) - jjx * bz(ix,iy,iz)
-          fz(iz,iy,ix) = jjx * by(ix,iy,iz) - jjy * bx(ix,iy,iz)
+          fx(ix,iy,iz) = jjy * bz(ix,iy,iz) - jjz * by(ix,iy,iz)
+          fy(ix,iy,iz) = jjz * bx(ix,iy,iz) - jjx * bz(ix,iy,iz)
+          fz(ix,iy,iz) = jjx * by(ix,iy,iz) - jjy * bx(ix,iy,iz)
 
           ! fill in j
           jx(ix,iy,iz) = jjx
@@ -221,25 +222,25 @@ contains
           !curl(B_fperp)
           curl_bfpx = (bfpz(r(2,1),r(3,2),r(2,3))     &
                       -bfpz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
-                    - (bfpy(r(3,1),r(2,2),r(2,3))     &
-                      -bfpy(r(1,1),r(2,2),r(2,3)))/(2*hz)
+                    - (bfpy(r(2,1),r(2,2),r(3,3))     &
+                      -bfpy(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
-          curl_bfpy = (bfpx(r(3,1),r(2,2),r(2,3))     &
-                      -bfpx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
-                    - (bfpz(r(2,1),r(2,2),r(3,3))     &
-                      -bfpz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
+          curl_bfpy = (bfpx(r(2,1),r(2,2),r(3,3))     &
+                      -bfpx(r(2,1),r(2,2),r(1,3)))/(2*hz) &
+                    - (bfpz(r(3,1),r(2,2),r(2,3))     &
+                      -bfpz(r(1,1),r(2,2),r(2,3)))/(2*hx) 
 
-          curl_bfpz = (bfpy(r(2,1),r(2,2),r(3,3))     &
-                      -bfpy(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+          curl_bfpz = (bfpy(r(3,1),r(2,2),r(2,3))     &
+                      -bfpy(r(1,1),r(2,2),r(2,3)))/(2*hx) &
                     - (bfpx(r(2,1),r(3,2),r(2,3))     &
                       -bfpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
           ! (lambda * curl(B_fperp) dot F/|F| - Grad(lambda) dot B)/|B|
           c2_t1(ix,iy,iz) = (&
                             lambda(ix,iy,iz)*(curl_bfpx*fx(ix,iy,iz) + curl_bfpy*fy(ix,iy,iz) + curl_bfpz*fz(ix,iy,iz))/magF(ix,iy,iz)&
-                          - ((lambda(r(2,1),r(2,2),r(3,3)) - lambda(r(2,1),r(2,2),r(1,3)))/(2*hx)*bx(ix,iy,iz) &
+                          - ((lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hx)*bx(ix,iy,iz) &
                             +(lambda(r(2,1),r(3,2),r(2,3)) - lambda(r(2,1),r(1,2),r(2,3)))/(2*hy)*by(ix,iy,iz) &
-                            +(lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hz)*bz(ix,iy,iz) &
+                            +(lambda(r(2,1),r(2,2),r(3,3)) - lambda(r(2,1),r(2,2),r(1,3)))/(2*hz)*bz(ix,iy,iz) &
                             )&
                             )/magB(ix,iy,iz)
         end do
@@ -305,21 +306,21 @@ contains
           !curl(B_fperp)
           curl_bfpx = (bfpz(r(2,1),r(3,2),r(2,3))     &
                       -bfpz(r(2,1),r(1,2),r(2,3)))/(2*hy) &
-                    - (bfpy(r(3,1),r(2,2),r(2,3))     &
-                      -bfpy(r(1,1),r(2,2),r(2,3)))/(2*hz)
+                    - (bfpy(r(2,1),r(2,2),r(3,3))     &
+                      -bfpy(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
-          curl_bfpy = (bfpx(r(3,1),r(2,2),r(2,3))     &
-                      -bfpx(r(1,1),r(2,2),r(2,3)))/(2*hz) &
-                    - (bfpz(r(2,1),r(2,2),r(3,3))     &
-                      -bfpz(r(2,1),r(2,2),r(1,3)))/(2*hx) 
+          curl_bfpy = (bfpx(r(2,1),r(2,2),r(3,3))     &
+                      -bfpx(r(2,1),r(2,2),r(1,3)))/(2*hz) &
+                    - (bfpz(r(3,1),r(2,2),r(2,3))     &
+                      -bfpz(r(1,1),r(2,2),r(2,3)))/(2*hx) 
 
-          curl_bfpz = (bfpy(r(2,1),r(2,2),r(3,3))     &
-                      -bfpy(r(2,1),r(2,2),r(1,3)))/(2*hx) &
+          curl_bfpz = (bfpy(r(3,1),r(2,2),r(2,3))     &
+                      -bfpy(r(1,1),r(2,2),r(2,3)))/(2*hx) &
                     - (bfpx(r(2,1),r(3,2),r(2,3))     &
                       -bfpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
           ! lambda (curl(B_fperp) dot B_fperp/|B|^2 + alpha)/|B|
-          c2_t2(ix,iy,iy) = lambda(ix,iy,iz)*( &
+          c2_t2(ix,iy,iz) = lambda(ix,iy,iz)*( &
                   ( curl_bfpx*bfpx(ix,iy,iz) &
                   + curl_bfpy*bfpy(ix,iy,iz) &
                   + curl_bfpz*bfpz(ix,iy,iz) )/magB(ix,iy,iz)**2 &
@@ -379,9 +380,9 @@ contains
           else; r(:,1) = [ix-1, ix, ix+1];
           end if
 
-          dxa = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hx)
+          dxa = (alpha(r(3,1),r(2,2),r(2,3))-alpha(r(1,1),r(2,2),r(2,3)))/(2*hx)
           dya = (alpha(r(2,1),r(3,2),r(2,3))-alpha(r(2,1),r(1,2),r(2,3)))/(2*hy)
-          dza = (alpha(r(3,1),r(2,2),r(2,3))-alpha(r(1,1),r(2,2),r(2,3)))/(2*hz)
+          dza = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
           ! c2_t3 = (Grad(alpha) cross B)/|B|
           c2_t3(ix,iy,iz) = sqrt( (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))**2 + (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))**2 + (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))**2 )/magB(ix,iy,iz)

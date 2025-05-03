@@ -132,6 +132,9 @@ contains
 
   subroutine field(x,y,z,dateInfo,velocity,parmod,ps,modelNumber,dipoleNumber,bx,by,bz,nx,ny,nz)
 
+    !! NOTE: compute field does not currently work as the common block is not playing well with
+    !! this setup.
+
     use magnetosphereModels, only: compute_field
 
     integer :: nx, ny, nz

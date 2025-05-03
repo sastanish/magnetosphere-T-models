@@ -47,17 +47,11 @@ def compute(line):
     ihour = line[2]
     imin = line[3]
     isec = 0
-    modelNumber = 5 # TS05 model
-    dipoleNumber = 1 # Dipole model
 
-    ## DOCS ##
-    # TS has only one module, compute. This contains two routines, field and metrics.
-    # field: computes the total field of the earth at a given time. If modelNumber=5, use TS05 for
-    # external field. If modelNumber=16, use TA16.
-    # The dipole model of the earth is either dipoleNumber=1 => DIP_08 or dipoleNumber=2 => IGRF
-    # Make sure to pass in the correctly formatted parmod for your chosen model (see TA16_RBF.f or TS04c.f for details).
-    (bx, by, bz) = TS.compute.field(x,y,z, (iyear, iday, ihour, imin, isec), (vgsex, vgsey, vgsez), parmod, ps, modelNumber, dipoleNumber)
-
+    # External field
+    [ex_bx, ex_by, ex_bz] = TS.compute.run_ts05(parmod,ps,x,y,z)
+    # Internal field via igrf
+    [in_bx, in_by, in_bz] = TS.compute.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
 
     # Reconnection Metrics
     # Pass in a grid and field and this method will return the following 
@@ -70,9 +64,9 @@ def compute(line):
 
     # Create and write dataset
     ds = xr.Dataset(data_vars={
-                          "bx": (["x", "y", "z"], bx),
-                          "by": (["x", "y", "z"], by),
-                          "bz": (["x", "y", "z"], bz),
+                          "bx": (["x", "y", "z"], ex_bx + in_bx),
+                          "by": (["x", "y", "z"], ex_by + in_by),
+                          "bz": (["x", "y", "z"], ex_bz + in_bz),
                           "c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
                           "c2_t2": (["x", "y", "z"], output_metrics[12,:,:,:]),
                           "c2_t3": (["x", "y", "z"], output_metrics[13,:,:,:]),

@@ -4,6 +4,75 @@
 python module TsyganenkoWrapper ! in 
     interface  ! in :TsyganenkoWrapper
         module compute ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90
+            subroutine run_ta16(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
+                use ta16, only : rbf_model_2016
+                real(kind=8) dimension(10), intent(in) :: parmod
+                real(kind=8), intent(in) :: ps
+                real(kind=8) dimension(nx), intent(in) :: x
+                real(kind=8) dimension(ny), intent(in) :: y
+                real(kind=8) dimension(nz), intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bx
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: by
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bz
+                integer, optional,check(shape(x, 0) == nx),depend(x), intent(hide) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y), intent(hide) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z), intent(hide) :: nz=shape(z, 0)
+            end subroutine run_ta16
+            subroutine run_ts05(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
+                use ts05, only : t04_s
+                real(kind=8) dimension(10), intent(in) :: parmod
+                real(kind=8), intent(in) :: ps
+                real(kind=8) dimension(nx), intent(in) :: x
+                real(kind=8) dimension(ny), intent(in) :: y
+                real(kind=8) dimension(nz), intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bx
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: by
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: bz
+                integer, optional,check(shape(x, 0) == nx),depend(x), intent(hide) :: nx=shape(x, 0)
+                integer, optional,check(shape(y, 0) == ny),depend(y), intent(hide) :: ny=shape(y, 0)
+                integer, optional,check(shape(z, 0) == nz),depend(z), intent(hide) :: nz=shape(z, 0)
+            end subroutine run_ts05
+            subroutine run_igrf_dipole(iyear,iday,ihour,imin,isec,vx_gse,vy_gse,vz_gse,x_gsw,y_gsw,z_gsw,hx_gsw,hy_gsw,hz_gsw,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
+                use geopack_dipoles, only : recalc_08, igrf_gsw_08
+                integer, intent(in) :: iyear
+                integer, intent(in) :: iday
+                integer, intent(in) :: ihour
+                integer, intent(in) :: imin
+                integer, intent(in) :: isec
+                real(kind=8), intent(in) :: vx_gse
+                real(kind=8), intent(in) :: vy_gse
+                real(kind=8), intent(in) :: vz_gse
+                real(kind=8) dimension(nx), intent(in) :: x_gsw
+                real(kind=8) dimension(ny), intent(in) :: y_gsw
+                real(kind=8) dimension(nz), intent(in) :: z_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hx_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hy_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hz_gsw
+                integer, optional,check(shape(x_gsw, 0) == nx),depend(x_gsw), intent(hide) :: nx=shape(x_gsw, 0)
+                integer, optional,check(shape(y_gsw, 0) == ny),depend(y_gsw), intent(hide) :: ny=shape(y_gsw, 0)
+                integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw), intent(hide) :: nz=shape(z_gsw, 0)
+            end subroutine run_igrf_dipole
+            subroutine run_dipole(iyear,iday,ihour,imin,isec,vx_gse,vy_gse,vz_gse,x_gsw,y_gsw,z_gsw,hx_gsw,hy_gsw,hz_gsw,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
+                use geopack, only : dip_08, recalc_08
+                integer, intent(in) :: iyear
+                integer, intent(in) :: iday
+                integer, intent(in) :: ihour
+                integer, intent(in) :: imin
+                integer, intent(in) :: isec
+                real(kind=8), intent(in) :: vx_gse
+                real(kind=8), intent(in) :: vy_gse
+                real(kind=8), intent(in) :: vz_gse
+                real(kind=8) dimension(nx), intent(in) :: x_gsw
+                real(kind=8) dimension(ny), intent(in) :: y_gsw
+                real(kind=8) dimension(nz), intent(in) :: z_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hx_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hy_gsw
+                real(kind=8) dimension(nx,ny,nz),depend(nx,ny,nz), intent(out) :: hz_gsw
+                integer, optional,check(shape(x_gsw, 0) == nx),depend(x_gsw), intent(hide) :: nx=shape(x_gsw, 0)
+                integer, optional,check(shape(y_gsw, 0) == ny),depend(y_gsw), intent(hide) :: ny=shape(y_gsw, 0)
+                integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw), intent(hide) :: nz=shape(z_gsw, 0)
+             end subroutine run_dipole
+
             subroutine field(x,y,z,dateinfo,velocity,parmod,ps,modelnumber,dipolenumber,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
                 use magnetospheremodels, only: compute_field
                 real(kind=8) dimension(nx),intent(in) :: x

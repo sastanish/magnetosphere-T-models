@@ -8,7 +8,7 @@ contains
 
     use TA16, only : RBF_MODEL_2016
     use TS05, only : T04_s
-    use geopack, only : RECALC_08, IGRF_GSW_08, DIP_08
+    use geopack, only : RECALC_08, DIP_08, IGRF_GSW_08
 
     real(8), dimension(:), intent(in) :: x,y,z
 

@@ -237,12 +237,12 @@ contains
 
           ! (lambda * curl(B_fperp) dot F/|F| - Grad(lambda) dot B)/|B|
           c2_t1(ix,iy,iz) = (&
-                            lambda(ix,iy,iz)*(curl_bfpx*fx(ix,iy,iz) + curl_bfpy*fy(ix,iy,iz) + curl_bfpz*fz(ix,iy,iz))/magF(ix,iy,iz)&
-                          - ((lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hx)*bx(ix,iy,iz) &
-                            +(lambda(r(2,1),r(3,2),r(2,3)) - lambda(r(2,1),r(1,2),r(2,3)))/(2*hy)*by(ix,iy,iz) &
-                            +(lambda(r(2,1),r(2,2),r(3,3)) - lambda(r(2,1),r(2,2),r(1,3)))/(2*hz)*bz(ix,iy,iz) &
-                            )&
-                            )/magB(ix,iy,iz)
+          lambda(ix,iy,iz)*(curl_bfpx*fx(ix,iy,iz) + curl_bfpy*fy(ix,iy,iz) + curl_bfpz*fz(ix,iy,iz))/magF(ix,iy,iz)&
+        - ((lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hx)*bx(ix,iy,iz) &
+          +(lambda(r(2,1),r(3,2),r(2,3)) - lambda(r(2,1),r(1,2),r(2,3)))/(2*hy)*by(ix,iy,iz) &
+          +(lambda(r(2,1),r(2,2),r(3,3)) - lambda(r(2,1),r(2,2),r(1,3)))/(2*hz)*bz(ix,iy,iz) &
+          )&
+          )/magB(ix,iy,iz)
         end do
       end do
     end do
@@ -385,7 +385,9 @@ contains
           dza = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
           ! c2_t3 = (Grad(alpha) cross B)/|B|
-          c2_t3(ix,iy,iz) = sqrt( (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))**2 + (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))**2 + (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))**2 )/magB(ix,iy,iz)
+          c2_t3(ix,iy,iz) = sqrt( (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))**2&
+            + (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))**2 &
+            + (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))**2 )/magB(ix,iy,iz)
 
         end do
       end do

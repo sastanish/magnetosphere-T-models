@@ -10,8 +10,10 @@ contains
     real(8), intent(in), dimension(:,:,:) :: bx,by,bz
 
     real(8), intent(out), dimension(:,:,:,:) :: Mout
-    ! First dimension is [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz,&
-    !                     alpha, lambda, c2_t1, c2_t2, c2_t3]
+    ! First dimension is [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz, alpha, lambda,&
+    !                     mag_c2_t1, c2_t1_x, c2_t1_y, c2_t1_z,
+    !                     mag_c2_t2, c2_t2_x, c2_t2_y, c2_t2_z,
+    !                     mag_c2_t3, c2_t3_x, c2_t3_y, c2_t3_z]
 
     call compute_forces(x,y,z,bx,by,bz,Mout(1,:,:,:),&
                                        Mout(2,:,:,:),&
@@ -41,7 +43,10 @@ contains
                                       Mout(8,:,:,:),&
                                       Mout(9,:,:,:),&
                                       Mout(11,:,:,:),&
-                                      Mout(12,:,:,:)&
+                                      Mout(12,:,:,:),&
+                                      Mout(13,:,:,:),&
+                                      Mout(14,:,:,:),&
+                                      Mout(15,:,:,:)&
                                       )
 
     call compute_c2_t2(x,y,z,bx,by,bz,Mout(4,:,:,:),&
@@ -52,10 +57,17 @@ contains
                                       Mout(9,:,:,:),&
                                       Mout(10,:,:,:),&
                                       Mout(11,:,:,:),&
-                                      Mout(13,:,:,:)&
+                                      Mout(16,:,:,:),&
+                                      Mout(17,:,:,:),&
+                                      Mout(18,:,:,:),&
+                                      Mout(19,:,:,:)&
                                       )
 
-    call compute_c2_t3(x,y,z,bx,by,bz,Mout(10,:,:,:),Mout(14,:,:,:))
+    call compute_c2_t3(x,y,z,bx,by,bz,Mout(10,:,:,:),Mout(20,:,:,:),&
+                                                     Mout(21,:,:,:),&
+                                                     Mout(22,:,:,:),&
+                                                     Mout(23,:,:,:)&
+                                                     )
     
 
   end subroutine compute_all_metrics
@@ -169,7 +181,7 @@ contains
   end subroutine compute_parameters
 
   subroutine compute_c2_t1(x,y,z,bx,by,bz,fx,fy,fz,bfpx,bfpy,bfpz,lambda,&
-                           c2_t1)
+                           mag,c2_t1_x,c2_t1_y,c2_t1_z)
 
     real(8), intent(in), dimension(:) :: x,y,z
     real(8), intent(in), dimension(:,:,:) :: bx,by,bz
@@ -177,7 +189,7 @@ contains
     real(8), intent(in), dimension(:,:,:) :: bfpx,bfpy,bfpz
     real(8), intent(in), dimension(:,:,:) :: lambda
 
-    real(8), intent(out), dimension(:,:,:) :: c2_t1
+    real(8), intent(out), dimension(:,:,:) :: mag,c2_t1_x,c2_t1_y,c2_t1_z
 
     integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
@@ -236,7 +248,7 @@ contains
                       -bfpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
           ! (lambda * curl(B_fperp) dot F/|F| - Grad(lambda) dot B)/|B|
-          c2_t1(ix,iy,iz) = (&
+          mag(ix,iy,iz) = (&
           lambda(ix,iy,iz)*(curl_bfpx*fx(ix,iy,iz) + curl_bfpy*fy(ix,iy,iz) + curl_bfpz*fz(ix,iy,iz))/magF(ix,iy,iz)&
         - ((lambda(r(3,1),r(2,2),r(2,3)) - lambda(r(1,1),r(2,2),r(2,3)))/(2*hx)*bx(ix,iy,iz) &
           +(lambda(r(2,1),r(3,2),r(2,3)) - lambda(r(2,1),r(1,2),r(2,3)))/(2*hy)*by(ix,iy,iz) &
@@ -247,13 +259,17 @@ contains
       end do
     end do
 
+    c2_t1_x = mag * fx/magF
+    c2_t1_y = mag * fy/magF
+    c2_t1_z = mag * fz/magF
+
     deallocate(magF)
     deallocate(magB)
 
   end subroutine compute_c2_t1
 
   subroutine compute_c2_t2(x,y,z,bx,by,bz,fx,fy,fz,bfpx,bfpy,bfpz,lambda,alpha,&
-                           c2_t2)
+                           mag,c2_t2_x,c2_t2_y,c2_t2_z)
 
     real(8), intent(in), dimension(:) :: x,y,z
     real(8), intent(in), dimension(:,:,:) :: bx,by,bz
@@ -261,7 +277,7 @@ contains
     real(8), intent(in), dimension(:,:,:) :: bfpx,bfpy,bfpz
     real(8), intent(in), dimension(:,:,:) :: alpha,lambda
 
-    real(8), intent(out), dimension(:,:,:) :: c2_t2
+    real(8), intent(out), dimension(:,:,:) :: mag,c2_t2_x,c2_t2_y,c2_t2_z
 
     integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
@@ -320,7 +336,7 @@ contains
                       -bfpx(r(2,1),r(1,2),r(2,3)))/(2*hy)
 
           ! lambda (curl(B_fperp) dot B_fperp/|B|^2 + alpha)/|B|
-          c2_t2(ix,iy,iz) = lambda(ix,iy,iz)*( &
+          mag(ix,iy,iz) = lambda(ix,iy,iz)*( &
                   ( curl_bfpx*bfpx(ix,iy,iz) &
                   + curl_bfpy*bfpy(ix,iy,iz) &
                   + curl_bfpz*bfpz(ix,iy,iz) )/magB(ix,iy,iz)**2 &
@@ -330,18 +346,22 @@ contains
       end do
     end do
 
+    c2_t2_x = mag * bfpx
+    c2_t2_y = mag * bfpy
+    c2_t2_z = mag * bfpz
+
     deallocate(magF)
     deallocate(magB)
 
   end subroutine compute_c2_t2
 
-  subroutine compute_c2_t3(x,y,z,bx,by,bz,alpha,c2_t3)
+  subroutine compute_c2_t3(x,y,z,bx,by,bz,alpha,mag,c2_t3_x,c2_t3_y,c2_t3_z)
 
     real(8), intent(in), dimension(:) :: x,y,z
     real(8), intent(in), dimension(:,:,:) :: bx,by,bz
     real(8), intent(in), dimension(:,:,:) :: alpha
 
-    real(8), intent(out), dimension(:,:,:) :: c2_t3
+    real(8), intent(out), dimension(:,:,:) :: mag,c2_t3_x,c2_t3_y,c2_t3_z
 
     integer :: ix, iy, iz, r(3,3)
     real(8) :: hx, hy, hz
@@ -384,14 +404,16 @@ contains
           dya = (alpha(r(2,1),r(3,2),r(2,3))-alpha(r(2,1),r(1,2),r(2,3)))/(2*hy)
           dza = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
-          ! c2_t3 = (Grad(alpha) cross B)/|B|
-          c2_t3(ix,iy,iz) = sqrt( (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))**2&
-            + (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))**2 &
-            + (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))**2 )/magB(ix,iy,iz)
+          !c2_t3 = (Grad(alpha) cross B)/|B|
+          c2_t3_x(ix,iy,iz) = (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))/magB(ix,iy,iz)
+          c2_t3_y(ix,iy,iz) = (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))/magB(ix,iy,iz)
+          c2_t3_z(ix,iy,iz) = (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))/magB(ix,iy,iz)
 
         end do
       end do
     end do
+
+    mag = sqrt(c2_t3_x**2 + c2_t3_y**2 + c2_t3_z**2)
 
     deallocate(magB)
 

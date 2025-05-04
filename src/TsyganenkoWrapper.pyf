@@ -99,7 +99,7 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bx
                 real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: by
                 real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bz
-                real(kind=8) dimension(14,nx,ny,nz),intent(out),depend(nz,ny,nx) :: mout
+                real(kind=8) dimension(23,nx,ny,nz),intent(out),depend(nz,ny,nx) :: mout
                 integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
                 integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
                 integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)

@@ -160,7 +160,7 @@ contains
 
     real(8), intent(in) :: x(nx), y(ny), z(nz)
     real(8), dimension(nx,ny,nz), intent(in) :: bx, by, bz
-    real(8), intent(out) :: Mout(14,nx,ny,nz)
+    real(8), intent(out) :: Mout(23,nx,ny,nz)
 
     call compute_all_metrics(x,y,z,bx,by,bz,Mout)
 

@@ -259,9 +259,9 @@ contains
       end do
     end do
 
-    c2_t1_x = mag * fx/magF
-    c2_t1_y = mag * fy/magF
-    c2_t1_z = mag * fz/magF
+    c2_t1_x = -1.0*mag * fx/magF
+    c2_t1_y = -1.0*mag * fy/magF
+    c2_t1_z = -1.0*mag * fz/magF
 
     deallocate(magF)
     deallocate(magB)
@@ -346,9 +346,9 @@ contains
       end do
     end do
 
-    c2_t2_x = mag * bfpx
-    c2_t2_y = mag * bfpy
-    c2_t2_z = mag * bfpz
+    c2_t2_x = -1.0*mag * bfpx
+    c2_t2_y = -1.0*mag * bfpy
+    c2_t2_z = -1.0*mag * bfpz
 
     deallocate(magF)
     deallocate(magB)
@@ -405,9 +405,9 @@ contains
           dza = (alpha(r(2,1),r(2,2),r(3,3))-alpha(r(2,1),r(2,2),r(1,3)))/(2*hz)
 
           !c2_t3 = (Grad(alpha) cross B)/|B|
-          c2_t3_x(ix,iy,iz) = (dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))/magB(ix,iy,iz)
-          c2_t3_y(ix,iy,iz) = (dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))/magB(ix,iy,iz)
-          c2_t3_z(ix,iy,iz) = (dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))/magB(ix,iy,iz)
+          c2_t3_x(ix,iy,iz) = -1.0*(dya*bz(ix,iy,iz)-dza*by(ix,iy,iz))/magB(ix,iy,iz)
+          c2_t3_y(ix,iy,iz) = -1.0*(dza*bx(ix,iy,iz)-dxa*bz(ix,iy,iz))/magB(ix,iy,iz)
+          c2_t3_z(ix,iy,iz) = -1.0*(dxa*by(ix,iy,iz)-dya*bx(ix,iy,iz))/magB(ix,iy,iz)
 
         end do
       end do

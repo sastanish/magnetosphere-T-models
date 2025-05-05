@@ -4,7 +4,7 @@ module reconnectionMetrics
 
 contains
 
-  subroutine compute_all_metrics(x,y,z,bx,by,bz,Mout)
+  subroutine compute_reconnection_metrics(x,y,z,bx,by,bz,Mout)
     
     real(8), intent(in), dimension(:) :: x,y,z
     real(8), intent(in), dimension(:,:,:) :: bx,by,bz
@@ -70,7 +70,7 @@ contains
                                                      )
     
 
-  end subroutine compute_all_metrics
+  end subroutine compute_reconnection_metrics
 
   subroutine compute_forces(x,y,z,bx,by,bz,jx,jy,jz,fx,fy,fz)
     real(8), intent(in), dimension(:) :: x,y,z

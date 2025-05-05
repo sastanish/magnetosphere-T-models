@@ -4,20 +4,20 @@ module magnetosphereModels
 
 contains
 
-  subroutine compute_field(x,y,z,dateInfo,velocity,parmod,ps,modelNumber,dipoleNumber,bx,by,bz)
+  subroutine calculate_magnetic_field(x,y,z,model,dipole,ps,parmod,velocity,dateinfo,bx,by,bz)
 
     use TA16, only : RBF_MODEL_2016
     use TS05, only : T04_s
-    use geopack, only : RECALC_08, DIP_08, IGRF_GSW_08
+    use geopack ! Need whole geopack to use common
 
     real(8), dimension(:), intent(in) :: x,y,z
 
-    integer, dimension(:), intent(in) :: dateInfo ! [year, dayNumber, hour, min, sec]
+    integer, dimension(:), intent(in) :: dateInfo ! [year, dayNumber, hour, min]
     real(8), dimension(:), intent(in) :: velocity ! GSW Solar wind components [vx, vy, vz]
-    real(8), dimension(:), intent(in) :: parmod
+    real(8), dimension(:), intent(in) :: parmod ! Inputs for model, see model documentation
     real(8), intent(in) :: ps ! Geo-dipole tilt angle (in radians)
-    integer, intent(in) :: modelNumber, dipoleNumber
-    ! control parameters, modelNumber = 5 (TS05), 16 (TA16)
+    integer, intent(in) :: model, dipole
+    ! control parameters, modelNumber = 1 (TS05), 2 (TA16)
     !                     dipoleNumber = 1 (DIP_08), 2(IGRF_GSW_08)
     
     real(8), intent(out), dimension(:,:,:) :: bx,by,bz
@@ -52,8 +52,8 @@ contains
 
           if ( dipoleNumber == 1 ) call DIP_08(xx,yy,zz,ibx,iby,ibz)
           if ( dipoleNumber == 2 ) call IGRF_GSW_08(xx,yy,zz,ibx,iby,ibz)
-          if ( modelNumber == 5  ) call T04_s(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
-          if ( modelNumber == 16 ) call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
+          if ( modelNumber == 1  ) call T04_s(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
+          if ( modelNumber == 2 ) call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,ebx,eby,ebz)
 
           bx(i,j,k) = ibx+ebx
           by(i,j,k) = iby+eby
@@ -63,6 +63,6 @@ contains
       end do
     end do
 
-  end subroutine compute_field
+  end subroutine calculate_magnetic_field
 
 end module magnetosphereModels

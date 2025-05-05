@@ -60,8 +60,12 @@ def compute(line):
     # Reconnection Metrics
     # Pass in a grid and field and this method will return the following 
     # calculated quantities along the first dimension;
-    # [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz, alpha, lambda, c2_t1, c2_t2, c2_t3]
-    output_metrics = np.zeros( (14, nx, ny, nz) )
+    # [jx, jy, jz, fx, fy, fz, bfpx, bfpy, bfpz, alpha, lambda,
+    #  mag_c2_t1, c2_t1_x, c2_t1_y, c2_t1_z,
+    #  mag_c2_t2, c2_t2_x, c2_t2_y, c2_t2_z,
+    #  mag_c2_t3, c2_t3_x, c2_t3_y, c2_t3_z]
+    output_metrics = np.zeros( (22, nx, ny, nz) )
+
     output_metrics = TS.compute.metrics(x,y,z,bx,by,bz)
 
     time = str(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M")).replace(" ","_")
@@ -71,9 +75,9 @@ def compute(line):
                           "bx": (["x", "y", "z"], bx),
                           "by": (["x", "y", "z"], by),
                           "bz": (["x", "y", "z"], bz),
-                          "c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
-                          "c2_t2": (["x", "y", "z"], output_metrics[12,:,:,:]),
-                          "c2_t3": (["x", "y", "z"], output_metrics[13,:,:,:]),
+                          "mag_c2_t1": (["x", "y", "z"], output_metrics[11,:,:,:]),
+                          "mag_c2_t2": (["x", "y", "z"], output_metrics[15,:,:,:]),
+                          "mag_c2_t3": (["x", "y", "z"], output_metrics[19,:,:,:]),
                           # add other fields from output_metrics here
                           },
                    coords={
@@ -88,11 +92,10 @@ def compute(line):
                      "bx":{"zlib":True, "complevel": 7},
                      "by":{"zlib":True, "complevel": 7},
                      "bz":{"zlib":True, "complevel": 7},
-                     "c2_t1":{"zlib":True, "complevel": 7},
-                     "c2_t2":{"zlib":True, "complevel": 7},
-                     "c2_t3":{"zlib":True, "complevel": 7}
+                     "mag_c2_t1":{"zlib":True, "complevel": 7},
+                     "mag_c2_t2":{"zlib":True, "complevel": 7},
+                     "mag_c2_t3":{"zlib":True, "complevel": 7}}
                       # Specify extra fields encoding here.
-                     }
                      )
 
     print(time)
@@ -101,6 +104,5 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-#with Pool(Nproc) as comp_pool:
-#    comp_pool.map(compute,omni_data)
-compute(omni_data[0])
+with Pool(Nproc) as comp_pool:
+    comp_pool.map(compute,omni_data)

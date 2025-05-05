@@ -20,7 +20,7 @@ omni_data = np.genfromtxt('selected_may_storm_times.dat',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 
-(nx, ny, nz) = (10, 8, 8)
+(nx, ny, nz) = (200, 150, 150)
 x0 = -10
 x1 = 0
 y0 = -4
@@ -108,6 +108,5 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-#with Pool(Nproc) as comp_pool:
-#    comp_pool.map(compute,omni_data)
-compute(omni_data[0])
+with Pool(Nproc) as comp_pool:
+    comp_pool.map(compute,omni_data)

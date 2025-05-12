@@ -1,6 +1,6 @@
 import numpy as np
 
-infile = 'data/omni_5min_2022-03-13-10_to_14-08.lst'
+infile = 'data/omni_1min_2024-10-10-1200_to_11-1200.lst'
 
 file_data = np.genfromtxt(infile,dtype=None)
 IMF_flag = np.zeros(file_data.shape[0],dtype=int)

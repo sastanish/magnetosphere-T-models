@@ -6,16 +6,17 @@ c
       implicit real*8 (a-h,o-z)
       REAL*8 TILT,VXX,VYY,VZZ
 
-      CHARACTER*80 NAMEIN,NAMEOUT
+      CHARACTER*90 NAMEIN,NAMEOUT,NAME
 
       REAL*8 BX,BY,BZ,VX,VY,VZ,V_SW,T,DEN,PA
       INTEGER IYEA,IDA,IHOU,MI,IMFLAG,SWFLAG,AeIND,SymH
 
       COMMON /GEOPACK1/ AAA(15),TILT,BBB(18)
 
-      NAMEIN='omni_5min_2022-03-13-10_to_14-08'//
-     &       '_filled_SW_and_IMF_gaps.lst'
-      NAMEOUT='omni_5min_2022-03-13-10_to_14-08_with_tilt.lst'
+      NAME='omni_5min_2022-03-13-10_to_14-08'
+
+      NAMEIN=trim(NAME)//'_filled_SW_and_IMF_gaps.lst'
+      NAMEOUT=trim(NAME)//'_with_tilt.lst'
 
       VXX=-400.  ! THIS IS FOR RECALC_08
       VYY=0.

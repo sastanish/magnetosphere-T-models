@@ -263,7 +263,7 @@ contains
     c2_t1_y = -1.0*mag * fy/magF
     c2_t1_z = -1.0*mag * fz/magF
 
-    mag = abs(mag)
+    mag = sqrt(c2_t1_x**2 + c2_t1_y**2 + c2_t1_z**2)
 
     deallocate(magF)
     deallocate(magB)
@@ -352,7 +352,7 @@ contains
     c2_t2_y = -1.0*mag * bfpy
     c2_t2_z = -1.0*mag * bfpz
 
-    mag = abs(mag)
+    mag = sqrt(c2_t2_x**2 + c2_t2_y**2 + c2_t2_z**2)
 
     deallocate(magF)
     deallocate(magB)

@@ -1,0 +1,15 @@
+omni_1min_2018-08-25_to_27.lst
+omni_1min_2021-11-03-1800_to_04-1800.lst
+omni_1min_2022-01-14_to_16.lst
+omni_1min_2022-03-13_to_14.lst
+omni_1min_2022-10-22_to_24.lst
+omni_1min_2023-02-26-1200_to_27-2400.lst
+omni_1min_2023-03-22_to_24.lst
+omni_1min_2023-04-23-1200_to_24-2400.lst
+omni_1min_2023-11-06_to_06.lst
+omni_1min_2024-03-03-0000_to_04-1200.lst
+omni_1min_2024-03-24_to_25.lst
+omni_1min_2024-05-10_to_11.lst
+omni_1min_2024-08-11_to_13.lst
+omni_1min_2024-10-10-1200_to_11-1200.lst
+omni_5min_2022-03-13-10_to_14-08.lst

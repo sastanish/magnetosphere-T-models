@@ -9,24 +9,24 @@ from multiprocessing import Pool
 # All of the computation is done in serial, parallization only allows is to 
 # compute many different times at once
 
-Nproc = 4
+Nproc = 40
 
-# The fortran codes are loaded through the Tsyganenko_wrapper module.
+# The fortran codes are loaded through the TsyganenkoWrapper module.
 ##########
 
 # Read data
 
-omni_data = np.genfromtxt('may_2024_storm_with_TS05_vars.dat',dtype=None)
+omni_data = np.genfromtxt('input_data.lst',dtype=None)
 
 # Setup the desired GSW Coordinates and data-structure
 
-(nx, ny, nz) = (200, 150, 150)
-x0 = -10
-x1 = 2
-y0 = -4
-y1 = 4
-z0 = -4
-z1 = 4
+(nx, ny, nz) = (8*30, 2*30, 2*30)
+x0 = -8
+x1 = 0
+y0 = -1
+y1 = 1
+z0 = 0
+z1 = 2
 
 x = np.linspace(x0, x1, nx)
 y = np.linspace(y0, y1, ny)
@@ -37,8 +37,12 @@ z = np.linspace(z0, z1, nz)
 def compute(line):
     ## This function takes in a line of data from the input file and computes
     ## the resulting field via the fortran wrapper.
-    parmod = [line[16], line[12], line[5], line[6], line[17], line[18], line[19], line[20], line[21], line[22]]
-    ps = line[15]
+    parmod = [0 for i in range(10)]
+    parmod[0] = line[18] # Pdyn
+    parmod[1] = line[24] # <SymHc>
+    parmod[2] = line[23] # N-index
+    parmod[3] = line[20] # <By IMF>
+    ps = line[17]
     vgsex = line[7]
     vgsey = line[8] + 29.78
     vgsez = line[9]
@@ -49,7 +53,7 @@ def compute(line):
     isec = 0
 
     # External field
-    [bx, by, bz] = TS.compute.run_ts05(parmod,ps,x,y,z)
+    [bx, by, bz] = TS.compute.run_ta16(parmod,ps,x,y,z)
     # Internal field via igrf
     [in_bx, in_by, in_bz] = TS.compute.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
 
@@ -104,6 +108,5 @@ def compute(line):
 
 # Set up process pool and operate the compute function on each entry
 # in the omni_data array, or a subset of the array.
-#with Pool(Nproc) as comp_pool:
-#    comp_pool.map(compute,omni_data)
-compute(omni_data[0])
+with Pool(Nproc) as comp_pool:
+    comp_pool.map(compute,omni_data)

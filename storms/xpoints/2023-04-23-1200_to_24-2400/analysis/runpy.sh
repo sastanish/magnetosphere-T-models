@@ -16,7 +16,7 @@
 #SBATCH --ntasks=10 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:20:00
+#SBATCH --time=00:10:00
 #
 # Job name
 #SBATCH --job-name=test_plots
@@ -41,7 +41,7 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 
 conda activate magnetosphere
 
-python overview.py
+python track_x_point.py
 
 #======================================================
 # Epilogue script to record job endtime and runtime

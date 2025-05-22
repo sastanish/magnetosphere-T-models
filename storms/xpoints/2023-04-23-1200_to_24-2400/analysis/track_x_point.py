@@ -45,7 +45,7 @@ def compute_via_critical_points(pressure,rate):
 def compute(ind,niters=3):
 
     #load
-    ds = xr.open_dataset(f"../data/2024_data_{ind+1}.nc").sel(x=slice(-8,-1))
+    ds = xr.open_dataset(f"../data/2023-04_data_{ind+1}.nc").sel(x=slice(-8,-1))
 
     #calc pressure and rate
     pressure = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2)
@@ -76,7 +76,7 @@ def compute(ind,niters=3):
 if __name__ == '__main__':
 
     Nproc = 10
-    names = [1+i for i in range(860)]
+    names = [1+i for i in range(399)]
 
     with multiprocessing.Pool(Nproc) as pool:
         output = pool.map(compute,names)

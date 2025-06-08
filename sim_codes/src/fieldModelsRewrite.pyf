@@ -1,0 +1,39 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module magnetoModels ! in 
+    interface  ! in :magnetoModels
+        module compute ! in :magnetoModels:fieldModelsRewrite.f90
+            subroutine rbf_model(pdyn,symh,xind,byimf,ps,xin,yin,zin,bx,by,bz,nx,ny,nz) ! in :magnetoModels:fieldModelsRewrite.f90:compute
+                real intent(in) :: pdyn
+                real intent(in) :: symh
+                real intent(in) :: xind
+                real intent(in) :: byimf
+                real intent(in) :: ps
+                real dimension(nx),intent(in) :: xin
+                real dimension(ny),intent(in) :: yin
+                real dimension(nz),intent(in) :: zin
+                real dimension(nx,ny,nz),intent(out),depend(nx,nz,ny) :: bx
+                real dimension(nx,ny,nz),intent(out),depend(nx,nz,ny) :: by
+                real dimension(nx,ny,nz),intent(out),depend(nx,nz,ny) :: bz
+                integer, optional,check(shape(xin, 0) == nx),depend(xin) :: nx=shape(xin, 0)
+                integer, optional,check(shape(yin, 0) == ny),depend(yin) :: ny=shape(yin, 0)
+                integer, optional,check(shape(zin, 0) == nz),depend(zin) :: nz=shape(zin, 0)
+            end subroutine rbf_model
+            subroutine rbf_centers(xx,yy,zz,st,rho,zsp,zcp,rhbr) ! in :magnetoModels:fieldModelsRewrite.f90:compute
+                real dimension(:),intent(out) :: xx
+                real dimension(:),intent(out) :: yy
+                real dimension(:),intent(out) :: zz
+                real dimension(:),intent(out) :: st
+                real dimension(:),intent(out) :: rho
+                real dimension(:),intent(out) :: zsp
+                real dimension(:),intent(out) :: zcp
+                real dimension(:),intent(out) :: rhbr
+            end subroutine rbf_centers
+        end module compute
+    end interface 
+end python module magnetoModels
+
+! This file was auto-generated with f2py (version:2.2.6).
+! See:
+! https://web.archive.org/web/20140822061353/http://cens.ioc.ee/projects/f2py2e

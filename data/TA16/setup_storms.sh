@@ -8,6 +8,7 @@ do
   cp ../prepared_omni_data/TA16/data/${date}_TA16_parameters.lst $date/input_data.lst
   cp ./TA16_RBF.par $date/TA16_RBF.par
   cp ./storm.py $date/storm.py
+  cp ./run_storm.sh $date/run_storm.sh
   cd $date
   ln -s ../../../sim_codes/src/TsyganenkoWrapper.cpython-312-x86_64-linux-gnu.so .
   cd ../

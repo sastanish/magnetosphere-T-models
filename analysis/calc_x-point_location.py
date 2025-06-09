@@ -42,10 +42,10 @@ def compute_via_critical_points(pressure,rate):
 
     return (cradi, crate)
 
-def compute(ind,niters=3):
+def compute(path,niters=3):
 
     #load
-    ds = xr.open_dataset(f"../data/2024_data_{ind+1}.nc").sel(x=slice(-8,-1))
+    ds = xr.open_dataset(path).sel(x=slice(-15,-1))
 
     #calc pressure and rate
     pressure = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2)
@@ -69,15 +69,33 @@ def compute(ind,niters=3):
 
         #Remove last point
         pressure = pressure.where(pressure != ball)
+        time = str(ds.attrs["time"])
 
-
-    return (float(best_rate), float(closestPoint), crate, cradi)
+    return (time, float(best_rate), float(closestPoint), crate, cradi)
 
 if __name__ == '__main__':
 
-    Nproc = 10
-    names = [1+i for i in range(860)]
+    dates = ["2024-10-10"]
+    max_inds = [159]
+    Nproc = 5
 
-    with multiprocessing.Pool(Nproc) as pool:
-        output = pool.map(compute,names)
-    np.savetxt('./x-point_rate.txt',output,fmt="%.4f",header=' Format: \n   1) Maximal reconnection rate at closest pressure dip \n  2) Distance from earth \n  3) Rate from critical \n  4) Distance from critical')
+    for date,max_ind in zip(dates,max_inds):
+        directory = "/users/xnb22215/magnetosphere-T-models/data/TA16/" + date
+        filenames = [directory + f"/output_data_{ind+1}.nc" for ind in max_ind]
+        with multiprocessing.Pool(Nproc) as pool:
+            output = pool.map(compute,filenames)
+
+        header=' Format:\n
+           1) Time
+           2) Maximal reconnection rate at closest pressure dip\n
+           3) Distance from earth\n
+           4) Rate from critical\n
+           5) Distance from critical\n'
+        with open( directory + "/x-point_locations.txt", "w") as f:
+            f.write(header)
+            for line in output:
+                f.write( line[0] + '   ' )
+                f.write( f"{line[1]:.4f}" + '   ' )
+                f.write( f"{line[2]:.4f}" + '   ' )
+                f.write( f"{line[3]:.4f}" + '   ' )
+                f.write( f"{line[4]:.4f}" + '\n' )

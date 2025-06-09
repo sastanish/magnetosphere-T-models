@@ -49,7 +49,7 @@ def compute(path,niters=3):
 
     #calc pressure and rate
     pressure = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2)
-    rate = ds.mag_c2_t1 + ds.mag_c2_t2 + ds.mag_c2_t3
+    rate = ds.rate
 
     (cradi,crate) = compute_via_critical_points(pressure.sel(y=0,method="nearest"),rate.sel(y=0,method="nearest"))
 
@@ -81,16 +81,16 @@ if __name__ == '__main__':
 
     for date,max_ind in zip(dates,max_inds):
         directory = "/users/xnb22215/magnetosphere-T-models/data/TA16/" + date
-        filenames = [directory + f"/output_data_{ind+1}.nc" for ind in max_ind]
+        filenames = [directory + f"/output_data_{ind+1}.nc" for ind in range(max_ind)]
         with multiprocessing.Pool(Nproc) as pool:
             output = pool.map(compute,filenames)
 
-        header=' Format:\n
+        header = '''Format:
            1) Time
-           2) Maximal reconnection rate at closest pressure dip\n
-           3) Distance from earth\n
-           4) Rate from critical\n
-           5) Distance from critical\n'
+           2) Maximal reconnection rate at closest pressure dip
+           3) Distance from earth
+           4) Rate from critical
+           5) Distance from critical'''
         with open( directory + "/x-point_locations.txt", "w") as f:
             f.write(header)
             for line in output:

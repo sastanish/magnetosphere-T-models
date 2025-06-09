@@ -13,7 +13,7 @@ def norm(x):
 def get_neutron_data(directory,hskip=42):
 
     # Clean up neutron monitor data
-    neutron_data = np.genfromtxt("./neutron_data.txt",
+    neutron_data = np.genfromtxt(directory + "neutron_data.txt",
                                  skip_header=hskip,dtype=None,names=True,missing_values="null"
                                  )
     times = []
@@ -26,86 +26,86 @@ def get_neutron_data(directory,hskip=42):
     return (names, ntime, neutron_data)
 
 def get_omni_data(directory):
-    omni_data = np.genfromtxt("../input_data.lst",dtype=None)
 
-    Nt = len(omni_data)
-    symh  = np.zeros(Nt)
-    AeInd = np.zeros(Nt)
-    BZ = np.zeros(Nt)
+    SymHc  = []
+    Nind = []
+    BZ = []
+    avg_BZ = []
     times = []
 
-    for i in range(Nt):
-        line = omni_data[i]
-        
+    for line in np.genfromtxt(directory + "input_data.lst",dtype=None):
+
         times.append(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M"))
-        symh[i] = line[14]
-        AeInd[i] = line[13]
-        BZ[i] = line[6]
 
-    time =pd.to_datetime(times)
+        SymHc.append(float(line[23]))
+        Nind.append(float(line[22]))
+        BZ.append(float(line[6]))
+        avg_BZ.append(float(line[21]))
 
-    return (time)
+    time = pd.to_datetime(times)
 
-def 
+    return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
 
+def get_x_point_data(directory):
 
-def plot_loc(date):
     times = []
     brate = []
-    brad = []
+    brad  = []
     crate = []
-    crad = []
-    for line in np.genfromtxt('x-point_rate.txt',dtype=None):
+    crad  = []
+
+    for line in np.genfromtxt(directory + 'x-point_locations.txt',dtype=None,skip_header=6):
+
         times.append(str(line[0]).replace("_"," "))
         brate.append(float(line[1]))
         brad.append( float(line[2]))
         crate.append(float(line[3]))
         crad.append( float(line[4]))
 
-    rtime =pd.to_datetime(times)
+    time = pd.to_datetime(times)
 
-    sel = slice(400,1100)
+    return {"time":time, "brate":brate, "brad":brad, "crate":crate, "crad":crad}
 
-    fig, ax = plt.subplots(nrows=8,figsize=(8,24),sharex=True)
+def plot_statistics(date):
 
-    colors = matplotlib.color_sequences["tab20"]
+    directory = "../data/TA16/" + date + "/"
+    fig, ax = plt.subplots(nrows=5,figsize=(8,16),sharex=True)
 
-    for i in range(12):
-        ax[0].plot(ntime[4:],moving_average(norm(neutron_data[names[i+2]]),5),label=names[i+2],color=colors[i],alpha=0.9)
+    xpoints = get_x_point_data(directory)
+    omnidata = get_omni_data(directory)
+#    colors = matplotlib.color_sequences["tab20"]
+#    neutrondata = get_neutron_data(directory)
 
-    ax[0].legend()
-    ax[0].set_ylabel('monitor data shape')
+    ax[0].plot(xpoints["time"],xpoints["brate"],color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[0].plot(xpoints["time"],xpoints["crate"],color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[0].set_ylabel('rate')
+    ax[0].set_yscale('log')
 
-    ax[1].plot(rtime,brate,color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[1].plot(rtime,crate,color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[1].set_ylabel('rate')
-    ax[1].set_yscale('log')
+    ax[1].plot(xpoints["time"],xpoints["brad"],color="tab:red",linestyle="",marker=".",alpha=0.9)
+    ax[1].plot(xpoints["time"],xpoints["crad"],color="tab:blue",linestyle="",marker=".",alpha=0.9)
+    ax[1].set_ylabel('radius')
 
-    for i in range(12):
-        ax[2].plot(ntime[4:],moving_average(norm(neutron_data[names[i+14]]),5),label=names[i+14],color=colors[i],alpha=0.9)
+    ax[2].plot(omnidata["time"],omnidata["SymHc"])
+    ax[2].set_ylabel("<SymHc>")
 
-    ax[2].legend()
-    ax[2].set_ylabel('monitor data shape')
+    ax[3].plot(omnidata["time"],omnidata["Nind"])
+    ax[3].set_ylabel("N Index")
 
-    ax[3].plot(rtime,brad,color="tab:red",linestyle="",marker=".",alpha=0.9)
-    ax[3].plot(rtime,crad,color="tab:blue",linestyle="",marker=".",alpha=0.9)
-    ax[3].set_ylabel('radius')
-
-    for i in range(10):
-       ax[4].plot(ntime[4:],moving_average(norm(neutron_data[names[i+24]]),5),label=names[i+24],color=colors[i],alpha=0.9)
-
-    ax[4].legend()
-    ax[4].set_ylabel('monitor data shape')
-
-    ax[5].plot(xtime,symh)
-    ax[5].set_ylabel("SymH")
-
-    ax[6].plot(xtime,AeInd)
-    ax[6].set_ylabel("Ae Index")
-
-    ax[7].plot(xtime,BZ)
-    ax[7].set_ylabel("BZ")
+    ax[4].plot(omnidata["time"],omnidata["BZ"],color="black")
+    ax[4].plot(omnidata["time"],omnidata["avg_BZ"],color="tab:red")
+    ax[4].set_ylabel("BZ")
 
     plt.xticks(rotation=45)
-    plt.savefig("dip_vs_neutrons.png")
+    plt.savefig("../figs/TA16/" + date + "/x-point_location.png")
     plt.close()
+
+    return
+
+if __name__ == "__main__":
+
+    dates = ["2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2024-05-10"]
+
+    for date in dates:
+        print(date)
+        plot_statistics(date)
+

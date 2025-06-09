@@ -3,7 +3,8 @@ Format:
            2) Maximal reconnection rate at closest pressure dip
            3) Distance from earth
            4) Rate from critical
-           5) Distance from critical2022-03-12_08:10:00   315953.3304   14.2173   772.3795   13.6283
+           5) Distance from critical
+2022-03-12_08:10:00   315953.3304   14.2173   772.3795   13.6283
 2022-03-12_05:05:00   1811.2450   14.9696   357.0148   13.6621
 2022-03-12_20:05:00   257.2260   14.1636   40.9932   13.1595
 2022-03-12_13:45:00   735.6458   13.7320   180.4045   13.3618

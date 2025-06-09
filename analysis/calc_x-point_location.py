@@ -102,7 +102,7 @@ if __name__ == '__main__':
            2) Maximal reconnection rate at closest pressure dip
            3) Distance from earth
            4) Rate from critical
-           5) Distance from critical'''
+           5) Distance from critical\n'''
         with open( directory + "/x-point_locations.txt", "w") as f:
             f.write(header)
             for line in output:

@@ -17,6 +17,7 @@ contains
     real(8), intent(in) :: parmod(10), ps
 
     !$OMP PARALLEL SHARED(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
+    print *, OMP_GET_MAX_THREADS()
     !$OMP DO COLLAPSE(3)
     do i = 1,nx
       do j = 1,ny

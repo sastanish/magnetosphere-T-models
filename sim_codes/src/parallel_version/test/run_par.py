@@ -54,13 +54,13 @@ if __name__ == '__main__':
     omni_data = np.genfromtxt('input_data.lst',dtype=None)
 
     # Setup the desired GSW Coordinates and data-structure
-    (nx, ny, nz) = (75, 100, 20)
-    x0 = -15
+    (nx, ny, nz) = (100, 100, 100)
+    x0 = -17
     x1 = 0
     y0 = -10
     y1 = 10
-    z0 = -2
-    z1 = 2
+    z0 = -4
+    z1 = 4
 
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)
@@ -68,4 +68,4 @@ if __name__ == '__main__':
 
     # Set up process pool and operate the compute function on each entry
     # in the omni_data array, or a subset of the array.
-    compute(omni_data[0])
+    compute(omni_data[5])

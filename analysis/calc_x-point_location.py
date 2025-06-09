@@ -2,6 +2,8 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import multiprocessing
+import re
+import os
 
 def find_critical_points(ds,dim):
 
@@ -52,36 +54,46 @@ def compute(path,niters=3):
     rate = ds.rate
 
     (cradi,crate) = compute_via_critical_points(pressure.sel(y=0,method="nearest"),rate.sel(y=0,method="nearest"))
+    try:
+        #loop through num iters
+        closestPoint = 50
+        for j in range(niters):
+            ball = find_ball(pressure,'min',rad=1)
+            rateBall = rate.where(pressure == ball)
 
-    #loop through num iters
-    closestPoint = 50
-    for j in range(niters):
-        ball = find_ball(pressure,'min',rad=1)
-        rateBall = rate.where(pressure == ball)
+            loc = rateBall.argmax(dim=("x","y","z"))
+            maxrate = rateBall.isel(loc)
+            r = np.sqrt(maxrate.x**2+maxrate.y**2+maxrate.z**2)
 
-        loc = rateBall.argmax(dim=("x","y","z"))
-        maxrate = rateBall.isel(loc)
-        r = np.sqrt(maxrate.x**2+maxrate.y**2+maxrate.z**2)
+            if r < closestPoint:
+                closestPoint = r
+                best_rate = maxrate
 
-        if r < closestPoint:
-            closestPoint = r
-            best_rate = maxrate
+            #Remove last point
+            pressure = pressure.where(pressure != ball)
+    except:
+        best_rate = np.nan
+        closestPoint = np.nan
 
-        #Remove last point
-        pressure = pressure.where(pressure != ball)
-        time = str(ds.attrs["time"])
+    time = str(ds.attrs["time"])
 
     return (time, float(best_rate), float(closestPoint), crate, cradi)
 
 if __name__ == '__main__':
 
-    dates = ["2024-10-10"]
-    max_inds = [159]
-    Nproc = 5
+    #dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
+    dates = ["2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2024-05-10"]
+    Nproc = 10
 
-    for date,max_ind in zip(dates,max_inds):
+    for date in dates:
         directory = "/users/xnb22215/magnetosphere-T-models/data/TA16/" + date
-        filenames = [directory + f"/output_data_{ind+1}.nc" for ind in range(max_ind)]
+
+        filenames = []
+        pattern = re.compile(r"output_data_.*\.nc")
+        for fname in os.listdir(directory):
+            if pattern.match(fname):
+                filenames.append(str(directory + "/" + fname))
+
         with multiprocessing.Pool(Nproc) as pool:
             output = pool.map(compute,filenames)
 

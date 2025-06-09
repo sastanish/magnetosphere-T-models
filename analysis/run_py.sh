@@ -13,13 +13,13 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=5 --nodes=1
+#SBATCH --ntasks=10 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:15:00
+#SBATCH --time=00:25:00
 #
 # Job name
-#SBATCH --job-name=test_x-rate
+#SBATCH --job-name=x-rate
 #
 # Output file
 #SBATCH --output=%j-python.out

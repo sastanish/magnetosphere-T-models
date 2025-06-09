@@ -130,28 +130,6 @@ contains
     
   end subroutine run_dipole
 
-  subroutine field(x,y,z,dateInfo,velocity,parmod,ps,modelNumber,dipoleNumber,bx,by,bz,nx,ny,nz)
-
-    !! NOTE: compute field does not currently work as the common block is not playing well with
-    !! this setup.
-
-    use magnetosphereModels, only: compute_field
-
-    integer :: nx, ny, nz
-
-    real(8), intent(in) :: x(nx), y(ny), z(nz)
-    integer, intent(in) :: dateinfo(5)
-    real(8), intent(in) :: velocity(3)
-    real(8), intent(in) :: parmod(10)
-    real(8), intent(in) :: ps
-    integer, intent(in) :: modelNumber, dipoleNumber
-
-    real(8), dimension(nx,ny,nz), intent(out) :: bx, by, bz
-
-    call compute_field(x,y,z,dateInfo,velocity,parmod,ps,modelNumber,dipoleNumber,bx,by,bz)
-
-  end subroutine field
-
   subroutine metrics(x,y,z,bx,by,bz,Mout,nx,ny,nz)
 
     use reconnectionMetrics, only: compute_all_metrics
@@ -179,6 +157,5 @@ contains
     call compute_total_rate(x,y,z,bx,by,bz,Mout)
 
   end subroutine total_rate
-
 
 end module compute

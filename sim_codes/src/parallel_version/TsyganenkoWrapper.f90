@@ -12,9 +12,9 @@ contains
     integer :: nx, ny, nz
     integer :: i, j, k
     real(8) :: xx,yy,zz,bbx,bby,bbz !dummy variables
-    real(8) :: x(nx), y(ny), z(nz)
-    real(8) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
-    real(8) :: parmod(10), ps
+    real(8), intent(in) :: x(nx), y(ny), z(nz)
+    real(8), intent(out) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
+    real(8), intent(in) :: parmod(10), ps
 
     !$OMP PARALLEL SHARED(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
     !$OMP DO COLLAPSE(3)

@@ -16,16 +16,13 @@ contains
     real(8) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
     real(8) :: parmod(10), ps
 
-    !$OMP PARALLEL PUBLIC(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
-    bbx = 0.0
-    bby = 0.0
-    bbz = 0.0
+    !$OMP PARALLEL SHARED(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
     !$OMP DO COLLAPSE(3)
     do i = 1,nx
-      xx = x(i)
       do j = 1,ny
-        yy = y(j)
         do k = 1,nz
+          xx = x(i)
+          yy = y(j)
           zz = z(k)
           call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,bbx,bby,bbz)
           Bx(i,j,k) = bbx

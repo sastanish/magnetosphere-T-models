@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import TsyganenkoWrapper as TS
-import magnetoModels as MD
 import time as td
 
 def compute(line):
@@ -31,7 +30,7 @@ def compute(line):
 
     # My TA16 model
     mstart = td.time()
-    [Mbx, Mby, Mbz] = MD.compute.rbf_model(parmod[0],parmod[1],parmod[2],parmod[3],ps,x,y,z)
+    [Mbx, Mby, Mbz] = TS.compute.run_ta16_v2(parmod[0],parmod[1],parmod[2],parmod[3],ps,x,y,z)
     mend = td.time()
     print(f'my model over, elapsed: {mend-mstart}')
 
@@ -79,13 +78,13 @@ if __name__ == '__main__':
     omni_data = np.genfromtxt('input_data.lst',dtype=None)
 
     # Setup the desired GSW Coordinates and data-structure
-    (nx, ny, nz) = (75, 100, 20)
-    x0 = -15
+    (nx, ny, nz) = (50, 50, 50)
+    x0 = -10
     x1 = 0
-    y0 = -10
-    y1 = 10
-    z0 = -2
-    z1 = 2
+    y0 = -5
+    y1 = 5
+    z0 = -5
+    z1 = 5
 
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)

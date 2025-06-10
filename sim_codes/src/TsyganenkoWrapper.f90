@@ -7,22 +7,23 @@ contains
   subroutine run_TA16(parmod,ps,x,y,z,Bx,By,Bz,nx,ny,nz)
 
     use TA16, only : RBF_MODEL_2016
+    use omp_lib
 
     integer :: nx, ny, nz
     integer :: i, j, k
     real(8) :: xx,yy,zz,bbx,bby,bbz !dummy variables
-    real(8) :: x(nx), y(ny), z(nz)
-    real(8) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
-    real(8) :: parmod(10), ps
+    real(8), intent(in) :: x(nx), y(ny), z(nz)
+    real(8), intent(out) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
+    real(8), intent(in) :: parmod(10), ps
 
-    bbx = 0.0
-    bby = 0.0
-    bbz = 0.0
+    !$OMP PARALLEL SHARED(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
+    !$ print *, OMP_GET_MAX_THREADS()
+    !$OMP DO COLLAPSE(3)
     do i = 1,nx
-      xx = x(i)
       do j = 1,ny
-        yy = y(j)
         do k = 1,nz
+          xx = x(i)
+          yy = y(j)
           zz = z(k)
           call RBF_MODEL_2016(0,parmod,ps,xx,yy,zz,bbx,bby,bbz)
           Bx(i,j,k) = bbx
@@ -31,28 +32,31 @@ contains
         end do
       end do
     end do
+    !$OMP END DO
+    !$OMP END PARALLEL
     
   end subroutine run_TA16
 
   subroutine run_TS05(parmod,ps,x,y,z,Bx,By,Bz,nx,ny,nz)
 
     use TS05, only : T04_s
+    use omp_lib
 
     integer :: nx, ny, nz
     integer :: i, j, k
     real(8) :: xx,yy,zz,bbx,bby,bbz !dummy variables
-    real(8) :: x(nx), y(ny), z(nz)
-    real(8) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
-    real(8) :: parmod(10), ps
+    real(8), intent(in) :: x(nx), y(ny), z(nz)
+    real(8), intent(out) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
+    real(8), intent(in) :: parmod(10), ps
 
-    bbx = 0.0
-    bby = 0.0
-    bbz = 0.0
+    !$OMP PARALLEL SHARED(Bx,By,Bz,nx,ny,nz,parmod,ps) PRIVATE(bbx,bby,bbz,xx,yy,zz,i,j,k)
+    !$ print *, OMP_GET_MAX_THREADS()
+    !$OMP DO COLLAPSE(3)
     do i = 1,nx
-      xx = x(i)
       do j = 1,ny
-        yy = y(j)
         do k = 1,nz
+          xx = x(i)
+          yy = y(j)
           zz = z(k)
           call T04_s(0,parmod,ps,xx,yy,zz,bbx,bby,bbz)
           Bx(i,j,k) = bbx
@@ -61,6 +65,8 @@ contains
         end do
       end do
     end do
+    !$OMP END DO
+    !$OMP END PARALLEL
     
   end subroutine run_TS05
 
@@ -71,11 +77,11 @@ contains
 
     integer :: nx, ny, nz
     integer :: i, j, k
-    integer :: iyear, iday, ihour, imin, isec
-    real(8) :: vx_gse, vy_gse, vz_gse
     real(8) :: xx,yy,zz,hhx,hhy,hhz !dummy variables
-    real(8) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
-    real(8) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
+    integer, intent(in) :: iyear, iday, ihour, imin, isec
+    real(8), intent(in) :: vx_gse, vy_gse, vz_gse
+    real(8), intent(in) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
+    real(8), intent(out) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
     
     hhx = 0.0
     hhy = 0.0
@@ -104,11 +110,11 @@ contains
 
     integer :: nx, ny, nz
     integer :: i, j, k
-    integer :: iyear, iday, ihour, imin, isec
-    real(8) :: vx_gse, vy_gse, vz_gse
     real(8) :: xx,yy,zz,hhx,hhy,hhz !dummy variables
-    real(8) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
-    real(8) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
+    integer, intent(in) :: iyear, iday, ihour, imin, isec
+    real(8), intent(in) :: vx_gse, vy_gse, vz_gse
+    real(8), intent(in) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
+    real(8), intent(out) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
 
     hhx = 0.0
     hhy = 0.0

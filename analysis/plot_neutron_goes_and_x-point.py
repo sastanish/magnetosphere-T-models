@@ -5,25 +5,72 @@ import xarray as xr
 import pandas as pd
 
 def moving_average(x, w):
-    return np.convolve(x, np.ones(w), 'valid') / w
+    return np.convolve(x, np.ones(w), 'same') / w
 
 def norm(x):
     return (x-x.min())/(x.max()-x.min())
 
-def get_neutron_data(directory,hskip=42):
+def get_goes_particles(filename):
 
-    # Clean up neutron monitor data
-    neutron_data = np.genfromtxt(directory + "neutron_data.txt",
-                                 skip_header=hskip,dtype=None,names=True,missing_values="null"
-                                 )
-    times = []
-    for i in range(len(neutron_data)):
-        times.append(pd.to_datetime(str(neutron_data["DATE"][i]) + "_" + str(neutron_data["HOUR"][i]), format="%Y-%m-%d_%H:%M:%S"))
+    with open(filename, "r") as datFile:
+        times = []
+        data_labels = ["P1", "P5", "P10", "P30", "P50", "P100", "E_8", "E2_0", "E4_0", "P60", "P500"]
+        goes_data = []
+        for i,line in enumerate(datFile): 
+            if i != 0: # skip first line
+                line_data = []
+                nowrite = 0
+                # remove bad characters
+                for bad in ( "(", ")" ):
+                    line = line.replace(bad,"")
+                # replace arrow with seperator
+                line = line.replace(" ->",",")
+                for i,entry in enumerate(line.split(",")):
+                    if entry == "\n":
+                        nowrite = 1
+                    elif i==0: # record the time
+                        times.append(entry)
+                    else: # record entry as data
+                        if entry.strip(" ").strip("\n") == "-100000.0":
+                            line_data.append(float("nan"))
+                        else:
+                            line_data.append(float(entry.strip(" ")))
+                if nowrite == 0:
+                    goes_data.append(line_data)
+    times = pd.to_datetime(times,format="%Y-%m-%d %H:%M:%S")
+    return (data_labels, times, goes_data)
 
-    names = neutron_data.dtype.names
-    ntime = pd.to_datetime(times)
 
-    return (names, ntime, neutron_data)
+def get_neutron_data(filename):
+
+    with open(filename, "r") as datFile:
+        times = []
+        nmdb_data = []
+        firstline=0
+        for line in datFile:
+            # skip all header lines
+            if not line.startswith("#"):
+                # get station names as first non-commend str
+                if firstline==0:
+                    stations = line.split()
+                    firstline = 1
+                else:
+                    line_data = []
+                    nowrite = 0
+                    for i,entry in enumerate(line.split(";")):
+                        if entry == "\n":
+                            nowrite = 1
+                        elif i==0: # record the time
+                            times.append(entry)
+                        else: # record entry as data
+                            if entry.strip(" ").strip("\n") == "null":
+                                line_data.append(float("nan"))
+                            else:
+                                line_data.append(float(entry.strip(" ")))
+                    if nowrite == 0:
+                        nmdb_data.append(line_data)
+    times = pd.to_datetime(times,format="%Y-%m-%d %H:%M:%S")
+    return (stations, times, nmdb_data)
 
 def get_omni_data(directory):
 
@@ -69,37 +116,44 @@ def get_x_point_data(directory):
 def plot_statistics(date):
 
     directory = "../data/TA16/" + date + "/"
-    fig, ax = plt.subplots(nrows=5,figsize=(8,16),sharex=True)
+    nmdb_file = "../data/nmdb_data/nmdb_data_" + date + ".lst"
+    goes_file = "../data/goes_data/goes_flux_data_" + date + ".lst"
+    fig, ax = plt.subplots(nrows=4,figsize=(10,12),sharex=True)
 
+    ## Use helper functions to get data from data dir
     xpoints = get_x_point_data(directory)
     omnidata = get_omni_data(directory)
-#    colors = matplotlib.color_sequences["tab20"]
-#    neutrondata = get_neutron_data(directory)
+    (stations, ntimes, neutrons) = get_neutron_data(nmdb_file)
+    (goes_ids, gtimes, goesflux) = get_goes_particles(goes_file)
 
-    ax[0].plot(xpoints["time"],xpoints["brate"],color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[0].plot(xpoints["time"],xpoints["crate"],color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[0].set_ylabel('rate')
-    ax[0].set_yscale('log')
+    neutrons = np.array(neutrons)
+    goesflux = np.array(goesflux)
 
-    ax[1].plot(xpoints["time"],xpoints["brad"],color="tab:red",linestyle="",marker=".",alpha=0.9)
-    ax[1].plot(xpoints["time"],xpoints["crad"],color="tab:blue",linestyle="",marker=".",alpha=0.9)
-    ax[1].set_ylabel('radius')
+    ## Plot of neutrons
+    for i,station in enumerate(stations):
+        ax[0].plot(ntimes,moving_average(norm(neutrons[:,i]),10),alpha=0.5)
+    ax[0].set_ylabel("Relative Neutron Counts")
 
-    ax[2].plot(omnidata["time"],omnidata["SymHc"])
-    ax[2].set_ylabel("<SymHc>")
+    ax[1].plot(xpoints["time"],xpoints["crate"],color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[1].plot(xpoints["time"],xpoints["brate"],color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[1].set_ylabel('rate')
+    ax[1].set_yscale('log')
 
-    ax[3].plot(omnidata["time"],omnidata["Nind"])
-    ax[3].set_ylabel("N Index")
+    data_inds = (1,2,3,4,5)
+    for ind in data_inds:
+        ax[2].plot(gtimes,moving_average(goesflux[:,ind],10),label=goes_ids[ind])
+    ax[2].legend()
+    ax[2].set_ylabel("Proton Fluxes")
 
-    ax[4].plot(omnidata["time"],omnidata["BZ"],color="black")
-    ax[4].plot(omnidata["time"],omnidata["avg_BZ"],color="tab:red")
-    ax[4].set_ylabel("BZ")
+    ax[3].plot(xpoints["time"],xpoints["brad"],color="tab:red",linestyle="",marker=".",alpha=0.9)
+    ax[3].plot(xpoints["time"],xpoints["crad"],color="tab:blue",linestyle="",marker=".",alpha=0.9)
+    ax[3].set_ylabel('radius')
 
     plt.xticks(rotation=45)
-    plt.savefig("../figs/TA16/" + date + "/x-point_location.png")
+    plt.savefig("../figs/TA16/" + date + "/protons_neutrons_and_x-points.png")
     plt.close()
 
-    return
+    return 
 
 if __name__ == "__main__":
 
@@ -108,4 +162,3 @@ if __name__ == "__main__":
     for date in dates:
         print(date)
         plot_statistics(date)
-

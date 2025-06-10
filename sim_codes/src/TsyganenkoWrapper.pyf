@@ -12,28 +12,13 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x
                 real(kind=8) dimension(ny),intent(in) :: y
                 real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bz
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: bz
                 integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
                 integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
                 integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
             end subroutine run_ta16
-            subroutine run_ta16_v2(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
-                use ta16_v2, only: rbf_centers,rbf_model_2016
-                use omp_lib
-                real(kind=8) dimension(10),intent(in) :: parmod
-                real(kind=8) intent(in) :: ps
-                real(kind=8) dimension(nx),intent(in) :: x
-                real(kind=8) dimension(ny),intent(in) :: y
-                real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bz
-                integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
-                integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
-                integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
-            end subroutine run_ta16_v2
             subroutine run_ts05(parmod,ps,x,y,z,bx,by,bz,nx,ny,nz) ! in :TsyganenkoWrapper:TsyganenkoWrapper.f90:compute
                 use ts05, only: t04_s
                 use omp_lib
@@ -42,9 +27,9 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x
                 real(kind=8) dimension(ny),intent(in) :: y
                 real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: bz
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: bz
                 integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
                 integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
                 integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
@@ -62,9 +47,9 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x_gsw
                 real(kind=8) dimension(ny),intent(in) :: y_gsw
                 real(kind=8) dimension(nz),intent(in) :: z_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hx_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hy_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hz_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hx_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hy_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hz_gsw
                 integer, optional,check(shape(x_gsw, 0) == nx),depend(x_gsw) :: nx=shape(x_gsw, 0)
                 integer, optional,check(shape(y_gsw, 0) == ny),depend(y_gsw) :: ny=shape(y_gsw, 0)
                 integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw) :: nz=shape(z_gsw, 0)
@@ -82,9 +67,9 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x_gsw
                 real(kind=8) dimension(ny),intent(in) :: y_gsw
                 real(kind=8) dimension(nz),intent(in) :: z_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hx_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hy_gsw
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: hz_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hx_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hy_gsw
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: hz_gsw
                 integer, optional,check(shape(x_gsw, 0) == nx),depend(x_gsw) :: nx=shape(x_gsw, 0)
                 integer, optional,check(shape(y_gsw, 0) == ny),depend(y_gsw) :: ny=shape(y_gsw, 0)
                 integer, optional,check(shape(z_gsw, 0) == nz),depend(z_gsw) :: nz=shape(z_gsw, 0)
@@ -94,10 +79,10 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x
                 real(kind=8) dimension(ny),intent(in) :: y
                 real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bz
-                real(kind=8) dimension(23,nx,ny,nz),intent(out),depend(ny,nx,nz) :: mout
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bz
+                real(kind=8) dimension(23,nx,ny,nz),intent(out),depend(nz,ny,nx) :: mout
                 integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
                 integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
                 integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
@@ -107,10 +92,10 @@ python module TsyganenkoWrapper ! in
                 real(kind=8) dimension(nx),intent(in) :: x
                 real(kind=8) dimension(ny),intent(in) :: y
                 real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(in),depend(ny,nx,nz) :: bz
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(ny,nx,nz) :: mout
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(in),depend(nz,ny,nx) :: bz
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nz,ny,nx) :: mout
                 integer, optional,check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
                 integer, optional,check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
                 integer, optional,check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)

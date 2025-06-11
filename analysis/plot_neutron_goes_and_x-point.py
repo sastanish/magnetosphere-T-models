@@ -141,7 +141,8 @@ def plot_statistics(date):
 
     data_inds = (1,2,3,4,5)
     for ind in data_inds:
-        ax[2].plot(gtimes,moving_average(goesflux[:,ind],10),label=goes_ids[ind])
+        ax[2].plot(gtimes,goesflux[:,ind],label=goes_ids[ind])
+        #ax[2].plot(gtimes,moving_average(goesflux[:,ind],10),label=goes_ids[ind])
     ax[2].legend()
     ax[2].set_ylabel("Proton Fluxes")
 
@@ -149,6 +150,13 @@ def plot_statistics(date):
     ax[3].plot(xpoints["time"],xpoints["crad"],color="tab:blue",linestyle="",marker=".",alpha=0.9)
     ax[3].set_ylabel('radius')
 
+
+    ax[0].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
+    ax[1].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
+    ax[2].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
+    ax[3].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
+
+    fig.suptitle("storm: " + date)
     plt.xticks(rotation=45)
     plt.savefig("../figs/TA16/" + date + "/protons_neutrons_and_x-points.png")
     plt.close()
@@ -157,7 +165,7 @@ def plot_statistics(date):
 
 if __name__ == "__main__":
 
-    dates = ["2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2024-05-10"]
+    dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
 
     for date in dates:
         print(date)

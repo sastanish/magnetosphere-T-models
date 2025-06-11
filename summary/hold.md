@@ -1,15 +1,3 @@
----
-title: Near Earth x-point
-date: 2025/06/11
-author: Sage Stanish
-css: theme.css
----
-
-This document details the solar storms that we have simulated using the TA16 empirical magnetosphere of Tsyganenko. 
-
-# Overview of storms
-
-The following storms are all simulated over the domain $x,y,z \in (-17,0) \times (-10,10) \times (-4,4)$ with a resolution of 5cells per earth radii in $x,y$ and 10 cells per radii in $z$. 
 
 <details>
 <summary>Storm 2018-08-25</summary>
@@ -178,28 +166,3 @@ The following storms are all simulated over the domain $x,y,z \in (-17,0) \times
     <figcaption>X-point location in comparison with neutron monitor data and GOES proton flux. The neutron monitors have been normalized to the unit interval. The vertical line corresponds to the peak in the proton flux.</figcaption>
   </figure>
 </details>
-
-# Methods
-
-To determine the location of the x-point in these simulations, we need to identify dips in the pressure that correspond to the x-point and surrounding tail-current. There are two methods of determining the location of the x-point that we use in data below. The first, in red, is the pressure ball method and the second, in blue, is the critical point method. 
-
-## Pressure-Ball Method.
-The algorithm is as follows:
-
- 1) Find the global minimum in $P_B=|B|^2$.
- 2) Let $\mathcal{B}(P_{B,\min})$ be the ball of points of radius $0.5Re$ around the minima of the magnetic pressure.
- 3) Find the maximum reconnection rate within $\mathcal{B}(P_{B,\min})$. This rate corresponds to either the center of the x-point or the center of the current sheet/flux rope. Record this rate as $R_i$ and location as $x_i$.
- 4) Repeat this process 3 times, removing $\mathcal{B}(P_{B,\min})$ from the pressure each time. Then the reconnection rate that we keep is the one that is closest to earth, $\min(|x_i|)$. 
-
-This repeated procedure pics out the closest drop in pressure to the earth. We iterate this process since the current sheet will often have a lower magnetic pressure than the x-point itself. So, we have to ensure that we get the actual x-point by considering the closest such pressure drop.
-
-Note: This method will always return some point, even if no x-point or current sheet exists.
-
-## Critical Point Method
-The algorithm:
-
- 1) Consider a North-South slice along the magneto-tail ($y=0$)
- 2) Via rolling array operations, find all points (not within the Earth) where both derivatives of the pressure ($\partial_x P=\partial_z P=0$) change sign. 
- 3) Consider the closest point the center of the x-point and record it's location and reconnection rate.
-
-This method does not consider the full 3d-field, but does reproduce the x-point location well. It agrees with the Pressure-Ball method when an x-point is present and also returns *NaN* for times when no x-point exists.

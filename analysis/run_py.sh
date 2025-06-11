@@ -16,7 +16,7 @@
 #SBATCH --ntasks=10 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:25:00
+#SBATCH --time=00:15:00
 #
 # Job name
 #SBATCH --job-name=x-rate

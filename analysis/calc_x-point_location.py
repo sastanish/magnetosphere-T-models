@@ -44,7 +44,7 @@ def compute_via_critical_points(pressure,rate):
 
     return (cradi, crate)
 
-def compute(path,niters=6):
+def compute(path,niters=7):
 
     #load
     ds = xr.open_dataset(path).sel(x=slice(-15,-1))
@@ -54,11 +54,11 @@ def compute(path,niters=6):
     rate = ds.rate
 
     (cradi,crate) = compute_via_critical_points(pressure.sel(y=0,method="nearest"),rate.sel(y=0,method="nearest"))
-    try:
-        #loop through num iters
-        closestPoint = 50
-        for j in range(niters):
-            ball = find_ball(pressure,'min',rad=2)
+    #loop through num iters
+    closestPoint = 50
+    for j in range(niters):
+        try:
+            ball = find_ball(pressure,'min',rad=1)
             rateBall = rate.where(pressure == ball)
 
             loc = rateBall.argmax(dim=("x","y","z"))
@@ -69,11 +69,10 @@ def compute(path,niters=6):
                 closestPoint = r
                 best_rate = maxrate
 
-            #Remove last point
-            pressure = pressure.where(pressure != ball)
-    except:
-        best_rate = np.nan
-        closestPoint = np.nan
+            #Artificially increase region to find new one
+            pressure += (ball + 1e6)
+        except:
+            break
 
     time = str(ds.attrs["time"])
 

@@ -156,7 +156,7 @@ def plot_statistics(date):
     ax[2].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
     ax[3].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
 
-    fig.suptitle("storm: " + date)
+    fig.suptitle("storm: " + date,size="xx-large")
     plt.xticks(rotation=45)
     plt.savefig("../figs/TA16/" + date + "/protons_neutrons_and_x-points.png")
     plt.close()

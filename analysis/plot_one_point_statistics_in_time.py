@@ -96,6 +96,7 @@ def plot_statistics(date):
     ax[4].set_ylabel("BZ")
 
     plt.xticks(rotation=45)
+    fig.suptitle("storm: " + date,size="xx-large")
     plt.savefig("../figs/TA16/" + date + "/x-point_location.png")
     plt.close()
 

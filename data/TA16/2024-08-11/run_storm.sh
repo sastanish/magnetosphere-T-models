@@ -19,7 +19,7 @@
 #SBATCH --time=16:00:00
 #
 # Job name
-#SBATCH --job-name=re_sub_storms
+#SBATCH --job-name=storm2024-08-11
 #
 # Output file
 #SBATCH --output=%j_cmd.out

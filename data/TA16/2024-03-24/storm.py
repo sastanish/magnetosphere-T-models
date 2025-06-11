@@ -67,7 +67,7 @@ def compute(imp):
 if __name__ == '__main__':
 
     Nproc = 40
-    start_ind = 160
+    start_ind = 400
 
     # Read data
     omni_data = np.genfromtxt('input_data.lst',dtype=None)

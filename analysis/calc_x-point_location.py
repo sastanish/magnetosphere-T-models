@@ -44,7 +44,7 @@ def compute_via_critical_points(pressure,rate):
 
     return (cradi, crate)
 
-def compute(path,niters=3):
+def compute(path,niters=6):
 
     #load
     ds = xr.open_dataset(path).sel(x=slice(-15,-1))
@@ -58,7 +58,7 @@ def compute(path,niters=3):
         #loop through num iters
         closestPoint = 50
         for j in range(niters):
-            ball = find_ball(pressure,'min',rad=1)
+            ball = find_ball(pressure,'min',rad=2)
             rateBall = rate.where(pressure == ball)
 
             loc = rateBall.argmax(dim=("x","y","z"))

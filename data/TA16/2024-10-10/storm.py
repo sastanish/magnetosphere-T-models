@@ -67,11 +67,12 @@ def compute(imp):
 if __name__ == '__main__':
 
     Nproc = 40
+    start_ind = 160
 
     # Read data
     omni_data = np.genfromtxt('input_data.lst',dtype=None)
-    omni_data = omni_data[slice(0,-1,5)] #take 5-min steps
-    indicies = [i+1 for i in range(len(omni_data))] # index for output labeling
+    omni_data = omni_data[slice(start_ind,-1,5)] #take 5-min steps
+    indicies = [start_ind+i+1 for i in range(len(omni_data)-start_ind)] # index for output labeling
 
     # Setup the desired GSW Coordinates and data-structure
     (nx, ny, nz) = (17*5, 20*5, 8*10)

@@ -16,10 +16,10 @@
 #SBATCH --ntasks=40 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=08:00:00
+#SBATCH --time=16:00:00
 #
 # Job name
-#SBATCH --job-name=STORM2024
+#SBATCH --job-name=re_sub_storms
 #
 # Output file
 #SBATCH --output=%j_cmd.out

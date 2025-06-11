@@ -41,6 +41,7 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 
 conda activate magnetosphere
 
+export OMP_NUM_THREADS=10
 python benchmark_multi_core_par.py
 
 #======================================================

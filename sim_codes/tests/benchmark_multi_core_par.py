@@ -48,7 +48,7 @@ def compute(line):
                       },
                     attrs={"time":time}
                )
-    ds.to_netcdf(f"data/{time}.nc",mode='w',format="NETCDF4", 
+    ds.to_netcdf(f"multi_core_{time}.nc",mode='w',format="NETCDF4", 
                  engine='h5netcdf', encoding={
                      "bx":{"zlib":True, "complevel": 7},
                      "by":{"zlib":True, "complevel": 7},
@@ -63,13 +63,13 @@ if __name__ == '__main__':
     omni_data = np.genfromtxt('input_data.lst',dtype=None)
 
     # Setup the desired GSW Coordinates and data-structure
-    (nx, ny, nz) = (100, 100, 100)
+    (nx, ny, nz) = (50, 50, 40)
     x0 = -10
     x1 = 0
     y0 = -5
     y1 = 5
-    z0 = -5
-    z1 = 5
+    z0 = -4
+    z1 = 4
 
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)
@@ -78,8 +78,9 @@ if __name__ == '__main__':
     # Set up process pool and operate the compute function on each entry
     # in the omni_data array, or a subset of the array.
     StartTime = td.time()
-    for line in omni_data:
+    print(f"starting time: {StartTime}")
+    for i,line in enumerate(omni_data):
+        print(f"{i} of 10 done, elapsed: {td.time() - StartTime}")
         compute(line)
     EndTime = td.time()
-
     print(f"Time Elapsed: {EndTime-StartTime}")

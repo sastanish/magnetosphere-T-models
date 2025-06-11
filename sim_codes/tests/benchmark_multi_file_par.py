@@ -22,6 +22,7 @@ def compute(line):
     ihour = line[2]
     imin = line[3]
     isec = 0
+    stime = td.time()
 
     [bx, by, bz] = TS.compute.run_ta16(parmod,ps,x,y,z)
     [in_bx, in_by, in_bz] = TS.compute.run_igrf_dipole(iyear,iday,ihour,imin,isec,vgsex,vgsey,vgsez,x,y,z)
@@ -49,13 +50,14 @@ def compute(line):
                       },
                     attrs={"time":time}
                )
-    ds.to_netcdf(f"data/{time}.nc",mode='w',format="NETCDF4", 
+    ds.to_netcdf(f"multi_file_{time}.nc",mode='w',format="NETCDF4", 
                  engine='h5netcdf', encoding={
                      "bx":{"zlib":True, "complevel": 7},
                      "by":{"zlib":True, "complevel": 7},
                      "bz":{"zlib":True, "complevel": 7},
                      "rate":{"zlib":True, "complevel": 7}}
                      )
+    print(f"some proc just finished, elapsed: {td.time() - stime}")
     return
 
 if __name__ == '__main__':
@@ -64,13 +66,13 @@ if __name__ == '__main__':
     omni_data = np.genfromtxt('input_data.lst',dtype=None)
 
     # Setup the desired GSW Coordinates and data-structure
-    (nx, ny, nz) = (100, 100, 100)
+    (nx, ny, nz) = (50, 50, 40)
     x0 = -10
     x1 = 0
     y0 = -5
     y1 = 5
-    z0 = -5
-    z1 = 5
+    z0 = -4
+    z1 = 4
 
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)
@@ -79,7 +81,7 @@ if __name__ == '__main__':
     # Set up process pool and operate the compute function on each entry
     # in the omni_data array, or a subset of the array.
     StartTime = td.time()
-    with Pool(Nproc) as comp_pool:
+    with Pool(10) as comp_pool:
         comp_pool.map(compute,omni_data)
     EndTime = td.time()
 

@@ -3,7 +3,8 @@ Format:
            2) Maximal reconnection rate at closest pressure dip
            3) Distance from earth
            4) Rate from critical
-           5) Distance from critical2024-05-10_16:14:00   3229.6148   13.7301   300.4623   14.6560
+           5) Distance from critical
+2024-05-10_16:14:00   3229.6148   13.7301   300.4623   14.6560
 2024-05-10_13:09:00   30635.8195   14.3507   2429.8280   13.5851
 2024-05-10_21:49:00   25882.8875   11.2698   13.3717   4.0482
 2024-05-10_16:04:00   3281.2286   13.6617   350.8457   14.6560

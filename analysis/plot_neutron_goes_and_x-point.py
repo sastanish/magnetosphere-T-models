@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import xarray as xr
 import pandas as pd
+import datetime
 
 def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'same') / w
@@ -129,6 +130,11 @@ def plot_statistics(date):
     neutrons = np.array(neutrons)
     goesflux = np.array(goesflux)
 
+    for j in range(4):
+        ax[j].autoscale(enable=False)
+        ax[j].autoscale(enable=True,axis="y")
+    ax[1].autoscale(enable=True,axis="x")
+
     ## Plot of neutrons
     for i,station in enumerate(stations):
         ax[0].plot(ntimes,moving_average(norm(neutrons[:,i]),10),alpha=0.5)
@@ -149,7 +155,6 @@ def plot_statistics(date):
     ax[3].plot(xpoints["time"],xpoints["brad"],color="tab:red",linestyle="",marker=".",alpha=0.9)
     ax[3].plot(xpoints["time"],xpoints["crad"],color="tab:blue",linestyle="",marker=".",alpha=0.9)
     ax[3].set_ylabel('radius')
-
 
     ax[0].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
     ax[1].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")

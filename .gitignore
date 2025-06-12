@@ -6,9 +6,10 @@
 *.nc
 *.out
 
-# Exclude images
+# Exclude images and video
 *.svg
 *.png
+*.mp4
 
 # Exclude webpages and non-source notes
 *.pdf

@@ -15,14 +15,15 @@ def plot_tail(inp):
     ind = inp[1]
     ds = xr.open_dataset(f"../data/TA16/{date}/output_data_{ind}.nc")
     # Assume ds is a slice in y
-    ds = ds.where(np.sqrt(ds.x**2+ds.z**2) > 1)
+    ds = ds.where(np.sqrt(ds.x**2+ds.z**2) > 1).sel(y=0,method="nearest").squeeze()
 
     mplstyle.use('fast')
     fig, ax = plt.subplots(figsize = (12,6))
 
-    rate.plot.imshow(x="x",y="z",ax=ax,cmap="inferno")
+    ds.rate.plot.imshow(x="x",y="z",ax=ax,cmap="inferno")
     ds.plot.streamplot(x="x",y="z",u="bx",v="bz",ax=ax,color="white")
 
+    ax.set_title(str(ds.attrs["time"]))
     canvas = FigureCanvas(fig)
     canvas.print_figure(f"../figs/TA16/{date}/tail_slices/{ind}.png")
     plt.close(fig)
@@ -41,7 +42,7 @@ def compute_for_date(date,Nproc):
         output = pool.map(plot_tail,inds)
 
 
-    return (float(best_rate), float(avg_rate), xpoint[0], xpoint[1], xpoint[2])
+    return 
 
 if __name__ == "__main__":
 

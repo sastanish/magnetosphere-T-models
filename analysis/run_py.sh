@@ -16,10 +16,10 @@
 #SBATCH --ntasks=10 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:15:00
+#SBATCH --time=00:20:00
 #
 # Job name
-#SBATCH --job-name=x-rate
+#SBATCH --job-name=plot_slices
 #
 # Output file
 #SBATCH --output=%j-python.out
@@ -41,7 +41,7 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 
 conda activate magnetosphere
 
-python calc_x-point_location.py
+python plot_tail_slices.py
 
 #======================================================
 # Epilogue script to record job endtime and runtime

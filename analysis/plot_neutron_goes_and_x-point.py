@@ -130,20 +130,16 @@ def plot_statistics(date):
     neutrons = np.array(neutrons)
     goesflux = np.array(goesflux)
 
-    for j in range(4):
-        ax[j].autoscale(enable=False)
-        ax[j].autoscale(enable=True,axis="y")
-    ax[1].autoscale(enable=True,axis="x")
+    ax[1].plot(xpoints["time"],xpoints["crate"],color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[1].plot(xpoints["time"],xpoints["brate"],color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
+    ax[1].set_ylabel('rate')
+    ax[1].set_yscale('log')
+    (xm,xp) = ax[1].get_xlim()
 
     ## Plot of neutrons
     for i,station in enumerate(stations):
         ax[0].plot(ntimes,moving_average(norm(neutrons[:,i]),10),alpha=0.5)
     ax[0].set_ylabel("Relative Neutron Counts")
-
-    ax[1].plot(xpoints["time"],xpoints["crate"],color="tab:blue",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[1].plot(xpoints["time"],xpoints["brate"],color="tab:red",linestyle="",marker=".",label="max rate",alpha=0.9)
-    ax[1].set_ylabel('rate')
-    ax[1].set_yscale('log')
 
     data_inds = (1,2,3,4,5)
     for ind in data_inds:
@@ -160,6 +156,11 @@ def plot_statistics(date):
     ax[1].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
     ax[2].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
     ax[3].axvline(gtimes[np.argmax(goesflux[:,1])],linestyle="--",color="grey")
+
+    ax[0].set_xlim((xm,xp))
+    ax[1].set_xlim((xm,xp))
+    ax[2].set_xlim((xm,xp))
+    ax[3].set_xlim((xm,xp))
 
     fig.suptitle("storm: " + date,size="xx-large")
     plt.xticks(rotation=45)

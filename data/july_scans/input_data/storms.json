@@ -1,0 +1,154 @@
+{
+  "s01": {
+    "ID": "s01",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2018",
+      "month": "08",
+      "day": "25",
+      "hour": "06",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2018",
+      "month": "08",
+      "day": "26",
+      "hour": "18",
+      "min": "00"
+    }
+  },
+  "s02": {
+    "ID": "s02",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2022",
+      "month": "03",
+      "day": "13",
+      "hour": "03",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2022",
+      "month": "03",
+      "day": "15",
+      "hour": "24",
+      "min": "00"
+    }
+  },
+  "s03": {
+    "ID": "s03",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2022",
+      "month": "10",
+      "day": "21",
+      "hour": "04",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2022",
+      "month": "10",
+      "day": "22",
+      "hour": "24",
+      "min": "00"
+    }
+  },
+  "s04": {
+    "ID": "s04",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2023",
+      "month": "03",
+      "day": "22",
+      "hour": "23",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2023",
+      "month": "03",
+      "day": "25",
+      "hour": "24",
+      "min": "00"
+    }
+  },
+  "s05": {
+    "ID": "s05",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2024",
+      "month": "03",
+      "day": "24",
+      "hour": "08",
+      "min": "30"
+    },
+    "end_date": {
+      "year": "2024",
+      "month": "03",
+      "day": "26",
+      "hour": "16",
+      "min": "00"
+    }
+  },
+  "s06": {
+    "ID": "s06",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2024",
+      "month": "05",
+      "day": "10",
+      "hour": "11",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2024",
+      "month": "05",
+      "day": "12",
+      "hour": "21",
+      "min": "00"
+    }
+  },
+  "s07": {
+    "ID": "s07",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2024",
+      "month": "08",
+      "day": "10",
+      "hour": "07",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2024",
+      "month": "08",
+      "day": "14",
+      "hour": "06",
+      "min": "00"
+    }
+  },
+  "s08": {
+    "ID": "s08",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2024",
+      "month": "10",
+      "day": "10",
+      "hour": "09",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2024",
+      "month": "10",
+      "day": "12",
+      "hour": "09",
+      "min": "00"
+    }
+  }
+}

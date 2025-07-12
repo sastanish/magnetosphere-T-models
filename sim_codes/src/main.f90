@@ -2,12 +2,17 @@ program compute
 
   use TA16, only : RBF_MODEL_2016
   use geopack, only : RECALC_08, IGRF_GSW_08
+  use inputOutput, only : save_field_to_netcdf
   !$ use omp_lib
 
   implicit none
   integer :: nx, ny, nz
   integer :: i, j, k
   integer :: ip, id, stat
+
+  integer :: fileind
+  character(4) :: str_ind
+
   real(8) :: xmin, xmax, ymin, ymax, zmin, zmax
   real(8) :: xx,yy,zz,bbx,bby,bbz,hhx,hhy,hhz !dummy variables
   real(8) :: x(nx), y(ny), z(nz)
@@ -38,6 +43,7 @@ program compute
 
   ! Now read the next line of data from the input data
   open(newunit=id, file='input_data.txt', status='old', action='read')
+  fileind = 1
   do 
     read(id, *, iostat=stat) year, day, hour, mint, ibx, iby, ibz, ivx, ivy, ivz, &
                              den, temp, p, symh, imf, sw, tilt, rp, abx, aby, abz,&
@@ -75,6 +81,11 @@ program compute
     end do
     !$OMP END DO
     !$OMP END PARALLEL
+
+    ! Write to file
+    write( str_ind, '(I4)' ) fileind
+    call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//str_ind//'.nc')
+
   end do
 
 end program main

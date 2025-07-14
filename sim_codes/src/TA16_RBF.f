@@ -1,63 +1,9 @@
       MODULE TA16
-      CONTAINS
-c     CORRECTED VERSION OF 11/23/2021 (SEE LINE 271)
-c
-      SUBROUTINE RBF_MODEL_2016 (IOPT,PARMOD,PS,X,Y,Z,BX,BY,BZ)     !  A DOUBLE-PRECISION SUBROUTINE
-C
-C  RETURNS COMPONENTS OF THE EXTERNAL MAGNETIC FIELD VECTOR (I.E., DUE TO ONLY MAGNETOSPHERIC CURRENTS, 
-C  WITHOUT CONTRIBUTION FROM THE EARTH'S SOURCES), ACCORDING TO THE DATA-BASED RBF-MODEL DRIVEN BY 
-C  INTERPLANETARY AND GROUND-BASED OBSERVABLES.
-C
-C  VERSION OF 10/19/2016, BASED ON FITTING THE MODEL TO A DATA SET WITH 732 746 RECORDS
-C
-C  REFERENCES: (1) Tsyganenko, N. A., and V. A. Andreeva (2016), "An empirical RBF model of the magnetosphere
-C                  parameterized by interplanetary and ground-based drivers", v.121, doi:10.1002/2016JA023217,
-c                  accepted by JGRA, 10/17/2016.
-C
-C              (2) Andreeva, V. A., and N. A. Tsyganenko (2016), "Reconstructing the magnetosphere from data 
-c                  using radial basis functions, JGRA Space Physics, v.121, 2249-2263, doi:10.1002/2015JA022242.
-C
-C  INPUT PARAMETERS:
-C
-C  IOPT       A DUMMY PARAMETER, INCLUDED TO MAKE THE SUBROUTINE COMPATIBLE WITH THE TRACING SOFTWARE 
-C             PACKAGE (GEOPACK-08). IOPT DOES NOT AFFECT THE OUTPUT FIELD AND MUST BE SET AT ANY INTEGER VALUE
-C
-C  PARMOD     A 10-element array, with its first 4 elements to be specified as follows:
-c
-C  PARMOD(1) =  PDYN    - solar wind dynamic pressure in nPa
-c
-C  PARMOD(2) = <SymHc>  - corrected SymH index, to be calculated as <SymHc> = <0.8*SymH-13*sqrt(PDYN)>
-C                         where the angular brackets denote the sliding 30-min average, centered on the
-C                         current time moment
-c
-C  PARMOD(3) = <XIND>   - solar-wind-magnetosphere coupling index, based on Newell et al. [2007] function,
-C                         averaged over the previous 30-min trailing interval, see also the documentation 
-C                         file TA16_Model_description.pdf for further details. Typical values of <XIND> 
-C                         lie between 0 (quiet) and 2 (strongly disturbed)
-c
-C  PARMOD(4) = <IMF BY> - azimuthal IMF By, in GSW (or GSM) coordinate system, in nanoTeslas, averaged over 
-c                         the previous 30-min trailing interval
-c
-C  PS                   - geodipole tilt angle (in radians)
-c
-C  X, Y, Z              - Cartesian GSW (or GSM) position (in Earth's radii, Re=6371.2km)
-C
-C------------------------------------------------------------------------------------------------------
-C  ATTENTION: THE MODEL IS VALID ONLY UP TO Xgsw=-15 Re and should NOT be used tailward of that distance
-C------------------------------------------------------------------------------------------------------
-c
-C  OUTPUT:  BX, BY, BZ   - GSW (or GSM) components of the model field (nanoTesla)
-C
-C  CODED BY: N. A. TSYGANENKO AND V. A. ANDREEVA, version of Oct. 19, 2016
-C
-C------------------------------------------------------------------------------------------
-      IMPLICIT REAL*8 (A-H,O-Z)
-C
-      DIMENSION PARMOD(10),A(23328)                   !SW PARAMETERS AND LINEAR COEFFICIENTS OF RBF-EXPANSIONS
-      DIMENSION XX(1296),YY(1296),ZZ(1296),ST(1296),  ! FORWARDS RBF CENTER COORDINATES AND AUXILIARY PARAMS
-     *          RHO(1296),ZSP(1296),ZCP(1296),RHBR(1296)
-C
-      DATA IOP /100001/
+
+      DIMENSION :: A(23328)                   !SW PARAMETERS AND LINEAR COEFFICIENTS OF RBF-EXPANSIONS
+      DIMENSION :: XX(1296),YY(1296),ZZ(1296),ST(1296),  ! FORWARDS RBF CENTER COORDINATES AND AUXILIARY PARAMS
+     *             RHO(1296),ZSP(1296),ZCP(1296),RHBR(1296)
+
       DATA D/4.D0/
       DATA PI/3.14159265359D0/
       DATA A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,
@@ -65,16 +11,11 @@ C
      * 0.0571D0,-0.999D0,16.473D0,0.00152D0,0.382D0,0.0431D0,-0.00763D0,
      * -0.210D0,0.0405D0,-4.430D0,-0.636D0,-2.600D0,0.832D0,-5.328D0,
      * 1.103D0,-0.907D0,1.450D0/
-C
-      SAVE
-C
-       IF (IOP.NE.IOPT) THEN
-C
-       IOP=IOPT
-       OPEN (UNIT=777,FILE='TA16_RBF.par')   !  MODEL LINEAR COEFFICIENTS A_i,B_i,.. IN THE POLO- AND TORO-EXPANSIONS
-       READ (777,100) A
- 100   FORMAT (G15.6)
-       CLOSE(777)
+c
+      CONTAINS
+c
+      SUBROUTINE CALCULATE_RBF_CENTERS
+      IMPLICIT REAL*8 (A-H,O-Z)
 C----------------------------------------------------------------------------------------
 C  CREATE A 3D KURIHARA'S GRID OF RBF CENTERS (ONE-TIME-ONLY PROCEDURE)
 C----------------------------------------------------------------------------------------
@@ -196,8 +137,71 @@ C
              IF (R.GT.RHIGH_GRID) GOTO 913                    ! CENTERS CREATED ONLY INSIDE R=RHIGH
  911  CONTINUE
  913  CONTINUE
-
-       ENDIF    !      END OF GENERATING THE RBF GRID (ONE-TIME-ONLY PROCEDURE)
+c
+c     END OF GENERATING THE RBF GRID (ONE-TIME-ONLY PROCEDURE)
+      END SUBROUTINE CALCULATE_RBF_CENTERS
+c
+      SUBROUTINE READ_TA16_PARS
+       OPEN (UNIT=777,FILE='TA16_RBF.par')   !  MODEL LINEAR COEFFICIENTS A_i,B_i,.. IN THE POLO- AND TORO-EXPANSIONS
+       READ (777,100) A
+ 100   FORMAT (G15.6)
+       CLOSE(777)
+      END SUBROUTINE READ_TA16_PARS
+c
+c     CORRECTED VERSION OF 11/23/2021 (SEE LINE 271)
+c
+      SUBROUTINE RBF_MODEL_2016 (IOPT,PARMOD,PS,X,Y,Z,BX,BY,BZ)     !  A DOUBLE-PRECISION SUBROUTINE
+C
+C  RETURNS COMPONENTS OF THE EXTERNAL MAGNETIC FIELD VECTOR (I.E., DUE TO ONLY MAGNETOSPHERIC CURRENTS, 
+C  WITHOUT CONTRIBUTION FROM THE EARTH'S SOURCES), ACCORDING TO THE DATA-BASED RBF-MODEL DRIVEN BY 
+C  INTERPLANETARY AND GROUND-BASED OBSERVABLES.
+C
+C  VERSION OF 10/19/2016, BASED ON FITTING THE MODEL TO A DATA SET WITH 732 746 RECORDS
+C
+C  REFERENCES: (1) Tsyganenko, N. A., and V. A. Andreeva (2016), "An empirical RBF model of the magnetosphere
+C                  parameterized by interplanetary and ground-based drivers", v.121, doi:10.1002/2016JA023217,
+c                  accepted by JGRA, 10/17/2016.
+C
+C              (2) Andreeva, V. A., and N. A. Tsyganenko (2016), "Reconstructing the magnetosphere from data 
+c                  using radial basis functions, JGRA Space Physics, v.121, 2249-2263, doi:10.1002/2015JA022242.
+C
+C  INPUT PARAMETERS:
+C
+C  IOPT       A DUMMY PARAMETER, INCLUDED TO MAKE THE SUBROUTINE COMPATIBLE WITH THE TRACING SOFTWARE 
+C             PACKAGE (GEOPACK-08). IOPT DOES NOT AFFECT THE OUTPUT FIELD AND MUST BE SET AT ANY INTEGER VALUE
+C
+C  PARMOD     A 10-element array, with its first 4 elements to be specified as follows:
+c
+C  PARMOD(1) =  PDYN    - solar wind dynamic pressure in nPa
+c
+C  PARMOD(2) = <SymHc>  - corrected SymH index, to be calculated as <SymHc> = <0.8*SymH-13*sqrt(PDYN)>
+C                         where the angular brackets denote the sliding 30-min average, centered on the
+C                         current time moment
+c
+C  PARMOD(3) = <XIND>   - solar-wind-magnetosphere coupling index, based on Newell et al. [2007] function,
+C                         averaged over the previous 30-min trailing interval, see also the documentation 
+C                         file TA16_Model_description.pdf for further details. Typical values of <XIND> 
+C                         lie between 0 (quiet) and 2 (strongly disturbed)
+c
+C  PARMOD(4) = <IMF BY> - azimuthal IMF By, in GSW (or GSM) coordinate system, in nanoTeslas, averaged over 
+c                         the previous 30-min trailing interval
+c
+C  PS                   - geodipole tilt angle (in radians)
+c
+C  X, Y, Z              - Cartesian GSW (or GSM) position (in Earth's radii, Re=6371.2km)
+C
+C------------------------------------------------------------------------------------------------------
+C  ATTENTION: THE MODEL IS VALID ONLY UP TO Xgsw=-15 Re and should NOT be used tailward of that distance
+C------------------------------------------------------------------------------------------------------
+c
+C  OUTPUT:  BX, BY, BZ   - GSW (or GSM) components of the model field (nanoTesla)
+C
+C  CODED BY: N. A. TSYGANENKO AND V. A. ANDREEVA, version of Oct. 19, 2016
+C
+C------------------------------------------------------------------------------------------
+      IMPLICIT REAL*8 (A-H,O-Z)
+C
+      DIMENSION PARMOD(10)                   !SW PARAMETERS AND LINEAR COEFFICIENTS OF RBF-EXPANSIONS
 C
 C--------------------  START CALCULATING THE MODEL B-FIELD  ---------------------------------------
 C
@@ -318,6 +322,6 @@ C-------------------------------------------------------------------------------
       BZ=BZSM*CPS-BXSM*SPS
 C
       RETURN
-      END
+      END SUBROUTINE RBF_MODEL_2016
 C
       END MODULE TA16

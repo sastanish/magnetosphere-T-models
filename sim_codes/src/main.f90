@@ -1,77 +1,53 @@
 program main
 
-  use TA16, only : RBF_MODEL_2016
+  use TA16, only : RBF_MODEL_2016,CALCULATE_RBF_CENTERS,READ_TA16_PARS
   use geopack, only : RECALC_08, IGRF_GSW_08
   use inputOutput, only : save_field_to_netcdf
   !$ use omp_lib
 
   implicit none
-  integer :: nx, ny, nz
-  integer :: i, j, k
-  integer :: ip, id, stat, par_file
+
+  real(8), dimension(:,:,:), allocatable :: Bx, By, Bz
+  real(8), dimension(:), allocatable :: x,y,z
+
+  ! Input File params
+  integer, dimension(:), allocatable :: year,day,hour,mint
+  real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+
+  ! vars
+  integer :: nruns
+  integer :: n, i, j, k
 
   integer :: fileind
   character(4) :: str_ind
 
-  real(8) :: xmin, xmax, ymin, ymax, zmin, zmax
   real(8) :: xx,yy,zz,bbx,bby,bbz,hhx,hhy,hhz !dummy variables
-  real(8), dimension(:), allocatable :: x,y,z
-  real(8), dimension(:,:,:), allocatable :: Bx, By, Bz
-  real(8) :: parmod(10), TA16_params(23328)
+  real(8) :: parmod(10)
 
-  ! Input File params
-  integer :: year, day, hour, mint, aeind, symh, imf
-  real(8) :: ibx, iby, ibz, ivx, ivy, ivz, den, temp, p, sw, tilt, rp
-  real(8) :: nind, symhc, abx, aby, abz
 
-  ! Get input parameters for grid
-  open(newunit=ip, file='input_parameters.txt', status='old', action='read')
-  read(ip, *) !skip the header line
-  read(ip, *) xmin, xmax, ymin, ymax, zmin, zmax, nx, ny, nz
-  close(ip)
+  call setup_grid(x,y,z,Bx,By,Bz)
+  call read_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
+  call read_TA16_pars
+  call calculate_rbf_centers
 
-  allocate(x(nx))
-  allocate(y(ny))
-  allocate(z(nz))
+  ivy = ivy + 29.78 !velocity correction
 
-  ! Setup grid
-  do i = 1,nx
-    x(i) = xmin + (i-1)*(xmax-xmin)/nx
-  end do
-  do i = 1,ny
-    y(i) = ymin + (i-1)*(ymax-ymin)/ny
-  end do
-  do i = 1,nz
-    z(i) = zmin + (i-1)*(zmax-zmin)/nz
-  end do
-
-  ! Now read the next line of data from the input data
-  open(newunit=id, file='input_data.lst', status='old', action='read')
+  nruns = size(year)
   fileind = 1
+  do n = 1,nruns
 
-  !$OMP PARALLEL DO
-  do 
-    allocate(Bx(nx,ny,nz))
-    allocate(By(nx,ny,nz))
-    allocate(Bz(nx,ny,nz))
+    call RECALC_08(year(n), day(n), hour(n), mint(n), 0, ivx(n), ivy(n), ivz(n))
 
-    !$OMP CRITICAL
-    read(id, *, iostat=stat) year, day, hour, mint, ibx, iby, ibz, ivx, ivy, ivz, &
-                             den, temp, p, aeind, symh, imf, sw, tilt, rp, abx, aby, abz,&
-                             nind, symhc
+    !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(n,x,y,z,Bx,By,Bz)
+    parmod(1) = pydn(n)
+    parmod(2) = symhc(n)
+    parmod(3) = nind(n)
+    parmod(4) = aby(n)
 
-    !$OMP END CRITICAL
-    if (stat < 0) exit !checking for end of file
-    parmod(1) = p
-    parmod(2) = symhc
-    parmod(3) = nind
-    parmod(4) = aby
-
-    !call RECALC_08(year, day, hour, mint, 0, ivx, ivy, ivz)
-
-    do k = 1,nz
-      do j = 1,ny
-        do i = 1,nx
+    !$OMP DO COLLAPSE(3)
+    do k = 1,size(z)
+      do j = 1,size(y)
+        do i = 1,size(x)
 
           xx = x(i)
           yy = y(j)
@@ -84,10 +60,10 @@ program main
           bbz = 0
 
           ! External field
-          call RBF_MODEL_2016(0,parmod,tilt,xx,yy,zz,hhx,hhy,hhz)
+          call RBF_MODEL_2016(0,parmod,tilt(n),xx,yy,zz,hhx,hhy,hhz)
 
           ! Internal field
-          !call IGRF_GSW_08(xx,yy,zz,bbx,bby,bbz)
+          call IGRF_GSW_08(xx,yy,zz,bbx,bby,bbz)
 
           Bx(i,j,k) = hhx + bbx
           By(i,j,k) = hhy + bby
@@ -96,22 +72,114 @@ program main
         end do
       end do
     end do
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! Write to file
     write( str_ind, '(I4)' ) fileind
     print *, 'my name is '//'output_'//trim(adjustl(str_ind))//'.nc'
     call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//trim(adjustl(str_ind))//'.nc')
     fileind = fileind + 1
-
-    deallocate(Bx)
-    deallocate(By)
-    deallocate(Bz)
   end do
-  !$OMP END DO
-  !$OMP END PARALLEL
 
+  deallocate(Bx)
+  deallocate(By)
+  deallocate(Bz)
   deallocate(x)
   deallocate(y)
   deallocate(z)
 
+contains
+
+  subroutine setup_grid(x,y,z,Bx,By,Bz)
+
+    implicit none
+
+    integer :: nx, ny, nz, i
+    integer :: file
+
+    real(8) :: xmin, xmax, ymin, ymax, zmin, zmax
+    real(8), dimension(:), allocatable, intent(inout) :: x,y,z
+    real(8), dimension(:,:,:), allocatable, intent(inout) :: Bx, By, Bz
+
+    ! Get input parameters for grid
+    open(newunit=file, file='input_parameters.txt', status='old', action='read')
+    read(file, *) !skip the header line
+    read(file, *) xmin, xmax, ymin, ymax, zmin, zmax, nx, ny, nz
+    close(file)
+
+    allocate(x(nx))
+    allocate(y(ny))
+    allocate(z(nz))
+    allocate(Bx(nx,ny,nz))
+    allocate(By(nx,ny,nz))
+    allocate(Bz(nx,ny,nz))
+
+    ! Setup grid
+    do i = 1,nx
+      x(i) = xmin + (i-1)*(xmax-xmin)/nx
+    end do
+    do i = 1,ny
+      y(i) = ymin + (i-1)*(ymax-ymin)/ny
+    end do
+    do i = 1,nz
+      z(i) = zmin + (i-1)*(zmax-zmin)/nz
+    end do
+
+  end subroutine setup_grid
+
+  subroutine read_input_data(filename,year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
+
+    implicit none
+
+    integer :: Nlines, file, i
+    character(*), intent(in) :: filename
+
+    integer, dimension(:), allocatable, intent(inout) :: year,day,hour,mint
+    real(8), dimension(:), allocatable, intent(inout) :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+
+    ! un-used input params
+    integer :: aeind, symh, imf
+    real(8) :: ibx, iby, ibz, den, temp, sw, rp, abx, abz
+
+    call get_num_lines(filename,nlines)
+
+    allocate(year(nlines))
+    allocate(day(nlines))
+    allocate(hour(nlines))
+    allocate(mint(nlines))
+    allocate(ivx(nlines))
+    allocate(ivy(nlines))
+    allocate(ivz(nlines))
+    allocate(tilt(nlines))
+    allocate(pydn(nlines))
+    allocate(symhc(nlines))
+    allocate(nind(nlines))
+    allocate(aby(nlines))
+
+    open(newunit=file, file=filename, status='old', action='read')
+    do i = 1,nlines
+      read(file,*) year(i),day(i),hour(i),mint(i),ibx,iby,ibz,ivx(i),ivy(i),ivz(i),den,temp,pydn(i),aeind,symh,imf,sw,tilt(i),rp,abx,aby(i),abz,nind(i),symhc(i)
+    end do
+    close(file)
+  end subroutine read_input_data
+
+  subroutine get_num_lines(filename,nlines)
+    implicit none
+
+    character(*), intent(in) :: filename
+    integer, intent(out) :: nlines
+    integer :: file, i, stat
+
+    nlines = 0
+    open(newunit=file, file=filename, status='old', action='read')
+    do 
+      read(file, *, iostat=stat)
+      if (stat < 0) exit !checking for end of file
+      nlines = nlines + 1
+    end do
+    close(file)
+  end subroutine get_num_lines
+
 end program main
+

@@ -72,6 +72,7 @@ contains
                              x_gsw, y_gsw, z_gsw, hx_gsw, hy_gsw, hz_gsw, nx, ny, nz)
 
     use geopack, only : RECALC_08, IGRF_GSW_08
+    use omp_lib
 
     integer :: nx, ny, nz
     integer :: i, j, k
@@ -81,10 +82,9 @@ contains
     real(8), intent(in) :: x_gsw(nx), y_gsw(ny), z_gsw(nz)
     real(8), intent(out) :: hx_gsw(nx,ny,nz), hy_gsw(nx,ny,nz), hz_gsw(nx,ny,nz)
     
-    hhx = 0.0
-    hhy = 0.0
-    hhz = 0.0
     call RECALC_08(iyear, iday, ihour, imin, isec, vx_gse, vy_gse, vz_gse)
+    !$OMP PARALLEL SHARED(hx_gsw,hy_gsw,hz_gsw,nx,ny,nz,x_gsw,y_gsw,z_gsw) PRIVATE(hhx,hhy,hhz,xx,yy,zz,i,j,k)
+    !$OMP DO COLLAPSE(3)
     do i = 1,nx
       xx = x_gsw(i)
       do j = 1,ny
@@ -98,6 +98,8 @@ contains
         end do
       end do
     end do
+    !$OMP END DO
+    !$OMP END PARALLEL
     
   end subroutine run_igrf_dipole
 

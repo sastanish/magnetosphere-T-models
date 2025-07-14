@@ -1,23 +1,21 @@
 program main
 
-  use TA16, only : RBF_MODEL_2016
-  use geopack, only : RECALC_08, IGRF_GSW_08
+  use compute, only : run_TA16, run_igrf_dipole
   use inputOutput, only : save_field_to_netcdf
-  !$ use omp_lib
 
   implicit none
   integer :: nx, ny, nz
   integer :: i, j, k
-  integer :: ip, id, stat, par_file
+  integer :: ip, id, stat
 
   integer :: fileind
   character(4) :: str_ind
 
   real(8) :: xmin, xmax, ymin, ymax, zmin, zmax
-  real(8) :: xx,yy,zz,bbx,bby,bbz,hhx,hhy,hhz !dummy variables
   real(8), dimension(:), allocatable :: x,y,z
   real(8), dimension(:,:,:), allocatable :: Bx, By, Bz
-  real(8) :: parmod(10), TA16_params(23328)
+  real(8), dimension(:,:,:), allocatable :: Hx, Hy, Hz
+  real(8) :: parmod(10)
 
   ! Input File params
   integer :: year, day, hour, mint, aeind, symh, imf
@@ -33,6 +31,13 @@ program main
   allocate(x(nx))
   allocate(y(ny))
   allocate(z(nz))
+  allocate(Bx(nx,ny,nz))
+  allocate(By(nx,ny,nz))
+  allocate(Bz(nx,ny,nz))
+  allocate(Hx(nx,ny,nz))
+  allocate(Hy(nx,ny,nz))
+  allocate(Hz(nx,ny,nz))
+
 
   ! Setup grid
   do i = 1,nx
@@ -46,56 +51,31 @@ program main
   end do
 
   ! Now read the next line of data from the input data
-  open(newunit=id, file='input_data.lst', status='old', action='read')
+  open(newunit=id, file='input_data.txt', status='old', action='read')
   fileind = 1
-
-  !$OMP PARALLEL DO
   do 
-    allocate(Bx(nx,ny,nz))
-    allocate(By(nx,ny,nz))
-    allocate(Bz(nx,ny,nz))
-
-    !$OMP CRITICAL
     read(id, *, iostat=stat) year, day, hour, mint, ibx, iby, ibz, ivx, ivy, ivz, &
                              den, temp, p, aeind, symh, imf, sw, tilt, rp, abx, aby, abz,&
                              nind, symhc
-
-    !$OMP END CRITICAL
     if (stat < 0) exit !checking for end of file
     parmod(1) = p
     parmod(2) = symhc
     parmod(3) = nind
-    parmod(4) = aby
+    parmod(4) = aby 
+    ivy = ivx + 29.78
 
-    !call RECALC_08(year, day, hour, mint, 0, ivx, ivy, ivz)
+    ! External field
+    call run_igrf_dipole(year, day, hour, mint, 0, ivx, ivy, ivz, &
+                         x, y, z, Bx, By, Bz, nx, ny, nz)
 
-    do k = 1,nz
-      do j = 1,ny
-        do i = 1,nx
+    print *, 'do we get to here?'
+    ! Internal field
+    call run_TA16(parmod,tilt,x,y,z,Hx,Hy,Hz,nx,ny,nz)
 
-          xx = x(i)
-          yy = y(j)
-          zz = z(k)
-          hhx = 0
-          hhy = 0
-          hhz = 0
-          bbx = 0
-          bby = 0
-          bbz = 0
-
-          ! External field
-          call RBF_MODEL_2016(0,parmod,tilt,xx,yy,zz,hhx,hhy,hhz)
-
-          ! Internal field
-          !call IGRF_GSW_08(xx,yy,zz,bbx,bby,bbz)
-
-          Bx(i,j,k) = hhx + bbx
-          By(i,j,k) = hhy + bby
-          Bz(i,j,k) = hhz + bbz
-
-        end do
-      end do
-    end do
+    print *, 'How bout here?'
+    Bx = Bx + Hx
+    By = By + Hy
+    Bz = Bz + Hz
 
     ! Write to file
     write( str_ind, '(I4)' ) fileind
@@ -103,15 +83,17 @@ program main
     call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//trim(adjustl(str_ind))//'.nc')
     fileind = fileind + 1
 
-    deallocate(Bx)
-    deallocate(By)
-    deallocate(Bz)
   end do
-  !$OMP END DO
-  !$OMP END PARALLEL
 
   deallocate(x)
   deallocate(y)
   deallocate(z)
+  deallocate(Bx)
+  deallocate(By)
+  deallocate(Bz)
+  deallocate(Hx)
+  deallocate(Hy)
+  deallocate(Hz)
+
 
 end program main

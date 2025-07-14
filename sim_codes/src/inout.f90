@@ -19,7 +19,7 @@ contains
 
     integer :: id_nc,xdim_id,ydim_id,zdim_id
     integer :: x_id,y_id,z_id
-    integer :: id_bx, id_by, id_bz, id_b_mag 
+    integer :: id_bx, id_by, id_bz
 
     integer, dimension(3) :: dim_ids
 

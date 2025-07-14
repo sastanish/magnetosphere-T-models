@@ -2,7 +2,7 @@ program main
 
   use TA16, only : RBF_MODEL_2016,CALCULATE_RBF_CENTERS,READ_TA16_PARS
   use geopack, only : RECALC_08, IGRF_GSW_08
-  use inputOutput, only : save_field_to_netcdf
+  use inputOutput, only : save_field_to_netcdf, save_rate_to_netcdf
   !$ use omp_lib
 
   implicit none
@@ -80,6 +80,7 @@ program main
     print *, 'my name is '//'output_'//trim(adjustl(str_ind))//'.nc'
     call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//trim(adjustl(str_ind))//'.nc')
     fileind = fileind + 1
+
   end do
 
   deallocate(Bx)

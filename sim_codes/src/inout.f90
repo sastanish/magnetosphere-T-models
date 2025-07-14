@@ -2,7 +2,7 @@ module inputOutput
 
   implicit none
   private
-  public :: save_field_to_netcdf
+  public :: save_field_to_netcdf, save_rate_to_netcdf
 
 contains
 
@@ -54,6 +54,51 @@ contains
     call check(nf90_close(id_nc))
 
   end subroutine save_field_to_netcdf
+ 
+  subroutine save_rate_to_netcdf(x,y,z,rate,filename)
+
+    use netcdf
+
+    real(8), intent(in), dimension(:) :: x, y, z
+    real(8), intent(in), dimension(:,:,:) :: rate
+    character(*), intent(in) :: filename
+
+    integer :: i
+    integer :: nx, ny, nz
+
+    integer :: id_nc,xdim_id,ydim_id,zdim_id
+    integer :: x_id,y_id,z_id
+    integer :: id_rate
+
+    integer, dimension(3) :: dim_ids
+
+    call check(nf90_create(filename, NF90_NETCDF4, id_nc))
+
+    ! setup dimensions
+    call check(nf90_def_dim(id_nc, "x", size(x), xdim_id))
+    call check(nf90_def_dim(id_nc, "y", size(y), ydim_id))
+    call check(nf90_def_dim(id_nc, "z", size(z), zdim_id))
+
+    ! create variables for data
+    call check(nf90_def_var(id_nc, "x", NF90_DOUBLE, xdim_id, x_id))
+    call check(nf90_def_var(id_nc, "y", NF90_DOUBLE, ydim_id, y_id))
+    call check(nf90_def_var(id_nc, "z", NF90_DOUBLE, zdim_id, z_id))
+
+    dim_ids = (/ xdim_id,ydim_id,zdim_id /)
+
+    call check(nf90_def_var(id_nc, "rate", NF90_DOUBLE, dim_ids, id_rate , deflate_level=7))
+
+    call check(nf90_enddef(id_nc))
+
+    call check(nf90_put_var(id_nc, x_id, x))
+    call check(nf90_put_var(id_nc, y_id, y))
+    call check(nf90_put_var(id_nc, z_id, z))
+
+    call check(nf90_put_var(id_nc, id_rate, rate))
+    
+    call check(nf90_close(id_nc))
+
+  end subroutine save_rate_to_netcdf
   
   subroutine read_netcdf_field_file(filename)
     ! Note, this subroutine assumes that the layout of the netcdf file

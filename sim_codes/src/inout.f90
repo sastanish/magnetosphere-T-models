@@ -100,25 +100,22 @@ contains
 
   end subroutine save_rate_to_netcdf
   
-  subroutine read_netcdf_field_file(filename)
-    ! Note, this subroutine assumes that the layout of the netcdf file
-    ! as generated from the Tsynenko model.
+  subroutine load_field_from_netcdf(filename,x,y,z,Bx,By,Bz)
 
     use netcdf
 
-    character(*), intent(in) :: filename
+    character(*), intent(in), intent(in) :: filename
+    real(8), allocatable, dimension(:,:,:), intent(inout) :: bx,by,bz
+    real(8), allocatable, dimension(:), intent(inout) :: x,y,z
+
     character(len=50) :: dummy
     character(len=50) :: xname, yname, zname
     character(len=50) :: bxname, byname, bzname
     integer :: nc_id
-    real(8), allocatable, dimension(:,:,:) :: bx,by,bz
-    real(8), allocatable, dimension(:) :: x,y,z
     integer :: nx, ny, nz
 
     ! read the file and fill reference id, nc_id
-    call check(nf90_open(filename, nf90_nowrite, nc_id))
-
-    ! get indices of dimensions
+    call check(nf90_open(trim(filename), nf90_nowrite, nc_id))
 
     ! Read size of dimensions
     call check(nf90_inquire_dimension(nc_id,1,xname,nx))
@@ -130,10 +127,9 @@ contains
     allocate(y(ny))
     allocate(z(nz))
 
-    ! netcdf files are backwards indexed
-    allocate(bx(nz,ny,nx))
-    allocate(by(nz,ny,nx))
-    allocate(bz(nz,ny,nx))
+    allocate(Bx(nx,ny,nz))
+    allocate(By(nx,ny,nz))
+    allocate(Bz(nx,ny,nz))
 
     ! Read all data (dimension and variables) into memory
     call check(nf90_get_var(nc_id,4,x))

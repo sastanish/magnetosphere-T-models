@@ -1,5 +1,20 @@
+# Exclude code
+*.so
+*.mod
+
+# Exclude data
 *.nc
 *.out
-*.so
+
+# Exclude images and video
+*.svg
 *.png
-*.mod
+*.mp4
+
+# Exclude webpages and non-source notes
+*.pdf
+*.tex
+*.html
+
+# Exclude zips for storage
+*.zip

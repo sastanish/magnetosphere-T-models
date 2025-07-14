@@ -1,0 +1,15 @@
+2015,
+2018,
+2022-03-13 up to 14th
+10-05-2024
+2024-10-10
+
+- double check that these match up with Tsyganenko avg. for 2018 then send.
+
+- Just the input times.
+- USE DATA FROM DISCOVER FOR MAY STORM
+
+GET BY SATURDAY BY LATEST.
+Files today.
+
+Get 5-min data and generate data for these runs.

@@ -1,6 +1,7 @@
 program main
 
   use inputOutput, only : save_rate_to_netcdf, load_field_from_netcdf
+  !$ use omp_lib
 
   implicit none
 
@@ -16,10 +17,13 @@ program main
 
   !File handling
   integer :: fileind, start_ind, end_ind
-  character(4) :: str_ind
+  character(4) :: str_ind, start_str, end_str
 
-  GET_COMMAND_ARGUMENT(1,start_ind)
-  GET_COMMAND_ARGUMENT(2,end_ind)
+  call GET_COMMAND_ARGUMENT(1,start_str)
+  call GET_COMMAND_ARGUMENT(2,end_str)
+  read(start_str,'(I5)') start_ind
+  read(end_str,'(I5)') end_ind
+
   do fileind = start_ind,end_ind
 
     write( str_ind, '(I4)' ) fileind
@@ -51,23 +55,25 @@ program main
     ! Calculate rate !
     !!!!!!!!!!!!!!!!!!
 
-    !$OMP Parallel public(Bx,By,Bz,magB,Fx,Fy,Fz,Jx,Jy,Jz,Bfx,Bfy,Bfz,lambda,alpha) private(i,j,k)
+    hx = abs(x(2)-x(1))
+    hy = abs(y(2)-y(1))
+    hz = abs(z(2)-z(1))
+    !$OMP Parallel shared(Bx,By,Bz,magB,Fx,Fy,Fz,Jx,Jy,Jz,Bfx,Bfy,Bfz,lambda,alpha) private(i,j,k)
     !$OMP DO COLLAPSE(3)
     do k=2,nz-1
     do j=2,ny-1
     do i=2,nx-1
       ! |B|
       magB(i,j,k) = sqrt(Bx(i,j,k)**2 + By(i,j,k)**2 + Bz(i,j,k)**2)
-      ! F = u x B
-      Fx(i,j,k) = uy(i,j,k)*Bz(i,j,k) - uz(i,j,k)*By(i,j,k) 
-      Fy(i,j,k) = uz(i,j,k)*Bx(i,j,k) - ux(i,j,k)*Bz(i,j,k) 
-      Fz(i,j,k) = ux(i,j,k)*By(i,j,k) - uy(i,j,k)*Bx(i,j,k) 
-      magF(i,j,k) = sqrt(Fx(i,j,k)**2 + Fy(i,j,k)**2 + Fz(i,j,k)**2)
       ! J = Curl(B)
       Jx(i,j,k) = 1/(2*hy) * (Bz(i,j+1,k) - Bz(i,j-1,k)) - 1/(2*hz) * (By(i,j,k+1) - By(i,j,k-1))
       Jy(i,j,k) = 1/(2*hz) * (Bx(i,j,k+1) - Bx(i,j,k-1)) - 1/(2*hx) * (Bz(i+1,j,k) - Bz(i-1,j,k))
       Jz(i,j,k) = 1/(2*hx) * (By(i+1,j,k) - By(i-1,j,k)) - 1/(2*hy) * (Bx(i,j+1,k) - Bx(i,j-1,k))
-      magJ(i,j,k) = sqrt(Jx(i,j,k)**2 + Jy(i,j,k)**2 + Jz(i,j,k)**2)
+      ! F = u x B
+      Fx(i,j,k) = Jy(i,j,k)*Bz(i,j,k) - Jz(i,j,k)*By(i,j,k) 
+      Fy(i,j,k) = Jz(i,j,k)*Bx(i,j,k) - Jx(i,j,k)*Bz(i,j,k) 
+      Fz(i,j,k) = Jx(i,j,k)*By(i,j,k) - Jy(i,j,k)*Bx(i,j,k) 
+      magF(i,j,k) = sqrt(Fx(i,j,k)**2 + Fy(i,j,k)**2 + Fz(i,j,k)**2)
       ! B_f = B x F/|F|
       Bfx(i,j,k) = (By(i,j,k)*Fz(i,j,k) - Fz(i,j,k)*By(i,j,k) )/magF(i,j,k)
       Bfy(i,j,k) = (Bz(i,j,k)*Fx(i,j,k) - Fx(i,j,k)*Bz(i,j,k) )/magF(i,j,k)
@@ -82,7 +88,7 @@ program main
     !$OMP END DO
     !$OMP END PARALLEL
 
-    !$OMP Parallel public(rate) private(i,j,k,cBfx,cBfy,cBfz,omega1,omega2,rate_x,rate_y,rate_z,Gax,Gay,Gaz)
+    !$OMP Parallel shared(rate) private(i,j,k,cBfx,cBfy,cBfz,omega1,omega2,rate_x,rate_y,rate_z,Gax,Gay,Gaz)
     !$OMP DO COLLAPSE(3)
     do k=3,nz-2
     do j=3,ny-2
@@ -92,9 +98,9 @@ program main
       cBfy = 1/(2*hz) * (Bfx(i,j,k+1) - Bfx(i,j,k-1)) - 1/(2*hx) * (Bfz(i+1,j,k) - Bfz(i-1,j,k))
       cBfz = 1/(2*hx) * (Bfy(i+1,j,k) - Bfy(i-1,j,k)) - 1/(2*hy) * (Bfx(i,j+1,k) - Bfx(i,j-1,k))
       ! w1 = Curl(B_f) * F/|F|
-       omega1 = ( cBfx * Fx + cBfy * Fy + cBfz * Fz ) / magF(i,j,k)
+       omega1 = ( cBfx * Fx(i,j,k) + cBfy * Fy(i,j,k) + cBfz * Fz(i,j,k) ) / magF(i,j,k)
       ! w2 = curl(B_f) * B_f / |B|^2
-       omega2 = ( cBfx * Bfx + cBfy * Bfy + cBfz * Bfz ) / magB(i,j,k)**2
+       omega2 = ( cBfx * Bfx(i,j,k) + cBfy * Bfy(i,j,k) + cBfz * Bfz(i,j,k) ) / magB(i,j,k)**2
       ! GLB = Grad(lambda) * B
       BLG = ( 1/(2*hx) * (lambda(i+1,j,k) - lambda(i-1,j,k)) * Bx(i,j,k) &
             + 1/(2*hy) * (lambda(i,j+1,k) - lambda(i,j-1,k)) * By(i,j,k) &
@@ -127,6 +133,28 @@ program main
     ! Write to file
     print *, 'Writing '//'rate_'//trim(adjustl(str_ind))//'.nc'
     call save_rate_to_netcdf(x,y,z,rate,'rate_'//trim(adjustl(str_ind))//'.nc')
+
+    ! ALLOCATIONS
+    deallocate(x)
+    deallocate(y)
+    deallocate(z)
+    deallocate(Bx)
+    deallocate(By)
+    deallocate(Bz)
+    deallocate(magB)
+    deallocate(Fx)
+    deallocate(Fy)
+    deallocate(Fz)
+    deallocate(magF)
+    deallocate(Jx)
+    deallocate(Jy)
+    deallocate(Jz)
+    deallocate(Bfx)
+    deallocate(Bfy)
+    deallocate(Bfz)
+    deallocate(alpha)
+    deallocate(lambda)
+    deallocate(rate)
 
   end do
 

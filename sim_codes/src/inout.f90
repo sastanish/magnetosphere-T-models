@@ -2,7 +2,7 @@ module inputOutput
 
   implicit none
   private
-  public :: save_field_to_netcdf, save_rate_to_netcdf
+  public :: save_field_to_netcdf, save_rate_to_netcdf, load_field_from_netcdf
 
 contains
 
@@ -104,7 +104,7 @@ contains
 
     use netcdf
 
-    character(*), intent(in), intent(in) :: filename
+    character(*), intent(in) :: filename
     real(8), allocatable, dimension(:,:,:), intent(inout) :: bx,by,bz
     real(8), allocatable, dimension(:), intent(inout) :: x,y,z
 
@@ -132,16 +132,16 @@ contains
     allocate(Bz(nx,ny,nz))
 
     ! Read all data (dimension and variables) into memory
-    call check(nf90_get_var(nc_id,4,x))
-    call check(nf90_get_var(nc_id,5,y))
-    call check(nf90_get_var(nc_id,6,z))
-    call check(nf90_get_var(nc_id,1,bx))
-    call check(nf90_get_var(nc_id,2,by))
-    call check(nf90_get_var(nc_id,3,bz))
+    call check(nf90_get_var(nc_id,1,x))
+    call check(nf90_get_var(nc_id,2,y))
+    call check(nf90_get_var(nc_id,3,z))
+    call check(nf90_get_var(nc_id,4,Bx))
+    call check(nf90_get_var(nc_id,5,By))
+    call check(nf90_get_var(nc_id,6,Bz))
 
     call check(nf90_close(nc_id))
 
-  end subroutine read_netcdf_field_file
+  end subroutine load_field_from_netcdf
 
   subroutine check(istatus)
     use netcdf

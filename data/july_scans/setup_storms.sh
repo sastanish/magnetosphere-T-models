@@ -6,11 +6,9 @@ do
   idnq=$(echo $iid | sed 's/"//g')
   rm -r $idnq
   mkdir $idnq
-  cp ./input_data/data/$(idnq)_TA16_parameters.lst $idnq/input_data.lst
+  cp ./input_data/data/"$idnq"_TA16_parameters.lst $idnq/input_data.lst
   cp ./TA16_RBF.par $idnq/TA16_RBF.par
-  cp ./storm.py $idnq/storm.py
+  cp ./input_parameters.txt $idnq/input_parameters.txt
   cp ./run_storm.sh $idnq/run_storm.sh
-  cd $idnq
-  ln -s ../../../sim_codes/src/TsyganenkoWrapper.cpython-313-x86_64-linux-gnu.so .
-  cd ../
+  cp ../../sim_codes/src/ta16.out $idnq/ta16.out
 done

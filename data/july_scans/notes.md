@@ -12,4 +12,7 @@ This directory contains the input data for the TA16 model. We consider the follo
 The data taken for these storms is obtained through the OMNI spacecraft.
 
 
+# Timings
 
+on 20 cores for 300^3, it takes ~ 10 min for 4 runs. So, for a full run of 500 lines, on 40 cores 
+it should take ~ 625 min or 10 hrs.

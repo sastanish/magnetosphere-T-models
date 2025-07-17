@@ -80,14 +80,15 @@ def compute(path,niters=7):
 
 if __name__ == '__main__':
 
-    dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
+    #dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
     Nproc = 10
 
-    for date in dates:
-        directory = "/users/xnb22215/magnetosphere-T-models/data/TA16/" + date
+    #for date in dates:
+    for dirr in ["july_scans/s01"]:
+        directory = "/users/xnb22215/magnetosphere-T-models/data/" + dirr
 
         filenames = []
-        pattern = re.compile(r"output_data_.*\.nc")
+        pattern = re.compile(r"rate_.*\.nc")
         for fname in os.listdir(directory):
             if pattern.match(fname):
                 filenames.append(str(directory + "/" + fname))

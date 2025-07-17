@@ -44,14 +44,14 @@ def compute_via_critical_points(pressure,rate):
 
     return (cradi, crate)
 
-def compute(path,niters=7):
+def compute(paths,niters=7):
 
     #load
-    ds = xr.open_dataset(path).sel(x=slice(-15,-1))
+    rate = xr.open_dataset(paths[0]).sel(x=slice(-15,-1))
+    ds = xr.open_dataset(paths[1]).sel(x=slice(-15,-1))
 
-    #calc pressure and rate
+    #calc pressure
     pressure = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2)
-    rate = ds.rate
 
     (cradi,crate) = compute_via_critical_points(pressure.sel(y=0,method="nearest"),rate.sel(y=0,method="nearest"))
     #loop through num iters
@@ -87,14 +87,18 @@ if __name__ == '__main__':
     for dirr in ["july_scans/s01"]:
         directory = "/users/xnb22215/magnetosphere-T-models/data/" + dirr
 
-        filenames = []
-        pattern = re.compile(r"rate_.*\.nc")
+        rate_filenames = []
+        field_filenames = []
+        rate_pattern = re.compile(r"rate_.*\.nc")
+        field_pattern = re.compile(r"output_.*\.nc")
         for fname in os.listdir(directory):
-            if pattern.match(fname):
-                filenames.append(str(directory + "/" + fname))
+            if rate_pattern.match(fname):
+                rate_filenames.append(str(directory + "/" + fname))
+            if field_pattern.match(fname):
+                field_filenames.append(str(directory + "/" + fname))
 
         with multiprocessing.Pool(Nproc) as pool:
-            output = pool.map(compute,filenames)
+            output = pool.map(compute,zip(rate_filenames,field_filenames))
 
         header = '''Format:
            1) Time

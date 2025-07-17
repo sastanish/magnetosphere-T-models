@@ -4,7 +4,7 @@
 #SBATCH --export=ALL
 #
 # Run in the standard partition (queue)
-#SBATCH --partition=dev
+#SBATCH --partition=standard
 #
 # Specify project account
 #SBATCH --account=mactaggart-aMHD
@@ -13,16 +13,16 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=10 --nodes=1
+#SBATCH --ntasks=40 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:20:00
+#SBATCH --time=24:00:00
 #
 # Job name
-#SBATCH --job-name=multi_core
+#SBATCH --job-name=storm_scan
 #
 # Output file
-#SBATCH --output=multi_core_cmd.out
+#SBATCH --output=%j_cmd.out
 #======================================================
 
 module purge
@@ -30,7 +30,7 @@ module purge
 #Example module load command. 
 #Load any modules appropriate for your program's requirements
 
-module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/intel-2020.4/4.5.4
+module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 
 #======================================================
 # Prologue script to record job details
@@ -39,10 +39,8 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-conda activate magnetosphere
-
-export OMP_NUM_THREADS=10
-python benchmark_multi_core_par.py
+export OMP_NUM_THREADS=40
+./ta16.out
 
 #======================================================
 # Epilogue script to record job endtime and runtime

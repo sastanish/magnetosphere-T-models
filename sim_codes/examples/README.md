@@ -1,33 +1,14 @@
-## Summary
+This tutorial will walk you through how to use the TA16 model and attached reconnection metrics program. First, compile both the *recon.f90* and *main.f90* programs in the *src/* directory and copy their binaries to this directory. These programs will be referred to as *ta16.out* and *recon.out*. To run these programs, 
 
-This collection of files is an example of using the python wrapper of the TS05/TA16 solar field models and dipole codes by N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This directory contains:
+  - 1) Write an *input_parameters.txt* file which contains the grid info. See the example here.
+  - 2) Supply an *input_data.lst* as generated for the ta16 model
+  - 3) Ensure that the *TA16_RBF.par* parameter file is in the same directory you will run the scripts from
+  - 4) Set the number of cores being used by exporting the variable **OMP_NUM_THREADS=**. 
+  - 5) Run the *ta16.out* program. This will generate a series of netcdf files named *output_1.nc*, *output_2.nc*, etc. Each of these contains the 3 components of the magnetic field.
+  - 6) Run the *recon.out* program specifying which output files we with to calculate. For example, 
+    ```
+    ./recon.out 1 100
+    ```
+    will calculate the reconnection metrics over the output files numbered *output_1.nc* up to *output_100.nc*. These metrics will be saved in files named *rate_1.nc*, etc.
 
- - *README.md* 
-    - This file
- - *example_may_storm_TS05/*
-     - *may_2024_storm_with_TS05_vars.dat*
-        - May 2024 storm for example data.
-     - *storm.py*
-        - An example calculation using the Tasyganenko Fortran wrapper for TS05.  
- - *example_may_storm_TA16/*
-     - *convert_TS05_data_to_TA16_data.py*
-        - Generates the input parameters for the TA16 model from a TS05 input file.
-    - *may_2024_storm_with_TA16_vars.dat*
-        - May 2024 storm example data
-    - *TA16_RBF.par*
-        - Model parameters for TA16 model. Must be present in working directory from where the model is run.
-    - *storm.py*
-        - An example calculation using the Tasyganenko Fortran wrapper for TA16.  
- - *fortran_example_storm.py*
-    - An example calculation using the original Tasyganenko codes in modern fortran. Slower than then wrapped python (at the moment).
-
-## Requirements
-
-This example requires the following python packages:
-
- - xarray
- - multiprocess
- - pandas
- - netCDF4
- - h5netcdf - for compression when writing the magnetic field to disk.
- - The Tsyganenko_wrapper package from the modules_dir
+An example slurm script for the Archie-West machine is included as *run_storm.sh*.

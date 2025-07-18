@@ -2,7 +2,7 @@ module inputOutput
 
   implicit none
   private
-  public :: save_field_to_netcdf, save_rate_to_netcdf, load_field_from_netcdf
+  public :: save_field_to_netcdf, save_rate_to_netcdf, load_field_from_netcdf, load_rate_from_netcdf
 
 contains
 
@@ -142,6 +142,45 @@ contains
     call check(nf90_close(nc_id))
 
   end subroutine load_field_from_netcdf
+  
+  subroutine load_rate_from_netcdf(filename,x,y,z,rate)
+
+    use netcdf
+
+    character(*), intent(in) :: filename
+    real(8), allocatable, dimension(:,:,:), intent(inout) :: rate
+    real(8), allocatable, dimension(:), intent(inout) :: x,y,z
+
+    character(len=50) :: dummy
+    character(len=50) :: xname, yname, zname
+    character(len=50) :: bxname, byname, bzname
+    integer :: nc_id
+    integer :: nx, ny, nz
+
+    ! read the file and fill reference id, nc_id
+    call check(nf90_open(trim(filename), nf90_nowrite, nc_id))
+
+    ! Read size of dimensions
+    call check(nf90_inquire_dimension(nc_id,1,xname,nx))
+    call check(nf90_inquire_dimension(nc_id,2,yname,ny))
+    call check(nf90_inquire_dimension(nc_id,3,zname,nz))
+    
+    ! Allocate data in ram
+    allocate(x(nx))
+    allocate(y(ny))
+    allocate(z(nz))
+
+    allocate(rate(nx,ny,nz))
+
+    ! Read all data (dimension and variables) into memory
+    call check(nf90_get_var(nc_id,1,x))
+    call check(nf90_get_var(nc_id,2,y))
+    call check(nf90_get_var(nc_id,3,z))
+    call check(nf90_get_var(nc_id,4,rate))
+
+    call check(nf90_close(nc_id))
+
+  end subroutine load_rate_from_netcdf
 
   subroutine check(istatus)
     use netcdf

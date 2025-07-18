@@ -1,7 +1,6 @@
 import xarray as xr
 import numpy as np
 import pandas as pd
-import multiprocessing
 import re
 import os
 
@@ -30,9 +29,13 @@ def compute_via_critical_points(pressure,rate):
     points = points.where(np.sqrt(points.x**2+points.z**2)>1.5)
 
     stacked_points = points.stack(s=["x","z"]).notnull()
+    print(stacked_points)
+    print('---------------------------')
     stacked_rate = rate.stack(s=["x","z"])
+    print('---------------------------')
+    print(stacked_rate)
 
-    rates = stacked_rate[stacked_points]
+    rates = stacked_rate[stacked_points.s]
     radii = np.sqrt(rates.x**2+rates.z**2)
 
     try:
@@ -44,11 +47,11 @@ def compute_via_critical_points(pressure,rate):
 
     return (cradi, crate)
 
-def compute(paths,niters=7):
+def compute(field_file,rate_file,niters=4):
 
     #load
-    rate = xr.open_dataset(paths[0]).sel(x=slice(-15,-1))
-    ds = xr.open_dataset(paths[1]).sel(x=slice(-15,-1))
+    rate = xr.open_dataset(rate_file).sel(x=slice(-12,-1))
+    ds = xr.open_dataset(field_file).sel(x=slice(-12,-1))
 
     #calc pressure
     pressure = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2)
@@ -81,24 +84,32 @@ def compute(paths,niters=7):
 if __name__ == '__main__':
 
     #dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
-    Nproc = 10
 
     #for date in dates:
     for dirr in ["july_scans/s01"]:
         directory = "/users/xnb22215/magnetosphere-T-models/data/" + dirr
 
-        rate_filenames = []
-        field_filenames = []
+        # Sort out filenames in order of index
         rate_pattern = re.compile(r"rate_.*\.nc")
         field_pattern = re.compile(r"output_.*\.nc")
+        num_rates = 0
+        num_field = 0
         for fname in os.listdir(directory):
             if rate_pattern.match(fname):
-                rate_filenames.append(str(directory + "/" + fname))
+                num_rates = num_rates + 1
             if field_pattern.match(fname):
-                field_filenames.append(str(directory + "/" + fname))
+                num_field = num_field + 1
 
-        with multiprocessing.Pool(Nproc) as pool:
-            output = pool.map(compute,zip(rate_filenames,field_filenames))
+        rate_filenames = []
+        for i in range(num_rates):
+            rate_filenames.append(directory + "/rate_"+str(i+1)+".nc")
+        field_filenames = []
+        for i in range(num_field):
+            field_filenames.append(directory + "/output_"+str(i+1)+".nc")
+
+        output = []
+        for field,rate in zip(field_filenames,rate_filenames):
+            output.append(compute(field,rate))
 
         header = '''Format:
            1) Time

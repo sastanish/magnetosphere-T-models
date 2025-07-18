@@ -16,7 +16,7 @@
 #SBATCH --ntasks=10 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:30:00
+#SBATCH --time=00:20:00
 #
 # Job name
 #SBATCH --job-name=plot_slices
@@ -43,6 +43,7 @@ conda activate magnetosphere
 
 #python plot_tail_slices.py
 python calc_x-point_location.py
+python calc_field_drop.py
 
 #======================================================
 # Epilogue script to record job endtime and runtime

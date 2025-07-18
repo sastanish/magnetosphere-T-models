@@ -15,17 +15,25 @@ if __name__ == '__main__':
             if pattern.match(fname):
                 filenames.append(str(directory + "/" + fname))
 
-        field_strength = []
+        print(filenames)
         times = []
-        for i,file in enumerate(filenames):
-            ds = xr.open_dataset(file,chuncks="auto")
+        with open(directory + "/input_data.lst","r") as omni_data:
+            for line in omni_data.readlines():
+                data = line.split()
+                times.append(data[0] + '    ' + data[1] + '    ' + data[2]) 
+
+        field_strength = []
+        for files in filenames:
+            ds = xr.open_dataset(files,chunks="auto")
             magB = np.sqrt(ds.bx**2 + ds.by**2 + ds.bz**2).where(ds.x <= -2)
-            field_strength[i] = float(magB.sum())
-            times[i] = str(ds.attrs["time"])
+            field_strength.append(float(magB.sum()))
+            
 
         header = '''Format:
-           1) Time
-           2) SUM(|B|) for x<=-2
+           1) Year
+           2) Day
+           3) Min
+           4) SUM(|B|) for x<=-2
            \n'''
         with open( directory + "/total_nightside_field.lst", "w") as f:
             f.write(header)

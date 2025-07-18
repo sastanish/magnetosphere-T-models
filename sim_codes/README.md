@@ -1,56 +1,17 @@
 ## Summary
 
-This collection of files is a python wrapper of the TS05 solar field model and dipole codes by N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This directory contains:
+This collection of files is a fortran wrapper of the TS06 solar field model and dipole codes by N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This directory contains:
 
  - *README.md* 
     - This file
  - *src/*
-     - *TsyganenkoWrapper.f90*
-        - A fortran wrapper written in F90 that serves as an interface between Tsyganenko's original F77 codes and python. This file has been written to accept an array of spacial values for which to calculate the magnetic field from. This allows us to avoid looping in python (slow!) without modifying Tsyganenko's code an any way.
-     - *TsyganenkoWrapper.pyf*
-        - This file serves as an interpreter between python and fortran, providing information about the KIND and INTENT of each variable in the *Tsyganenko_wrapper*.  
-     - *TS04c.for*
-        - The original [TS04c.for](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/magnetic_field/ts05/) model code.  The only modification was  to wrap the included subroutines inside a Module interface.
+     - *main.f90*
+       - The main program that feeds the TA16 model it's data and manages in/out and program control.
+     - *inout.f90*
+       - A simple module that implements input/output through the net-CDF library.
      - *TA16_RBF.f*
-        - The original [TA16_RNF.f](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/magnetic_field/ta16/) model code.  The only modification was  to wrap the included subroutines inside a Module interface.
+        - A modification of the original [TA16_RBF.f](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/magnetic_field/ta16/) model code. The compute block is wrapped in a module for interfacing with the main program. Redundant code (generating the RBF centers grid and loading parameters) have been placed in their own subroutines.
      - *geopack.f*
         - As above, this is the original [geopack.f](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/coordinate_systems/geopack) file. The only modification was to wrap the included subroutines inside a Module interface.
-    - *reconnectionMetrics.f90*
+    - *recon.f90*
         - This file contains fortran routines for calculating the reconnection rate as written in [this paper](https://arxiv.org/abs/2502.01251).
-
-## How to compile/install
-
-To use these subroutines in python, all the fortran codes need compiled via the numpy wrapper, [f2py](https://numpy.org/doc/stable/f2py/f2py.getting-started.html).  You will need an active python environment with the following packages:
-
- - numpy
- - meson
- - ninja
-
-You will also need a fortran compiler.  Ensure that you python environment is active and run,
-```
-python -m numpy.f2py -c TS04c.for TA16_RBF.f geopack.f reconnectionMetrics.f90 magnetosphereModels.f90 TsyganenkoWrapper.pyf TsyganenkoWrapper.f90
-```
-within the src directory.  This should generate a module file entitled *TsyganenkoWrapper.cpython-313-x86_64-linux-gnu.so* or something similar. This module file can now be imported into python. For how to use, see the example storm directory.
-
-**NOTE:** Do not move this file around. If you wish to call this package in another directory, use a system link to point to this file in place.  Ie, *ln -s PATH_TO_MODULE CURRENT_DIR/.*
-
-### Parallel compilation
-
-The default state of this wrapper is to run each model on a single core. Parallel processing is achieved via launching many single-core runs for different input parameters as outlined in the examples directory. This code can be compiled with OpenMP parallelization on the fortran end. Simply compile the python module with the correct command for you compiler:
-
-**Intel compiler**
-```
-FC="ifort" FFlags="qopenmp" python -m numpy.f2py -lgomp -c geopack.f reconnectionMetrics.f90 TA16_RBF.f TS04c.for TsyganenkoWrapper.f90 TsyganenkoWrapper.pyf -m TsyganenkoWrapper --backend meson
-
-```
-**GFortran compiler**
-```
-FC="gfortran" FFlags="fopenmp" python -m numpy.f2py -lgomp -c geopack.f reconnectionMetrics.f90 TA16_RBF.f TS04c.for TsyganenkoWrapper.f90 TsyganenkoWrapper.pyf -m TsyganenkoWrapper --backend meson
-```
-
-Then use this module as usual and set the env variable,
-
-```
-OMP_NUM_THREADS=
-```
-so specify your desired number of threads.

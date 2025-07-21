@@ -1,4 +1,4 @@
-set terminal png size 680,600
+set term svg size 680,600
 set pm3d map
 s=0.3
 unset key

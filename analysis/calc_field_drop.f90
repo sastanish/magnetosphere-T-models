@@ -1,6 +1,6 @@
 program main
 
-  use inputOutput, only : load_field_from_netcdf
+  use netcdf
 
   implicit none
 
@@ -31,7 +31,7 @@ program main
     write( str_ind, '(I4)' ) f
     print *, 'reading: '//trim(dir)//'*_'//trim(adjustl(str_ind))//'.nc'
 
-    call load_field_from_netcdf(trim(dir)//'output_'//trim(adjustl(str_ind))//'.nc',x,y,z,bx,by,bz)
+    call load_from_netcdf(trim(dir)//'output_'//trim(adjustl(str_ind))//'.nc',x,y,z,bx,by,bz)
     Area = size(z)*size(y)*eind
     do i = 1,size(x)
       if ( x(i) > -2) then
@@ -75,5 +75,60 @@ program main
   close(outfile)
   close(omnifile)
   deallocate(strength)
+
+contains
+
+  subroutine load_from_netcdf(filename,x,y,z,Bx,By,Bz)
+
+    use netcdf
+
+    character(*), intent(in) :: filename
+    real(8), allocatable, dimension(:,:,:), intent(inout) :: bx,by,bz
+    real(8), allocatable, dimension(:), intent(inout) :: x,y,z
+
+    character(len=50) :: dummy
+    character(len=50) :: xname, yname, zname
+    character(len=50) :: bxname, byname, bzname
+    integer :: nc_id
+    integer :: nx, ny, nz
+
+    ! read the file and fill reference id, nc_id
+    call check(nf90_open(trim(filename), nf90_nowrite, nc_id))
+
+    ! Read size of dimensions
+    call check(nf90_inquire_dimension(nc_id,1,xname,nx))
+    call check(nf90_inquire_dimension(nc_id,2,yname,ny))
+    call check(nf90_inquire_dimension(nc_id,3,zname,nz))
+    
+    ! Allocate data in ram
+    allocate(x(nx))
+    allocate(y(ny))
+    allocate(z(nz))
+
+    allocate(Bx(nx,ny,nz))
+    allocate(By(nx,ny,nz))
+    allocate(Bz(nx,ny,nz))
+
+    ! Read all data (dimension and variables) into memory
+    call check(nf90_get_var(nc_id,1,x))
+    call check(nf90_get_var(nc_id,2,y))
+    call check(nf90_get_var(nc_id,3,z))
+    call check(nf90_get_var(nc_id,4,Bx))
+    call check(nf90_get_var(nc_id,5,By))
+    call check(nf90_get_var(nc_id,6,Bz))
+
+    call check(nf90_close(nc_id))
+
+  end subroutine load_from_netcdf
+ 
+  subroutine check(istatus)
+    use netcdf
+    implicit none
+    integer, intent (in) :: istatus
+    if (istatus /= nf90_noerr) then
+    write(*,*) trim(adjustl(nf90_strerror(istatus)))
+    end if
+  end subroutine check
+
 
 end program main

@@ -13,16 +13,16 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=10 --nodes=1
+#SBATCH --ntasks=1 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:40:00
+#SBATCH --time=00:30:00
 #
 # Job name
 #SBATCH --job-name=plot_slices
 #
 # Output file
-#SBATCH --output=%j-python.out
+#SBATCH --output=%j_cmd.out
 #======================================================
 
 module purge
@@ -30,7 +30,7 @@ module purge
 #Example module load command. 
 #Load any modules appropriate for your program's requirements
 
-module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/intel-2020.4/4.5.4
+module load netcdf-fortran/intel-2020.4 intel/intel-2020.4 gnuplot/5.4.0
 
 #======================================================
 # Prologue script to record job details
@@ -39,11 +39,13 @@ module load anaconda/python-3.10.9/2023.03 intel/intel-2020.4 netcdf-fortran/int
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-conda activate magnetosphere
-
-#python plot_tail_slices.py
-python calc_x-point_location.py
-#python calc_total_nightside_field.py
+export GNUTERM=png
+for i in {1..435}
+do
+  ./format_field ../data/july_scans/s01/output_$i.nc 12
+  ./format_rate ../data/july_scans/s01/rate_$i.nc
+  gnuplot plot_tail.gnu > ../figs/july/s01/slice_$i.svg
+done
 
 #======================================================
 # Epilogue script to record job endtime and runtime

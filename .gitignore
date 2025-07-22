@@ -8,6 +8,7 @@
 
 # Exclude images and video
 *.svg
+*.eps
 *.png
 *.mp4
 

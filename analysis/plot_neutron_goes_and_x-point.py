@@ -97,28 +97,22 @@ def get_omni_data(directory):
 def get_x_point_data(directory):
 
     times = []
-    brate = []
-    brad  = []
-    crate = []
-    crad  = []
+    rate  = []
+    dist  = []
 
     for line in np.genfromtxt(directory + 'x-point_locations.txt',dtype=None,skip_header=6):
 
-        times.append(str(line[0]).replace("_"," "))
-        brate.append(float(line[1]))
-        brad.append( float(line[2]))
-        crate.append(float(line[3]))
-        crad.append( float(line[4]))
+        times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
+        rate.append( float(line[4]))
+        dist.append( float(line[5]))
 
-    time = pd.to_datetime(times)
+    time = pd.to_datetime(times,format="%Y/%j/%H/%M")
 
-    return {"time":time, "brate":brate, "brad":brad, "crate":crate, "crad":crad}
+    return {"time":time, "rate":rate, "dist":dist}
 
-def plot_statistics(date):
+def plot_statistics(directory):
 
-    directory = "../data/TA16/" + date + "/"
     nmdb_file = "../data/nmdb_data/nmdb_data_" + date + ".lst"
-    goes_file = "../data/goes_data/goes_flux_data_" + date + ".lst"
     fig, ax = plt.subplots(nrows=4,figsize=(10,12),sharex=True)
 
     ## Use helper functions to get data from data dir

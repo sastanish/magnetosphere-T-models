@@ -15,15 +15,21 @@ program main
   real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
 
   ! vars
-  integer :: nruns
   integer :: n, i, j, k
 
-  integer :: fileind
   character(4) :: str_ind
 
   real(8) :: xx,yy,zz,bbx,bby,bbz,hhx,hhy,hhz !dummy variables
   real(8) :: parmod(10)
 
+  !command line args
+  integer :: start_ind, end_ind
+  character(4) :: start_str, end_str
+
+  call GET_COMMAND_ARGUMENT(1,start_str)
+  call GET_COMMAND_ARGUMENT(2,end_str)
+  read(start_str,'(I5)') start_ind
+  read(end_str,'(I5)') end_ind
 
   call setup_grid(x,y,z,Bx,By,Bz)
   call read_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
@@ -32,9 +38,7 @@ program main
 
   ivy = ivy + 29.78 !velocity correction
 
-  nruns = size(year)
-  fileind = 1
-  do n = 1,nruns
+  do n = start_ind,end_ind
 
     call RECALC_08(year(n), day(n), hour(n), mint(n), 0, ivx(n), ivy(n), ivz(n))
 
@@ -76,10 +80,9 @@ program main
     !$OMP END PARALLEL
 
     ! Write to file
-    write( str_ind, '(I4)' ) fileind
+    write( str_ind, '(I4)' ) n
     print *, 'my name is '//'output_'//trim(adjustl(str_ind))//'.nc'
     call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//trim(adjustl(str_ind))//'.nc')
-    fileind = fileind + 1
 
   end do
 

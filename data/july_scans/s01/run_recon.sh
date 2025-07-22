@@ -13,16 +13,16 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=1 --nodes=1
+#SBATCH --ntasks=40 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=01:00:00
+#SBATCH --time=10:00:00
 #
 # Job name
-#SBATCH --job-name=plot_slices
+#SBATCH --job-name=storm_recon
 #
 # Output file
-#SBATCH --output=%j_cmd.out
+#SBATCH --output=%j_cmd_recon.out
 #======================================================
 
 module purge
@@ -39,13 +39,8 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-export GNUTERM=dumb
-for i in {282..435}
-do
-  ./format_field.out ../data/july_scans/s01/output_$i.nc 12
-  ./format_rate.out ../data/july_scans/s01/rate_$i.nc
-  gnuplot plot_tail.gnu > ../figs/july/s01/slice_$i.eps
-done
+export OMP_NUM_THREADS=40
+./run_recon.out 1 435
 
 #======================================================
 # Epilogue script to record job endtime and runtime

@@ -1,4 +1,5 @@
-set term svg size 680,600
+set term postscript eps size 3.5,2.62 enhanced color \
+    font 'Helvetica,20' linewidth 2
 set pm3d map
 s=0.3
 unset key

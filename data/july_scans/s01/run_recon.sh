@@ -16,7 +16,7 @@
 #SBATCH --ntasks=40 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=10:00:00
+#SBATCH --time=04:00:00
 #
 # Job name
 #SBATCH --job-name=storm_recon
@@ -40,7 +40,7 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 #------------------------------------------------------
 
 export OMP_NUM_THREADS=40
-./run_recon.out 1 435
+./run_recon.out 435 603
 
 #======================================================
 # Epilogue script to record job endtime and runtime

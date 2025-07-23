@@ -16,13 +16,13 @@
 #SBATCH --ntasks=40 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=24:00:00
+#SBATCH --time=10:00:00
 #
 # Job name
-#SBATCH --job-name=storm_2018_ext
+#SBATCH --job-name=storm_recon
 #
 # Output file
-#SBATCH --output=%j_cmd.out
+#SBATCH --output=%j_cmd_recon.out
 #======================================================
 
 module purge
@@ -40,7 +40,7 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 #------------------------------------------------------
 
 export OMP_NUM_THREADS=40
-./ta16.out 435 603
+./run_recon.out 1 699
 
 #======================================================
 # Epilogue script to record job endtime and runtime

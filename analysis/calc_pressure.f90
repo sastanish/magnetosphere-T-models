@@ -7,7 +7,7 @@ program main
   !Data vars
   real(8), dimension(:,:,:), allocatable :: Bx, By, Bz
   real(8), dimension(:), allocatable :: x,y,z
-  real(8) :: Area, sum_flux
+  real(8) :: Area, pressure
   integer :: year, day, hour, minn
 
   !Indices
@@ -42,8 +42,8 @@ program main
     if (f==start_ind) then
 
       ! Setup output file
-      open(newunit=outfile, file=trim(dir)//"flux_Bx.lst", status="new")
-      write(outfile,"(A)") "#B_x flux in magnetotail where x < -2."
+      open(newunit=outfile, file=trim(dir)//"pressure.lst", status="new")
+      write(outfile,"(A)") "#Avg Pressure across y-z plane in magnetotail where x < -2."
       write(outfile,"(A)") "#FORMAT:"
       write(outfile,"(A, F6.2, 4x)",advance="no") "#YEAR   DAY    HOUR    MIN    x:", x(1)
       do i = 2,eind
@@ -63,14 +63,14 @@ program main
     write(outfile,"(I4, 4x, I3, 4x, I4, 4x, I3, 4x)",advance="no") year, day, hour, minn
 
     do i=1,eind
-      sum_flux=0
+      pressure=0
       do j=1,size(y)
       do k=1,size(z)
-        sum_flux = sum_flux + bx(i,j,k)/Area
+        pressure = pressure + (bx(i,j,k)**2 + by(i,j,k)**2 + bz(i,j,k)**2)/Area
       end do
       end do
 
-      write(outfile,"(F8.4, 4x)",advance="no") sum_flux
+      write(outfile,"(F8.4, 4x)",advance="no") pressure
 
     end do
 

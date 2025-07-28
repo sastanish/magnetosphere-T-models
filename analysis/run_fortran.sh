@@ -16,7 +16,7 @@
 #SBATCH --ntasks=1 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 #
 # Job name
 #SBATCH --job-name=analysis
@@ -39,8 +39,8 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-#./field_drop.out ../data/july_scans/s01/ 1 435
-./plot_tail_slices.sh
+#./calc_x-point_location.out ../data/july_scans/s01/ 435 603
+./field_drop.out ../data/july_scans/s06/ 1 699
 
 #======================================================
 # Epilogue script to record job endtime and runtime

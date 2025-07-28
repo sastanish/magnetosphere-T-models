@@ -5,49 +5,55 @@ import xarray as xr
 import pandas as pd
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.style as mplstyle
-import multiprocessing
-import re
-import os
 
-def plot_tail(inp):
+def get_omni_data(file):
 
-    date = inp[0]
-    ind = inp[1]
-    ds = xr.open_dataset(f"../data/TA16/{date}/output_data_{ind}.nc")
-    # Assume ds is a slice in y
-    ds = ds.where(np.sqrt(ds.x**2+ds.z**2) > 1).sel(y=0,method="nearest").squeeze()
+  SymHc  = []
+  Nind = []
+  BZ = []
+  avg_BZ = []
+  times = []
 
-    mplstyle.use('fast')
-    fig, ax = plt.subplots(figsize = (12,6))
+  for line in np.genfromtxt(file,dtype=None):
 
-    ds.rate.plot.imshow(x="x",y="z",ax=ax,cmap="inferno")
-    ds.plot.streamplot(x="x",y="z",u="bx",v="bz",ax=ax,color="white")
+    times.append(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M"))
 
-    ax.set_title(str(ds.attrs["time"]))
+    SymHc.append(float(line[23]))
+    Nind.append(float(line[22]))
+    BZ.append(float(line[6]))
+    avg_BZ.append(float(line[21]))
+
+  time = pd.to_datetime(times)
+
+  return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
+
+if __name__=="__main__":
+  data_directory = "../data/july_scans/s06/"
+  fig_directory = "../figs/july/s06/"
+  mplstyle.use('fast')
+
+  for i in range(417,699):
+    omni_data = get_omni_data(data_directory + "input_data.lst")
+    rate = xr.open_dataarray(data_directory + f"rate_{i}.nc").isel(y=151)
+    rate.load()
+    field = xr.open_dataset(data_directory + f"output_{i}.nc").isel(y=151)
+    field.load()
+   
+    pressure = field.bx**2 + field.by**2 + field.bz**2
+   
+    pressure = pressure.where(field.x**2+field.z**2 >= 1)
+    rate = rate.where(field.x**2+field.z**2 >= 1)
+
+    levels = np.geomspace(np.min(pressure),np.max(pressure)/10,num=10)
+   
+    fig, ax = plt.subplots(figsize = (5,5))
+   
+    rate.plot.imshow(x="x",y="z",ax=ax,cmap="inferno",vmax=10)
+    pressure.plot.contour(x="x",y="z",levels=levels,ax=ax,cmap="bwr")
+   
+    ax.set_title(omni_data["time"][i].strftime("%Y/%m/%d - %H:%M"))
     canvas = FigureCanvas(fig)
-    canvas.print_figure(f"../figs/TA16/{date}/tail_slices/{ind}.png")
+    canvas.print_figure(fig_directory + f"tail_slice_{i}.png")
     plt.close(fig)
-
-    return 
-
-def compute_for_date(date,Nproc):
-
-    inds = []
-    pattern = re.compile(r"output_data_.*\.nc")
-    for fname in os.listdir(f"../data/TA16/{date}/"):
-        if pattern.match(fname):
-            inds.append((date,str(fname).strip("output_data_").strip(".nc")))
-
-    with multiprocessing.Pool(Nproc) as pool:
-        output = pool.map(plot_tail,inds)
-
-
-    return 
-
-if __name__ == "__main__":
-
-    dates = ["2018-08-25", "2022-03-13", "2023-03-22", "2024-03-03", "2024-08-11", "2021-11-03", "2022-10-22", "2023-04-23", "2024-03-24", "2024-10-10", "2022-01-14", "2023-02-26", "2023-11-06", "2024-05-10"]
-    Nproc = 10
-    for date in dates:
-        compute_for_date(date,Nproc)
-
+    rate.close()
+    field.close()

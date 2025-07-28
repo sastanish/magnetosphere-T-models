@@ -40,11 +40,11 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 #------------------------------------------------------
 
 export GNUTERM=dumb
-for i in {282..435}
+for i in {1..699}
 do
-  ./format_field.out ../data/july_scans/s01/output_$i.nc 12
-  ./format_rate.out ../data/july_scans/s01/rate_$i.nc
-  gnuplot plot_tail.gnu > ../figs/july/s01/slice_$i.eps
+  ./format_field.out ../data/july_scans/s06/output_$i.nc 12
+  ./format_rate.out ../data/july_scans/s06/rate_$i.nc
+  gnuplot plot_tail.gnu > ../figs/july/s06/slice_$i.eps
 done
 
 #======================================================

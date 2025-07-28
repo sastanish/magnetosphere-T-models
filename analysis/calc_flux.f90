@@ -6,8 +6,8 @@ program main
 
   !Data vars
   real(8), dimension(:,:,:), allocatable :: Bx, By, Bz
-  real(8), dimension(:), allocatable :: x,y,z,flux
-  real(8) :: Area
+  real(8), dimension(:), allocatable :: x,y,z
+  real(8) :: Area, sum_flux
   integer :: year, day, hour, minn
 
   !Indices
@@ -24,15 +24,14 @@ program main
   read(start_str,'(I5)') start_ind
   read(end_str,'(I5)') end_ind
 
-  allocate(flux(start_ind:end_ind))
-
   do f = start_ind,end_ind
 
     write( str_ind, '(I4)' ) f
     print *, 'reading: '//trim(dir)//'*_'//trim(adjustl(str_ind))//'.nc'
 
     call load_from_netcdf(trim(dir)//'output_'//trim(adjustl(str_ind))//'.nc',x,y,z,bx,by,bz)
-    Area = size(z)*size(y)*eind
+
+    Area = size(z)*size(y)
     do i = 1,size(x)
       if ( x(i) > -2) then
         eind = i
@@ -40,15 +39,42 @@ program main
       end if
     end do
 
-    flux(f) = 0
+    if (f==start_ind) then
+
+      ! Setup output file
+      open(newunit=outfile, file=trim(dir)//"flux_Bx.lst", status="new")
+      write(outfile,"(A)") "#B_x flux in magnetotail where x < -2."
+      write(outfile,"(A)") "#FORMAT:"
+      write(outfile,"(A, F4.2, 6x)",advance="no") "#YEAR   DAY    HOUR   MIN    x:", x(1)
+      do i = 2,eind
+        write(outfile,"(F4.2, 8x)",advance="no") x(i)
+      end do
+      write(outfile,*)
+
+      ! skip omni file to correct line
+      open(newunit=omnifile, file=trim(dir)//"input_data.lst", status="old")
+      do i = 1,start_ind
+        read(omnifile,*)
+      end do
+
+    end if
+
+    read(omnifile,*) year, day, hour, minn
+    write(outfile,"(I4, 4x, I3, 4x, I4, 4x, I3, 4x)",advance="no") year, day, hour, minn
+
     do i=1,eind
-      flux(f) = flux(f) + bx(i,j,k)/Area
-    do j=1,size(y)
-    do k=1,size(z)
-      flux(f) = flux(f) + bx(i,j,k)/Area
+      sum_flux=0
+      do j=1,size(y)
+      do k=1,size(z)
+        sum_flux = sum_flux + bx(i,j,k)/Area
+      end do
+      end do
+
+      write(outfile,"(F8.4, 4x)",advance="no") sum_flux
+
     end do
-    end do
-    end do
+
+    write(outfile,*)
 
     deallocate(x)
     deallocate(y)
@@ -58,24 +84,8 @@ program main
     deallocate(bz)
   end do
 
-  open(newunit=outfile, file=trim(dir)//"field_strength.lst", status="new")
-  open(newunit=omnifile, file=trim(dir)//"input_data.lst", status="old")
-  write(outfile,"(A)") "|B| in magnetotail where x < -2."
-  write(outfile,"(A)") "FORMAT:"
-  write(outfile,"(A)") "YEAR    DAY    HOUR    MIN    |B|"
-
-  ! skip omni file to correct line
-  do i = 1,start_ind
-    read(omnifile,*)
-  end do
-  print *, strength
-  do i = start_ind,end_ind
-    read(omnifile,*) year, day, hour, minn
-    write(outfile,'(I4, 4x, I3, 4x, I4, 4x, I3, 4x, F8.4)') year, day, hour, minn, strength(i)
-  end do
   close(outfile)
   close(omnifile)
-  deallocate(strength)
 
 contains
 

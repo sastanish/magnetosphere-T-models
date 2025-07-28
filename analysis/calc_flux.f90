@@ -70,7 +70,7 @@ program main
       end do
       end do
 
-      write(outfile,"(F10.2, 2x)",advance="no") sum_flux
+      write(outfile,"(F10.8, 2x)",advance="no") sum_flux
 
     end do
 

@@ -45,7 +45,7 @@ program main
       open(newunit=outfile, file=trim(dir)//"pressure.lst", status="new")
       write(outfile,"(A)") "#Avg Pressure across y-z plane in magnetotail where x < -2."
       write(outfile,"(A)") "#FORMAT:"
-      write(outfile,"(A, F6.2, 4x)",advance="no") "#YEAR   DAY    HOUR    MIN    x:", x(1)
+      write(outfile,"(A, F6.2, 4x)",advance="no") "YEAR    DAY    HOUR    MIN    x:", x(1)
       do i = 2,eind
         write(outfile,"(F6.2, 6x)",advance="no") x(i)
       end do
@@ -70,7 +70,7 @@ program main
       end do
       end do
 
-      write(outfile,"(F8.4, 4x)",advance="no") pressure
+      write(outfile,"(F10.8, 2x)",advance="no") pressure
 
     end do
 

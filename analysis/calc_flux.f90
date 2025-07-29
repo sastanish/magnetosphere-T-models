@@ -45,9 +45,9 @@ program main
       open(newunit=outfile, file=trim(dir)//"flux_Bx.lst", status="new")
       write(outfile,"(A)") "#B_x flux in magnetotail where x < -2."
       write(outfile,"(A)") "#FORMAT:"
-      write(outfile,"(A, F6.2, 4x)",advance="no") "YEAR    DAY    HOUR    MIN    x:", x(1)
+      write(outfile,"(A, F6.2, 6x)",advance="no") "YEAR    DAY    HOUR    MIN    x:", x(1)
       do i = 2,eind
-        write(outfile,"(F6.2, 6x)",advance="no") x(i)
+        write(outfile,"(F6.2, 8x)",advance="no") x(i)
       end do
       write(outfile,*)
 
@@ -60,7 +60,7 @@ program main
     end if
 
     read(omnifile,*) year, day, hour, minn
-    write(outfile,"(I4, 4x, I3, 4x, I4, 4x, I3, 4x)",advance="no") year, day, hour, minn
+    write(outfile,"(I4, 6x, I3, 6x, I4, 6x, I3, 6x)",advance="no") year, day, hour, minn
 
     do i=1,eind
       sum_flux=0
@@ -70,7 +70,7 @@ program main
       end do
       end do
 
-      write(outfile,"(F10.8, 2x)",advance="no") sum_flux
+      write(outfile,"(F12.2, 2x)",advance="no") sum_flux
 
     end do
 

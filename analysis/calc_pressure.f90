@@ -70,7 +70,7 @@ program main
       end do
       end do
 
-      write(outfile,"(F10.8, 2x)",advance="no") pressure
+      write(outfile,"(F10.0, 2x)",advance="no") pressure
 
     end do
 

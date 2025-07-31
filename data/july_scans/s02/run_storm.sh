@@ -40,7 +40,7 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 #------------------------------------------------------
 
 export OMP_NUM_THREADS=40
-./ta16.out
+./ta16.out 1 819
 
 #======================================================
 # Epilogue script to record job endtime and runtime

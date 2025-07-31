@@ -4,7 +4,7 @@
 #SBATCH --export=ALL
 #
 # Run in the standard partition (queue)
-#SBATCH --partition=dev
+#SBATCH --partition=standard
 #
 # Specify project account
 #SBATCH --account=mactaggart-aMHD
@@ -16,7 +16,7 @@
 #SBATCH --ntasks=5 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=00:40:00
+#SBATCH --time=20:00:00
 #
 # Job name
 #SBATCH --job-name=plot_slices

@@ -4,7 +4,7 @@
 #SBATCH --export=ALL
 #
 # Run in the standard partition (queue)
-#SBATCH --partition=standard
+#SBATCH --partition=dev
 #
 # Specify project account
 #SBATCH --account=mactaggart-aMHD
@@ -13,13 +13,13 @@
 #SBATCH --distribution=cyclic
 #
 # Run the job on one node, all cores on the same node (full node)
-#SBATCH --ntasks=40 --nodes=1
+#SBATCH --ntasks=20 --nodes=1
 #
 # Specify (hard) runtime (HH:MM:SS)
-#SBATCH --time=24:00:00
+#SBATCH --time=00:20:00
 #
 # Job name
-#SBATCH --job-name=storm_scan
+#SBATCH --job-name=storm_test
 #
 # Output file
 #SBATCH --output=%j_cmd.out
@@ -39,8 +39,8 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-export OMP_NUM_THREADS=40
-./ta16.out
+export OMP_NUM_THREADS=20
+./ta16.out 3 10
 
 #======================================================
 # Epilogue script to record job endtime and runtime

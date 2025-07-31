@@ -16,6 +16,7 @@ def get_omni_data(file):
     Nind = []
     BZ = []
     avg_BZ = []
+    tilt = []
     times = []
 
     for line in np.genfromtxt(file,dtype=None):
@@ -26,14 +27,15 @@ def get_omni_data(file):
         Nind.append(float(line[22]))
         BZ.append(float(line[6]))
         avg_BZ.append(float(line[21]))
+        tilt.append(float(line[17]))
 
     time = pd.to_datetime(times)
 
-    return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
+    return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ, "tilt":tilt}
 
 def plot(data,ofile,width=4):
 
-    fig, ax = plt.subplots(nrows=3,figsize=(width*1.61803,3*width),sharex=True)
+    fig, ax = plt.subplots(nrows=4,figsize=(width*1.61803,4*width),sharex=True)
 
     ax[0].plot(data["time"],data["SymHc"])
     ax[0].set_ylabel("<SymHc>")
@@ -45,6 +47,9 @@ def plot(data,ofile,width=4):
     ax[2].plot(data["time"],data["avg_BZ"],color="tab:red")
     ax[2].set_ylabel("BZ")
 
+    ax[3].plot(data["time"],data["tilt"],color="tab:green")
+    ax[3].set_ylabel("tilt")
+
     plt.xticks(rotation=45)
     fig.suptitle("Omni data for storm: " + data["time"][0].strftime("%Y - %m"),size="large")
     plt.savefig(ofile)
@@ -53,5 +58,5 @@ def plot(data,ofile,width=4):
     return
 
 if __name__ == "__main__":
-    data = get_omni_data("../data/july_scans/s01/input_data.lst")
-    plot(data,"../figs/july/s01/omni_data.png")
+    data = get_omni_data("../data/july_scans/s02/input_data.lst")
+    plot(data,"../figs/july/s02/omni_data.png")

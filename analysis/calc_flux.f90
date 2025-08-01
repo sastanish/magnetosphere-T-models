@@ -66,9 +66,10 @@ program main
       sum_flux=0
       do j=1,size(y)
       do k=1,size(z)
-        sum_flux = sum_flux + bx(i,j,k)/Area
+        sum_flux = sum_flux + abs(bx(i,j,k))
       end do
       end do
+      sum_flux = sum_flux/Area
 
       write(outfile,"(F12.2, 2x)",advance="no") sum_flux
 

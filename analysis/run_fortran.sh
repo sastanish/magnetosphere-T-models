@@ -39,9 +39,9 @@ module load netcdf-fortran/intel-2020.4 intel/intel-2020.4
 /opt/software/scripts/job_prologue.sh  
 #------------------------------------------------------
 
-./x-point_location.out ../data/july_scans/s02/ 1 819
+#./x-point_location.out ../data/july_scans/s02/ 1 819
 #./field_drop.out ../data/july_scans/s02/ 1 819
-#./flux.out ../data/july_scans/s02/ 1 819
+./flux.out ../data/july_scans/s02/ 1 819
 #./pressure.out ../data/july_scans/s02/ 1 819
 
 #======================================================

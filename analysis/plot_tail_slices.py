@@ -28,11 +28,11 @@ def get_omni_data(file):
   return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
 
 if __name__=="__main__":
-  data_directory = "../data/july_scans/s02/"
-  fig_directory = "../figs/july/s02/"
+  data_directory = "../data/july_scans/s06/"
+  fig_directory = "../figs/july/s06/"
   mplstyle.use('fast')
 
-  for i in range(373,820):
+  for i in range(1,699):
     omni_data = get_omni_data(data_directory + "input_data.lst")
     rate = xr.open_dataarray(data_directory + f"rate_{i}.nc").isel(y=151)
     rate.load()
@@ -49,7 +49,7 @@ if __name__=="__main__":
     fig, ax = plt.subplots(figsize = (5,5))
    
     rate.plot.imshow(x="x",y="z",ax=ax,cmap="inferno",vmax=10)
-    pressure.plot.contour(x="x",y="z",levels=levels,ax=ax,cmap="bwr")
+    pressure.plot.contour(x="x",y="z",levels=levels,ax=ax,cmap="cividis")
    
     ax.set_title(omni_data["time"][i].strftime("%Y/%m/%d - %H:%M"))
     canvas = FigureCanvas(fig)

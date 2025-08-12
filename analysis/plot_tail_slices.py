@@ -28,11 +28,11 @@ def get_omni_data(file):
   return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
 
 if __name__=="__main__":
-  data_directory = "../data/july_scans/s06/"
-  fig_directory = "../figs/july/s06/"
+  data_directory = "../data/july_scans/s01/"
+  fig_directory = "../figs/july/s01/"
   mplstyle.use('fast')
 
-  for i in range(1,699):
+  for i in range(1,603):
     omni_data = get_omni_data(data_directory + "input_data.lst")
     rate = xr.open_dataarray(data_directory + f"rate_{i}.nc").isel(y=151)
     rate.load()

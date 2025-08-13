@@ -48,7 +48,6 @@ def plot(stations, times, neutrons, ofile, width=4):
 
     ## Plot of neutrons
     for i,station in enumerate(stations):
-        print(i)
         ax.plot(times,moving_average(norm(neutrons[:,i]),10),alpha=0.5)
     ax.set_ylabel("Relative Neutron Counts")
 
@@ -61,5 +60,10 @@ def plot(stations, times, neutrons, ofile, width=4):
 
 if __name__ == "__main__":
 
-    (stations, times, data) = get_neutron_data("../data/july_scans/nmdb/nmdb_data_s01.lst")
-    plot(stations, times, np.array(data), "../figs/july/s01/neutron_monitor_data.png")
+    for sid in ["s01", "s02", "s06"]:
+      try:
+        (stations, times, data) = get_neutron_data(f"../data/nmdb/nmdb_data_{sid}.lst")
+        plot(stations, times, np.array(data), f"../figs/{sid}/neutron_monitor_data.png")
+      except:
+        print("Issue with Storm ID: " + sid)
+

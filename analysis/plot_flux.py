@@ -62,5 +62,9 @@ def plot(time, x, field, ofile, width=5, nlines=10):
 
 if __name__ == "__main__":
 
-    (times, x, data) = get_field_data("../data/july_scans/s06/flux_Bx.lst")
-    plot(times, x, data, "../figs/july/s06/flux.png")
+    for sid in ["s01", "s02", "s06"]:
+      try:
+        (times, x, data) = get_field_data(f"../data/{sid}/flux_Bx.lst")
+        plot(times, x, data, f"../figs/{sid}/flux.png")
+      except:
+        print("Issue with Storm ID: " + sid)

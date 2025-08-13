@@ -47,5 +47,9 @@ def plot_x_point(time,rate,dist,ofile,width=4):
 
 if __name__ == "__main__":
 
-    data = get_x_point_data("../data/july_scans/s01/x-point_location.lst")
-    plot_x_point(data["time"],data["rate"],data["dist"],"../figs/july/s01/x-point_location.png")
+  for sid in ["s01", "s02", "s06"]:
+    try:
+      data = get_x_point_data(f"../data/{sid}/x-point_location.lst")
+      plot_x_point(data["time"],data["rate"],data["dist"],f"../figs/{sid}/x-point_location.png")
+    except:
+      print("Issue with Storm ID: " + sid)

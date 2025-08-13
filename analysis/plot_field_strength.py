@@ -45,5 +45,9 @@ def plot(time, field, ofile, width=4):
 
 if __name__ == "__main__":
 
-    (times, data) = get_field_data("../data/july_scans/s01/field_strength.lst")
-    plot(times, data, "../figs/july/s01/field_strength.png")
+    for sid in ["s01", "s02", "s06"]:
+      try:
+        (times, data) = get_field_data(f"../data/{sid}/field_strength.lst")
+        plot(times, data, f"../figs/{sid}/field_strength.png")
+      except:
+        print("Issue with Storm ID: " + sid)

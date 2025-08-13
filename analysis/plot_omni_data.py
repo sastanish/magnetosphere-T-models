@@ -58,5 +58,10 @@ def plot(data,ofile,width=4):
     return
 
 if __name__ == "__main__":
-    data = get_omni_data("../data/july_scans/s02/input_data.lst")
-    plot(data,"../figs/july/s02/omni_data.png")
+    for sid in ["s01", "s02", "s06"]:
+        try:
+            data = get_omni_data(f"../data/{sid}/input_data.lst")
+            plot(data,f"../figs/{sid}/omni_data.png")
+        except:
+            print("Issue with Storm ID: " + sid)
+        

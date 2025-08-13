@@ -28,8 +28,8 @@ def get_omni_data(file):
   return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
 
 if __name__=="__main__":
-  data_directory = "../data/july_scans/s01/"
-  fig_directory = "../figs/july/s01/"
+  data_directory = "../data/s01/"
+  fig_directory = "../figs/s01/"
   mplstyle.use('fast')
 
   for i in range(1,603):

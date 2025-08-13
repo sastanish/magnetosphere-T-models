@@ -12,10 +12,11 @@
 *.png
 *.mp4
 
-# Exclude webpages and non-source notes
-*.pdf
-*.tex
-*.html
+# Exclude misc tex
 
 # Exclude zips for storage
 *.zip
+
+# Exclude custom python env
+.env/
+activate_py_env

@@ -35,20 +35,20 @@ def get_omni_data(file):
 
 def plot(data,ofile,width=4):
 
-    fig, ax = plt.subplots(nrows=4,figsize=(width*1.61803,4*width),sharex=True)
+    fig, ax = plt.subplots(nrows=2,figsize=(width*1.61803,2*width),sharex=True)
 
     ax[0].plot(data["time"],data["SymHc"])
     ax[0].set_ylabel("<SymHc>")
 
-    ax[1].plot(data["time"],data["Nind"])
-    ax[1].set_ylabel("N Index")
+#    ax[1].plot(data["time"],data["Nind"])
+#    ax[1].set_ylabel("N Index")
 
-    ax[2].plot(data["time"],data["BZ"],color="black")
-    ax[2].plot(data["time"],data["avg_BZ"],color="tab:red")
-    ax[2].set_ylabel("BZ")
+    ax[1].plot(data["time"],data["BZ"],color="black")
+    ax[1].plot(data["time"],data["avg_BZ"],color="tab:red")
+    ax[1].set_ylabel("BZ")
 
-    ax[3].plot(data["time"],data["tilt"],color="tab:green")
-    ax[3].set_ylabel("tilt")
+#    ax[3].plot(data["time"],data["tilt"],color="tab:green")
+#    ax[3].set_ylabel("tilt")
 
     plt.xticks(rotation=45)
     fig.suptitle("Omni data for storm: " + data["time"][0].strftime("%Y - %m"),size="large")

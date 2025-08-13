@@ -13,6 +13,8 @@
 *.mp4
 
 # Exclude misc tex
+*.log
+*.aux
 
 # Exclude zips for storage
 *.zip

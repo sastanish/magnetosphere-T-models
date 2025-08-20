@@ -51,6 +51,7 @@ def plot(time, x, field, ofile, width=5, nlines=10):
 
     fig.suptitle("pressure for storm: " + times[0].strftime("%Y - %m"),size="large")
     plt.xticks(rotation=45)
+    fig.tight_layout()
     plt.savefig(ofile)
     plt.close()
 

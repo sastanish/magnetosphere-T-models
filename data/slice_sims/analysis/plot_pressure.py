@@ -57,7 +57,9 @@ def plot(time, x, field, ofile, width=5, nlines=10):
     return 
 
 if __name__ == "__main__":
+
   matplotlib.use("AGG")
-  for sid in ["s01", "s02", "s06"]:
-    (times, x, data) = get_field_data(f"../data/{sid}/pressure.lst")
+
+  for sid in [f"s0{i+1}" for i in range(8)]:
+    (times, x, data) = get_field_data(f"../{sid}/pressure.lst")
     plot(times, x, data, f"../figs/{sid}/pressure.png")

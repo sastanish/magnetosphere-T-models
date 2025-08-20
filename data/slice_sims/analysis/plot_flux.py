@@ -4,6 +4,7 @@ import matplotlib
 import xarray as xr
 import pandas as pd
 import datetime
+import scipy
 
 def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'same') / w
@@ -32,9 +33,9 @@ def get_field_data(file):
                     arr.append(float(line[j]))
             field.append(arr)
 
-        time = pd.to_datetime(times,format="%Y/%j/%H/%M")
+    time = pd.to_datetime(times,format="%Y/%j/%H/%M")
 
-    return (time, np.array(x), np.array(field))
+    return (time, x, np.array(field))
 
 def plot(time, x, field, ofile, width=5, nlines=10):
 
@@ -42,14 +43,17 @@ def plot(time, x, field, ofile, width=5, nlines=10):
 
     cmap = plt.cm.Blues(np.linspace(0,1,nlines))
 
+#    exp = lambda t,a,b,c,d: a*np.exp(b*(t-d))+c
+#    ((a,b,c,d), misc) = scipy.optimize.curve_fit(exp,  x,  np.average(field,axis=0),  p0=(1, 1, -3, -100 ), maxfev = 100000)
+
     ## Plot of neutrons
     for i in range(nlines):
-        ax.semilogy(time,field[:,i*len(x)//nlines],color=cmap[i],label=f"x:{x[i*len(x)//nlines]}")
-    ax.set_ylabel("$\\int \\int |\\vec{B}|^2 dx dy$")
+        ax.plot(time,field[:,i*len(x)//nlines],color=cmap[i],label=f"x:{x[i*len(x)//nlines]}")
+    ax.set_ylabel("$\\int \\int \\vec{B}_x dx dy$")
     ax.set_xlabel("time")
     ax.legend()
 
-    fig.suptitle("pressure for storm: " + times[0].strftime("%Y - %m"),size="large")
+    fig.suptitle("Flux for storm: " + times[0].strftime("%Y - %m"),size="large")
     plt.xticks(rotation=45)
     plt.savefig(ofile)
     plt.close()
@@ -57,7 +61,9 @@ def plot(time, x, field, ofile, width=5, nlines=10):
     return 
 
 if __name__ == "__main__":
+
   matplotlib.use("AGG")
-  for sid in ["s01", "s02", "s06"]:
-    (times, x, data) = get_field_data(f"../data/{sid}/pressure.lst")
-    plot(times, x, data, f"../figs/{sid}/pressure.png")
+
+  for sid in [f"s0{i+1}" for i in range(8)]:
+    (times, x, data) = get_field_data(f"../{sid}/flux_Bx.lst")
+    plot(times, x, data, f"../figs/{sid}/flux.png")

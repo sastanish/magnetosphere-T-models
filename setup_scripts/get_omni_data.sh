@@ -1,7 +1,5 @@
 #!/bin/bash
 
-ids=
-echo $ids
 for iid in $(./json.sh < storms.json | awk '/"ID"]/ {print $2}')
 do
   # Parse the start time

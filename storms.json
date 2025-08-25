@@ -1,25 +1,50 @@
 {
+  "s00": {
+    "ID": "s00",
+    "name": "Mar2015",
+    "include": "yes",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2015",
+      "month": "03",
+      "day": "17",
+      "hour": "00",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2015",
+      "month": "03",
+      "day": "19",
+      "hour": "00",
+      "min": "00"
+    }
+  },
   "s01": {
     "ID": "s01",
+    "name": "Aug2018",
+    "include": "yes",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
       "year": "2018",
       "month": "08",
       "day": "25",
-      "hour": "06",
+      "hour": "12",
       "min": "00"
     },
     "end_date": {
       "year": "2018",
       "month": "08",
       "day": "27",
-      "hour": "08",
+      "hour": "00",
       "min": "00"
     }
   },
   "s02": {
     "ID": "s02",
+    "name": "Mar2022",
+    "include": "no",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -39,6 +64,8 @@
   },
   "s03": {
     "ID": "s03",
+    "name": "Oct2022",
+    "include": "no",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -58,25 +85,29 @@
   },
   "s04": {
     "ID": "s04",
+    "name": "Mar2023",
+    "include": "no",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
       "year": "2023",
       "month": "03",
-      "day": "22",
-      "hour": "23",
+      "day": "23",
+      "hour": "00",
       "min": "00"
     },
     "end_date": {
       "year": "2023",
       "month": "03",
       "day": "25",
-      "hour": "24",
+      "hour": "00",
       "min": "00"
     }
   },
   "s05": {
     "ID": "s05",
+    "name": "Mar2024",
+    "include": "no",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -96,6 +127,8 @@
   },
   "s06": {
     "ID": "s06",
+    "name": "May2024",
+    "include": "yes",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -109,12 +142,14 @@
       "year": "2024",
       "month": "05",
       "day": "12",
-      "hour": "21",
+      "hour": "12",
       "min": "00"
     }
   },
   "s07": {
     "ID": "s07",
+    "name": "Aug2024",
+    "include": "no",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -134,6 +169,8 @@
   },
   "s08": {
     "ID": "s08",
+    "name": "Oct2024",
+    "include": "yes",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
@@ -146,8 +183,8 @@
     "end_date": {
       "year": "2024",
       "month": "10",
-      "day": "12",
-      "hour": "09",
+      "day": "11",
+      "hour": "18",
       "min": "00"
     }
   }

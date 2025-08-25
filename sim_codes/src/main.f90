@@ -1,6 +1,7 @@
 program main
 
   use TA16, only : RBF_MODEL_2016,CALCULATE_RBF_CENTERS,READ_TA16_PARS
+  use TS05, only : T04_s
   use geopack, only : RECALC_08, IGRF_GSW_08
   use inputOutput, only : save_field_to_netcdf
   !$ use omp_lib

@@ -36,7 +36,7 @@ def get_field_data(file):
 
     return (time, np.array(x), np.array(field))
 
-def plot(time, x, field, ofile, width=5, nlines=10):
+def plot(time, x, field, ofile, width=5, nlines=20):
 
     fig, ax = plt.subplots(figsize=(width*1.61803,width))
 

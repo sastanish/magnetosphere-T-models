@@ -46,13 +46,22 @@ def plot(stations, times, neutrons, ofile, width=4):
 
     fig, ax = plt.subplots(figsize=(width*1.61803,width))
 
+    cmap = plt.colormaps['cividis']
+    colors = cmap(np.linspace(0, 1, len(stations)))
+
     ## Plot of neutrons
     for i,station in enumerate(stations):
-        ax.plot(times,moving_average(norm(neutrons[:,i]),10),alpha=0.5)
+        ax.plot(times,moving_average(norm(neutrons[:,i]),10),alpha=0.3,color=colors[i])
+        if i == 0:
+          mean = np.nan_to_num(norm(neutrons[:,i]))
+        else:
+          mean += np.nan_to_num(norm(neutrons[:,i]))
+    ax.plot(times,mean/len(stations),color="black",alpha=1)
     ax.set_ylabel("Relative Neutron Counts")
 
     fig.suptitle("neutron ground data for storm: " + times[0].strftime("%Y - %m"),size="large")
     plt.xticks(rotation=45)
+    plt.tight_layout()
     plt.savefig(ofile)
     plt.close()
 
@@ -60,10 +69,9 @@ def plot(stations, times, neutrons, ofile, width=4):
 
 if __name__ == "__main__":
 
-    for sid in ["s01", "s02", "s06"]:
-      try:
-        (stations, times, data) = get_neutron_data(f"../data/nmdb/nmdb_data_{sid}.lst")
-        plot(stations, times, np.array(data), f"../figs/{sid}/neutron_monitor_data.png")
-      except:
-        print("Issue with Storm ID: " + sid)
+  matplotlib.use('module://matplotlib-backend-kitty')
+
+  for name in ["Aug2018", "Mar2015", "May2024", "Oct2024"]:
+    (stations, times, data) = get_neutron_data(f"../../data/{name}/nmdb/nmdb_data_{name}.lst")
+    plot(stations, times, np.array(data), f"../{name}_neutron_monitor_data.png")
 

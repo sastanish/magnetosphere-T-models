@@ -2,12 +2,12 @@ import numpy as np
 import json
 
 ## Get the correct storm id's from storms.json
-with open("storms.json", "r") as file:
+with open("../../storms.json", "r") as file:
     storm_dict = json.load(file)
     storm_ids = list(storm_dict.keys())
 
-infiles = [f'./data/omni_data_{id}_filled_gaps_with_tilt.lst' for id in storm_ids]
-outfiles = [f'./data/{id}_TA16_parameters.lst' for id in storm_ids]
+infiles = [f'./data/omni_data_{storm_dict[id]["name"]}_filled_gaps_with_tilt.lst' for id in storm_ids]
+outfiles = [f'./data/{storm_dict[id]["name"]}_TA16_parameters.lst' for id in storm_ids]
 
 for infile,outfile in zip(infiles,outfiles):
 

@@ -15,24 +15,19 @@ def get_field_data(file):
 
     times = []
     field  = []
-    x = []
 
-    for i,line in enumerate(np.genfromtxt(file,dtype=None)):
-        if i==0:
-            x.append(float(line[4][2:]))
-            for j in range(5,len(line)):
-                x.append(float(line[j]))
-        else: 
-            times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
-            arr = []
-            for j in range(4,len(line)):
-                if line[j] == "**********":
-                    arr.append(float('nan'))
-                else:
-                    arr.append(float(line[j]))
-            field.append(arr)
+    for i,line in enumerate(np.genfromtxt(file,dtype=None,skip_header=3)):
+        times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
+        arr = []
+        for j in range(4,len(line)):
+            if line[j] == "**********":
+                arr.append(float('nan'))
+            else:
+                arr.append(float(line[j]))
+        field.append(arr)
 
         time = pd.to_datetime(times,format="%Y/%j/%H/%M")
+        x = [-12 + i for i in range(len(arr))]
 
     return (time, np.array(x), np.array(field))
 
@@ -45,11 +40,11 @@ def plot(time, x, field, ofile, width=5, nlines=10):
     ## Plot of neutrons
     for i in range(nlines):
         ax.semilogy(time,field[:,i*len(x)//nlines],color=cmap[i],label=f"x:{x[i*len(x)//nlines]}")
-    ax.set_ylabel("$\\int \\int |\\vec{B}|^2 dx dy$")
+    ax.set_ylabel("$\\int \\int |\\vec{B}|^2 dy dz$")
     ax.set_xlabel("time")
     ax.legend()
 
-    fig.suptitle("pressure for storm: " + times[0].strftime("%Y - %m"),size="large")
+    fig.suptitle(f"Pressure -- {time[0].strftime('%b')} ${time[0].strftime('%Y')}$",size="large")
     plt.xticks(rotation=45)
     plt.savefig(ofile)
     plt.close()
@@ -57,7 +52,13 @@ def plot(time, x, field, ofile, width=5, nlines=10):
     return 
 
 if __name__ == "__main__":
-  matplotlib.use("AGG")
-  for sid in ["s01", "s02", "s06"]:
-    (times, x, data) = get_field_data(f"../data/{sid}/pressure.lst")
-    plot(times, x, data, f"../figs/{sid}/pressure.png")
+  matplotlib.use('AGG')
+  #matplotlib.use('module://matplotlib-backend-kitty')
+  plt.rcParams.update({
+    'text.usetex': True,
+    'font.family': 'Helvetica'
+  })
+
+  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024"]:
+    (times, x, data) = get_field_data(f"../../data/{name}/TA16/pressure.lst")
+    plot(times, x, data, f"../{name}_pressure.png")

@@ -51,15 +51,19 @@ def plot(stations, times, neutrons, ofile, width=4):
 
     ## Plot of neutrons
     for i,station in enumerate(stations):
+        # Slicing to remove boundaries
         ax.plot(times,moving_average(norm(neutrons[:,i]),10),alpha=0.3,color=colors[i])
         if i == 0:
           mean = np.nan_to_num(norm(neutrons[:,i]))
         else:
           mean += np.nan_to_num(norm(neutrons[:,i]))
+
+    # Slicing to remove boundaries
     ax.plot(times,mean/len(stations),color="black",alpha=1)
     ax.set_ylabel("Relative Neutron Counts")
+    ax.set_xlim(times.min(),times.max())
 
-    fig.suptitle("neutron ground data for storm: " + times[0].strftime("%Y - %m"),size="large")
+    fig.suptitle(f"Neutron ground data -- {times[0].strftime('%b')} ${times[0].strftime('%Y')}$",size="large")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(ofile)
@@ -69,7 +73,12 @@ def plot(stations, times, neutrons, ofile, width=4):
 
 if __name__ == "__main__":
 
-  matplotlib.use('module://matplotlib-backend-kitty')
+  matplotlib.use('AGG')
+  #matplotlib.use('module://matplotlib-backend-kitty')
+  plt.rcParams.update({
+    'text.usetex': True,
+    'font.family': 'Helvetica'
+  })
 
   for name in ["Aug2018", "Mar2015", "May2024", "Oct2024"]:
     (stations, times, data) = get_neutron_data(f"../../data/{name}/nmdb/nmdb_data_{name}.lst")

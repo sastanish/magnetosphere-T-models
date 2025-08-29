@@ -1,6 +1,6 @@
 program main
 
-  use TS05, only : T04_s
+  use TA16, only : RBF_MODEL_2016,CALCULATE_RBF_CENTERS,READ_TA16_PARS
   use geopack, only : RECALC_08, IGRF_GSW_08
   use inputOutput, only : save_field_to_netcdf
   !$ use omp_lib
@@ -33,6 +33,8 @@ program main
 
   call setup_grid(x,y,z,Bx,By,Bz)
   call read_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
+  call read_TA16_pars
+  call calculate_rbf_centers
 
   ivy = ivy + 29.78 !velocity correction
 
@@ -62,7 +64,7 @@ program main
           bbz = 0
 
           ! External field
-          call T04_s(0,parmod,tilt(n),xx,yy,zz,hhx,hhy,hhz)
+          call RBF_MODEL_2016(0,parmod,tilt(n),xx,yy,zz,hhx,hhy,hhz)
 
           ! Internal field
           call IGRF_GSW_08(xx,yy,zz,bbx,bby,bbz)

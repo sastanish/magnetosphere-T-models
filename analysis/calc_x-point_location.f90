@@ -37,10 +37,10 @@ program main
     call load_field_from_netcdf(trim(dir)//'output_'//trim(adjustl(str_ind))//'.nc',x,y,z,bx,by,bz)
 
     ! find index of y=0 or close to.
-    yind = 0
-    do i=1,size(y)
-      if (abs(y(i)) .le. 1e-3) yind=i
-    end do
+    yind = 8
+    !do i=1,size(y)
+    !  if (abs(y(i)) .le. 1e-3) yind=i
+    !end do
 
     allocate(pressure(size(x),size(z)))
     do j=1,size(z)

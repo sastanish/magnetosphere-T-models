@@ -4,7 +4,6 @@ import matplotlib
 import xarray as xr
 import pandas as pd
 import datetime
-import scipy
 
 def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'same') / w
@@ -18,24 +17,20 @@ def get_field_data(file):
     field  = []
     x = []
 
-    for i,line in enumerate(np.genfromtxt(file,dtype=None)):
-        if i==0:
-            x.append(float(line[4][2:]))
-            for j in range(5,len(line)):
-                x.append(float(line[j]))
-        else: 
-            times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
-            arr = []
-            for j in range(4,len(line)):
-                if line[j] == "**********":
-                    arr.append(float('nan'))
-                else:
-                    arr.append(float(line[j]))
-            field.append(arr)
+    for i,line in enumerate(np.genfromtxt(file,dtype=None,skip_header=3)):
+        times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
+        arr = []
+        for j in range(4,len(line)):
+            if line[j] == "**********":
+                arr.append(float('nan'))
+            else:
+                arr.append(float(line[j]))
+        field.append(arr)
 
-    time = pd.to_datetime(times,format="%Y/%j/%H/%M")
+        time = pd.to_datetime(times,format="%Y/%j/%H/%M")
+        x = [-12 + i for i in range(len(arr))]
 
-    return (time, x, np.array(field))
+    return (time, np.array(x), np.array(field))
 
 def plot(time, x, field, ofile, width=5, nlines=10):
 
@@ -43,17 +38,14 @@ def plot(time, x, field, ofile, width=5, nlines=10):
 
     cmap = plt.cm.Blues(np.linspace(0,1,nlines))
 
-#    exp = lambda t,a,b,c,d: a*np.exp(b*(t-d))+c
-#    ((a,b,c,d), misc) = scipy.optimize.curve_fit(exp,  x,  np.average(field,axis=0),  p0=(1, 1, -3, -100 ), maxfev = 100000)
-
     ## Plot of neutrons
     for i in range(nlines):
         ax.plot(time,field[:,i*len(x)//nlines],color=cmap[i],label=f"x:{x[i*len(x)//nlines]}")
-    ax.set_ylabel("$\\int \\int \\vec{B}_x dx dy$")
+    ax.set_ylabel("$\\int \\int |\\vec{B}_x| dy dz$")
     ax.set_xlabel("time")
     ax.legend()
 
-    fig.suptitle("Flux for storm: " + times[0].strftime("%Y - %m"),size="large")
+    fig.suptitle(f"Flux -- {time[0].strftime('%b')} ${time[0].strftime('%Y')}$",size="large")
     plt.xticks(rotation=45)
     plt.savefig(ofile)
     plt.close()
@@ -61,10 +53,13 @@ def plot(time, x, field, ofile, width=5, nlines=10):
     return 
 
 if __name__ == "__main__":
+  matplotlib.use('AGG')
+  #matplotlib.use('module://matplotlib-backend-kitty')
+  plt.rcParams.update({
+    'text.usetex': True,
+    'font.family': 'Helvetica'
+  })
 
-    for sid in ["s01", "s02", "s06"]:
-      try:
-        (times, x, data) = get_field_data(f"../data/{sid}/flux_Bx.lst")
-        plot(times, x, data, f"../figs/{sid}/flux.png")
-      except:
-        print("Issue with Storm ID: " + sid)
+  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024"]:
+    (times, x, data) = get_field_data(f"../../data/{name}/TA16/flux.lst")
+    plot(times, x, data, f"../{name}_flux.png")

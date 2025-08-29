@@ -18,6 +18,11 @@ do
     mkdir -p "$PROJ_HOME/data/$name/TA16"
     mkdir -p "$PROJ_HOME/data/$name/omni"
     mkdir -p "$PROJ_HOME/data/$name/nmdb"
+    cp $PROJ_HOME/sim_codes/main_TA16.out $PROJ_HOME/data/$name/TA16/
+    cp $PROJ_HOME/sim_codes/recon.out $PROJ_HOME/data/$name/TA16/
+    cp $PROJ_HOME/sim_codes/pressure_and_flux.out $PROJ_HOME/data/$name/TA16/
+    cp $PROJ_HOME/sim_codes/TA16_RBF.par $PROJ_HOME/data/$name/TA16/
+    cp $PROJ_HOME/sim_codes/input_parameters.txt $PROJ_HOME/data/$name/TA16/
   fi 
 
 done

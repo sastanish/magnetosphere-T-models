@@ -10,5 +10,6 @@ do
   
   cp data/omni_data_$name* $PROJ_HOME/data/$name/omni
   cp data/${name}_TA16_parameters.lst $PROJ_HOME/data/$name/omni
+  cp data/${name}_TA16_parameters.lst $PROJ_HOME/data/$name/TA16/input_data.lst
 
 done

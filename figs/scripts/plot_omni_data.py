@@ -43,15 +43,14 @@ def plot(data,ofile,width=4):
 #    ax[1].plot(data["time"],data["Nind"])
 #    ax[1].set_ylabel("N Index")
 
-    ax[1].plot(data["time"],data["BZ"],color="black")
-    ax[1].plot(data["time"],data["avg_BZ"],color="tab:red")
-    ax[1].set_ylabel("BZ")
+    ax[1].plot(data["time"],data["BZ"],color="tab:red")
+    ax[1].set_ylabel("$|\\mathbf{BZ}|$")
 
     ax[2].plot(data["time"],data["flow"],color="tab:green")
     ax[2].set_ylabel("$|\\mathbf{V}|$")
 
     plt.xticks(rotation=45)
-    fig.suptitle("Omni data for storm: " + data["time"][0].strftime("%Y - %m"),size="large")
+    fig.suptitle(f"Omni data -- {data['time'][0].strftime('%b')} ${data['time'][0].strftime('%Y')}$")
     plt.tight_layout()
     plt.savefig(ofile)
     plt.close()
@@ -59,9 +58,15 @@ def plot(data,ofile,width=4):
     return
 
 if __name__ == "__main__":
-  matplotlib.use('module://matplotlib-backend-kitty')
+  matplotlib.use('AGG')
+  #matplotlib.use('module://matplotlib-backend-kitty')
+  plt.rcParams.update({
+    'text.usetex': True,
+    'font.family': 'Helvetica'
+  })
 
-  for name in ["Aug2018", "Mar2015", "May2024", "Oct2024"]:
+
+  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024"]:
     data = get_omni_data(f"../../data/{name}/omni/{name}_TA16_parameters.lst")
     plot(data, f"../{name}_omni_data.png")
 

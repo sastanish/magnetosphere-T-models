@@ -1,21 +1,21 @@
 {
   "s00": {
     "ID": "s00",
-    "name": "Mar2015",
+    "name": "Jun2015",
     "include": "yes",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {
       "year": "2015",
-      "month": "03",
-      "day": "17",
-      "hour": "00",
+      "month": "06",
+      "day": "22",
+      "hour": "12",
       "min": "00"
     },
     "end_date": {
       "year": "2015",
-      "month": "03",
-      "day": "19",
+      "month": "06",
+      "day": "23",
       "hour": "00",
       "min": "00"
     }
@@ -186,6 +186,27 @@
       "day": "11",
       "hour": "18",
       "min": "00"
+    }
+  },
+  "s09": {
+    "ID": "s09",
+    "name": "Feb2022",
+    "include": "yes",
+    "OMNI": true,
+    "DSCOVR": false,
+    "start_date": {
+      "year": "2022",
+      "month": "02",
+      "day": "03",
+      "hour": "00",
+      "min": "00"
+    },
+    "end_date": {
+      "year": "2022",
+      "month": "02",
+      "day": "04",
+      "hour": "23",
+      "min": "55"
     }
   }
 }

@@ -1,88 +1,151 @@
-program prepare_input
+c  This is the latest version, specially compiled for processing the
+c  yearly OMNI files with 5-min resolution, named
+c       YYYY_IMF_and_SW_gaps_le_3hrs_filled_SYMH_added.txt, in which:
+c
+c (i) <=3hr gaps were filled by linear interpolation (codes Fill_IMF_gaps.for
+c      and Fill_SW_gaps_add_Dst.for)
+c
+c (ii)  5-min SYM-H index values were added to each record
+c
+c (iii) >=2hr-long quiet-time periods were identified (based on a set of
+c         criterions - see readme for details), followed by continuous data
+c         intervals. Lists of those intervals were compiled, using the code
+c         Prepare_intervals_1.for; their names are YYYY_Interval_list.txt
+c
+c---------------older comments------------------------------------------------------
+c
+c  This version also calculates and includes in the output the dipole tilt
+c  angle (in radians).
+c
+          P r o g r a m   Prepare_input_4
+C
+c   This program prepares a file with a sequence of geoeffective parameters to be used
+c     as input for the new TS05 model.
+c
+c   Author:  N. A. Tsyganenko  USRA/NASA GSFC,    SPBGU
+c   Dates:                       01/29/2004,    09/09/2008
+c
+      implicit real*8 (a-h,o-z)
+      REAL AAA,TILT,BBB,VXX,VYY,VZZ
+      INTEGER ARF_IND
 
-implicit none
+      CHARACTER*90 SWNAME,NAMEOUT,LISTNAME,ARG_NAME
+      DIMENSION IDAY(105408),IHOUR(105408),MIN(105408),BXGSM(105408),
+     * BYGSM(105408),BZGSM(105408),VXGSE(105408),VYGSE(105408),
+     * VZGSE(105408),V_SW(105408),TEMP(105408),DEN(105408),SYMH(105408),
+     * IMFFLAG(105408),ISWFLAG(105408)
 
-real :: A(1:69)
+      DIMENSION A(69)
+      DIMENSION INDBEG(500),INDEND(500)
 
-integer :: par_f, omni_f, out_f, iostat, nrecs
+      COMMON /GEOPACK1/ AAA(15),TILT,BBB(18)
+      DO 777 ARG_IND = 1,IARGC() !Loop through command line args
+      call getarg(ARG_IND,ARG_NAME)
+      SWNAME = trim(ARG_NAME) // '.lst'
+      LISTNAME= trim(ARG_NAME) // '.int'
+      NAMEOUT= trim(ARG_NAME) // '_with_TS05.lst'
 
-character(90) :: stormname
-character(200) :: in_format, out_format
+      OPEN (UNIT=1,FILE='Parameters.par')
+      READ (1,200) (A(I),I=1,69)
+200   FORMAT(G15.6)
+      CLOSE(1)
 
-! TS05 parameters
-open(unit=par_f,file='TS05.par')
-read(par_f,*) A
-close(par_f)
+      DT1=A(45)/60.   !  A(45) ... A(50) are in 1/hours, while DT1 ... DT6 are in 1/minutes
+      DT2=A(46)/60.
+      DT3=A(47)/60.
+      DT4=A(48)/60.
+      DT5=A(49)/60.
+      DT6=A(50)/60.
+C
+      VXX=-400.  ! THIS IS FOR RECALC_08
+      VYY=0.
+      VZZ=0.
+c
+C     READ THE INTERPLANETARY/DST DATA SET:
+C
+      OPEN (UNIT=1,FILE=SWNAME,STATUS='OLD')     !  filename for the solar wind/IMF/Sym-H data
+ 505  FORMAT(2I4,2I3,F8.2,2F8.2,3F8.1,F7.2,F9.0,F7.1,3X,I2,3X,I2)
 
-! Read omni file
-call get_command_argument(1,stormname)
+ 1    READ (1,505,END=2) IYEA,IDA,IHOU,MI,BX,BY,BZ,VX,VY,VZ,DE,T,Pressure,AEind
+     * DST5M,IMFLAG,ISFLAG,TILT,RAM
+      MINYEAR=(IDA-1)*1440+IHOU*60+MI
+      IND=MINYEAR/5+1
+      IDAY (IND)=IDA
+      IHOUR(IND)=IHOU
+      MIN  (IND)=MI
+      BXGSM(IND)=BX
+      BYGSM(IND)=BY
+      BZGSM(IND)=BZ
+      VXGSE(IND)=VX
+      VYGSE(IND)=VY
+      VZGSE(IND)=VZ
+      V_SW(IND)=DSQRT(VX**2+VY**2+VZ**2)
+C      VTH  (IND)=0.15745*SQRT(T)  !  SQRT(3kT/M_p) in km/s
+      TEMP (IND)=T
+      DEN  (IND)=DE
+      SYMH (IND)=DST5M
+      IMFFLAG(IND)=IMFLAG
+      ISWFLAG(IND)=ISFLAG
+      GOTO 1
 
-in_file='./data/omni_data_'//trim(adjustl(stormname))//'_filled_gaps_with_tilt.lst'
-out_file='./data/'//trim(adjustl(stormname))//'_TS05_parameters.lst'
+ 2    CLOSE(1)
 
-in_format = '(2I4,2I3,3F8.2,3F8.1,F7.2,F9.0,F6.2,2I6,2I3,F8.4,F7.2)'
-out_format = '(2I4,2I3,3F8.2,3F8.1,F7.2,F9.0,F7.1,2(3X,I2),F8.4,7F7.2)'
+      PRINT *, '  READING OF OMNI DATA FINISHED'
+C
+C  NOW READ THE CORRESPONDING FILE YYYY_Interval_list.txt:
+C
+      OPEN (UNIT=1,FILE=LISTNAME)
+      NREC1=0
+ 111  READ (1,100,END=112) INDB,INDE
+ 100  FORMAT((2I10))
+      NREC1=NREC1+1
+      INDBEG(NREC1)=INDB
+      INDEND(NREC1)=INDE
+      GOTO 111
+ 112  CONTINUE
+      CLOSE(1)
+C
+      OPEN (UNIT=3,FILE=NAMEOUT)
 
-nrecs=0
-iostat = 0
-open(unit=omni_f,file=in_file)
-do while ( iostat .eq. 0 )
-  read(omni_f,*,iostat=iostat)
-  nrecs = nrecs + 1
-end do
-close(omni_f)
+      DO 555 N=1,NREC1
 
-allocate(IYEA(nrecs))
-allocate(IDA(nrecs))
-allocate(IHOU(nrecs))
-allocate(MI(nrecs))
-allocate(BXX(nrecs))
-allocate(BYY(nrecs))
-allocate(BZZ(nrecs))
-allocate(VX(nrecs))
-allocate(VY(nrecs))
-allocate(VZ(nrecs))
-allocate(DEN(nrecs))
-allocate(T(nrecs))
-allocate(PA(nrecs))
-allocate(AeIND(nrecs))
-allocate(SYMH(nrecs))
-allocate(IMFLAG(nrecs))
-allocate(SWFLAG(nrecs))
-allocate(TILT(nrecs))
-allocate(PYDN(nrecs))
-allocate(V_SW(nrecs))
+       INDB=INDBEG(N)
+       INDE=INDEND(N)
 
-open(unit=omni_f,file=in_file)
-read(omni_f,*) IYEA,IDA,IHOU,MI,BXX,BYY,BZZ,VX,VY,VZ,DEN,T,PA,AeIND,SYMH,IMFLAG,SWFLAG,TILT,Pdyn
-close(omni_f)
+C
+C  NOW FIND CORRESPONDING VALUES OF THE SOLAR WIND PARAMETERS W1 - W6
+C  BY GOING OVER THE ARRAYS, PREVIOUSLY READ IN THE RAM, AND WRITE THEM IN THE OUTPUT FILE:
+C
+      DO 41 IND=INDB,INDE
 
-V_SW = sqrt(VX**2 + VY**2 + VZ**2)
-Pdyn=1.937D-6*DEN*V_SW**2
+         Pdyn=1.937D-6*DEN(IND)*V_SW(IND)**2
+         By=BYGSM(IND)
+         Bz=BZGSM(IND)
+         DstSYM=SYMH(IND)
 
-do IND=1,nrecs
+      CALL RECALC_08 (IYEAR,IDAY(IND),IHOUR(IND),MIN(IND),0,VXX,VYY,VZZ)
 
-  CALL RECALC_08 (IYEAR(IND),IDAY(IND),IHOUR(IND),MI(IND),0,-400.0,0.0,0.0)
+C    CALCULATE W1 - W6 INDICES:
 
-  W1=0.
-  W2=0.
-  W3=0.
-  W4=0.
-  W5=0.
-  W6=0.
+                W1=0.
+                W2=0.
+                W3=0.
+                W4=0.
+                W5=0.
+                W6=0.
 
-  KEY1=1
-  KEY2=1
-  KEY3=1
-  KEY4=1
-  KEY5=1
-  KEY6=1
+                KEY1=1
+                KEY2=1
+                KEY3=1
+                KEY4=1
+                KEY5=1
+                KEY6=1
 
-  DO 42 KK=IND,nrecs,-1
+            DO 42 KK=IND,INDB,-1
 
-  Vnorm=   V_SW(KK)/400.
-  Dennorm= DEN(KK)*1.16/5. !  ASSUME HeH=0.04, HENCE 1.16
-  Bsnorm= -BZGSM(KK)/5.
+                   Vnorm=   V_SW(KK)/400.
+                   Dennorm= DEN(KK)*1.16/5. !  ASSUME HeH=0.04, HENCE 1.16
+                   Bsnorm= -BZGSM(KK)/5.
 
                    IF (Bsnorm.LE.0.) THEN
                       Bs1=0.D0
@@ -167,12 +230,26 @@ do IND=1,nrecs
             W5=W5*DT5*5.
             W6=W6*DT6*5.
 
+      WRITE(3,444) IYEAR,IDAY(IND),IHOUR(IND),MIN(IND),BXGSM(IND),
+     * BYGSM(IND),BZGSM(IND),VXGSE(IND),VYGSE(IND),VZGSE(IND),DEN(IND),
+     * TEMP(IND),SYMH(IND),IMFFLAG(IND),ISWFLAG(IND),
+     * TILT,Pdyn,W1,W2,W3,W4,W5,W6
+ 444  FORMAT (2I4,2I3,3F8.2,3F8.1,F7.2,F9.0,F7.1,2(3X,I2),F8.4,7F7.2)
+c
+c  Each data record in the output file contains full set of parameters,
+c   including those to be  used as input for the TS05 model:
+c   Year, Day of Year, Hour of Day, Minute of Hour, BX_IMF, BY_IMF, BZ_IMF,
+C   solar wind VX_GSE, VY_GSE, VZ_GSE, proton density DEN, temperature TEMP,
+c   SYM-H index, IMF and SW data availability flags, dipole tilt angle (RADIANS),
+c   solar wind ram pressure (nPa), and 6 driving variables W1, W2, W3, W4, W5, W6.
+c
+  41   CONTINUE
+ 555   CONTINUE
 
+      CLOSE(3)
 
+ 777  CONTINUE
+C
+      END
 
-  write(out_f,trim(out_format)) IYEAR,IDAY,IHOUR,MI,BXGSM,TILT,Pdyn,W1,W2,W3,W4,W5,W6
-end do
-
-
-
-end program prepare_input
+C**************************************************************************

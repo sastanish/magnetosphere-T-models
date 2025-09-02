@@ -25,11 +25,12 @@ c
 c   Author:  N. A. Tsyganenko  USRA/NASA GSFC,    SPBGU
 c   Dates:                       01/29/2004,    09/09/2008
 c
+      use geopack, only : RECALC_08
       implicit real*8 (a-h,o-z)
-      REAL AAA,TILT,BBB,VXX,VYY,VZZ
-      INTEGER ARF_IND
+      REAL*8 AAA,TILT,BBB,VXX,VYY,VZZ
+      INTEGER ARG_IND
 
-      CHARACTER*90 SWNAME,NAMEOUT,LISTNAME,ARG_NAME
+      CHARACTER*90 SWNAME,NAMEOUT,ARG_NAME
       DIMENSION IDAY(105408),IHOUR(105408),MIN(105408),BXGSM(105408),
      * BYGSM(105408),BZGSM(105408),VXGSE(105408),VYGSE(105408),
      * VZGSE(105408),V_SW(105408),TEMP(105408),DEN(105408),SYMH(105408),
@@ -42,7 +43,6 @@ c
       DO 777 ARG_IND = 1,IARGC() !Loop through command line args
       call getarg(ARG_IND,ARG_NAME)
       SWNAME = trim(ARG_NAME) // '.lst'
-      LISTNAME= trim(ARG_NAME) // '.int'
       NAMEOUT= trim(ARG_NAME) // '_with_TS05.lst'
 
       OPEN (UNIT=1,FILE='Parameters.par')
@@ -92,26 +92,8 @@ C      VTH  (IND)=0.15745*SQRT(T)  !  SQRT(3kT/M_p) in km/s
 
       PRINT *, '  READING OF OMNI DATA FINISHED'
 C
-C  NOW READ THE CORRESPONDING FILE YYYY_Interval_list.txt:
-C
-      OPEN (UNIT=1,FILE=LISTNAME)
-      NREC1=0
- 111  READ (1,100,END=112) INDB,INDE
- 100  FORMAT((2I10))
-      NREC1=NREC1+1
-      INDBEG(NREC1)=INDB
-      INDEND(NREC1)=INDE
-      GOTO 111
- 112  CONTINUE
-      CLOSE(1)
-C
-      OPEN (UNIT=3,FILE=NAMEOUT)
-
-      DO 555 N=1,NREC1
-
-       INDB=INDBEG(N)
-       INDE=INDEND(N)
-
+      Call get_num_lines(SWNAME,INDE)
+      INDB = 1
 C
 C  NOW FIND CORRESPONDING VALUES OF THE SOLAR WIND PARAMETERS W1 - W6
 C  BY GOING OVER THE ARRAYS, PREVIOUSLY READ IN THE RAM, AND WRITE THEM IN THE OUTPUT FILE:
@@ -250,6 +232,25 @@ c
 
  777  CONTINUE
 C
+      CONTAINS
+
+      subroutine get_num_lines(filename,nlines)
+        implicit none
+
+        character(*), intent(in) :: filename
+        integer, intent(out) :: nlines
+        integer :: file, i, stat
+
+        nlines = 0
+        open(newunit=file, file=filename, status='old', action='read')
+        do 
+          read(file, *, iostat=stat)
+          if (stat < 0) exit !checking for end of file
+          nlines = nlines + 1
+        end do
+        close(file)
+      end subroutine get_num_lines
+
       END
 
 C**************************************************************************

@@ -44,7 +44,7 @@
   "s02": {
     "ID": "s02",
     "name": "Mar2022",
-    "include": "no",
+    "include": "yes",
     "OMNI": true,
     "DSCOVR": false,
     "start_date": {

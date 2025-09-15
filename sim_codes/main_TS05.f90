@@ -12,7 +12,7 @@ program main
 
   ! Input File params
   integer, dimension(:), allocatable :: year,day,hour,mint
-  real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+  real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6
 
   ! vars
   integer :: n, i, j, k
@@ -32,7 +32,7 @@ program main
   read(end_str,'(I5)') end_ind
 
   call setup_grid(x,y,z,Bx,By,Bz)
-  call read_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
+  call read_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6)
 
   ivy = ivy + 29.78 !velocity correction
 
@@ -42,9 +42,15 @@ program main
 
     !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(n,x,y,z,Bx,By,Bz)
     parmod(1) = pydn(n)
-    parmod(2) = symhc(n)
-    parmod(3) = nind(n)
-    parmod(4) = aby(n)
+    parmod(2) = symh(n)
+    parmod(3) = iby(n)
+    parmod(4) = ibz(n)
+    parmod(5) = w1(n)
+    parmod(6) = w2(n)
+    parmod(7) = w3(n)
+    parmod(8) = w4(n)
+    parmod(9) = w5(n)
+    parmod(10) = w6(n)
 
     !$OMP DO COLLAPSE(3)
     do k = 1,size(z)
@@ -130,7 +136,7 @@ contains
 
   end subroutine setup_grid
 
-  subroutine read_input_data(filename,year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
+  subroutine read_input_data(filename,year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6)
 
     implicit none
 
@@ -138,11 +144,11 @@ contains
     character(*), intent(in) :: filename
 
     integer, dimension(:), allocatable, intent(inout) :: year,day,hour,mint
-    real(8), dimension(:), allocatable, intent(inout) :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+    real(8), dimension(:), allocatable, intent(inout) :: ivx,ivy,ivz,tilt,pydn,w1,w2,w3,w4,w5,w6,iby,ibz,symh
 
     ! un-used input params
-    integer :: aeind, symh, imf
-    real(8) :: ibx, iby, ibz, den, temp, sw, rp, abx, abz
+    integer :: imf, sw
+    real(8) :: ibx, den, temp
 
     call get_num_lines(filename,nlines)
 
@@ -153,15 +159,21 @@ contains
     allocate(ivx(nlines))
     allocate(ivy(nlines))
     allocate(ivz(nlines))
-    allocate(tilt(nlines))
     allocate(pydn(nlines))
-    allocate(symhc(nlines))
-    allocate(nind(nlines))
-    allocate(aby(nlines))
+    allocate(symh(nlines))
+    allocate(tilt(nlines))
+    allocate(iby(nlines))
+    allocate(ibz(nlines))
+    allocate(w1(nlines))
+    allocate(w2(nlines))
+    allocate(w3(nlines))
+    allocate(w4(nlines))
+    allocate(w5(nlines))
+    allocate(w6(nlines))
 
     open(newunit=file, file=filename, status='old', action='read')
     do i = 1,nlines
-      read(file,*) year(i),day(i),hour(i),mint(i),ibx,iby,ibz,ivx(i),ivy(i),ivz(i),den,temp,pydn(i),aeind,symh,imf,sw,tilt(i),rp,abx,aby(i),abz,nind(i),symhc(i)
+      read(file,*) year(i),day(i),hour(i),mint(i),ibx,iby(i),ibz(i),ivx(i),ivy(i),ivz(i),den,temp,symh(i),imf,sw,tilt(i),pydn(i),w1(i),w2(i),w3(i),w4(i),w5(i),w6(i)
     end do
     close(file)
   end subroutine read_input_data

@@ -4,6 +4,12 @@ import matplotlib
 import xarray as xr
 import pandas as pd
 import datetime
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern'],'size': 16})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'\usepackage{amsmath}\usepackage{amssymb}')
+matplotlib.use('AGG')
 
 def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'same') / w
@@ -27,23 +33,19 @@ def get_x_point_data(file):
 
     return {"time":time, "rate":rate, "dist":dist}
 
-def plot_x_point(time,srate,sdist,mrate,mdist,ofile,width=4):
+def plot_x_point(time,rate,dist,ofile,width=4):
 
     fig, ax = plt.subplots(nrows=2,figsize=(width*1.61803,2*width),sharex=True)
 
-    ax[0].plot(time,srate,color="gray",linestyle="",marker=".",alpha=0.5)
-    ax[0].plot(time,mrate,color="tab:blue",linestyle="",marker=".",label="rate")
-    ax[0].set_ylabel('$|\\Gamma|$')
+    ax[0].plot(time,rate,color="tab:blue",linestyle="",marker=".",label="rate")
+    ax[0].set_ylabel('$|\\boldsymbol{\\Sigma}|$')
     ax[0].set_yscale('log')
 
-    ax[0].set_ylim( (12,0) )
-    ax[1].set_ylim( (12,0) )
+    ax[1].plot(time,dist,color="tab:red",linestyle="",marker=".")
+    ax[1].set_ylabel('reconnection location')
 
-    ax[1].plot(time,sdist,color="gray",linestyle="",marker=".",alpha=0.5)
-    ax[1].plot(time,mdist,color="tab:red",linestyle="",marker=".")
-    ax[1].set_ylabel('x-point distance')
+    ax[1].set_ylim( (1,12) )
 
-    fig.suptitle(f"X-point Location -- {time[0].strftime('%b')} ${time[0].strftime('%Y')}$")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(ofile)
@@ -53,15 +55,13 @@ def plot_x_point(time,srate,sdist,mrate,mdist,ofile,width=4):
 
 if __name__ == "__main__":
 
-
-  matplotlib.use("AGG")
+  matplotlib.use('AGG')
+  #matplotlib.use('module://matplotlib-backend-kitty')
   plt.rcParams.update({
     'text.usetex': True,
     'font.family': 'Helvetica'
   })
 
-
-  for name in ["Aug2018", "May2024", "Oct2024"]:
-    sim_data = get_x_point_data(f"../../data/{name}/TA16/tail_slice/x-point_location.lst")
-    man_data = get_x_point_data(f"../../data/{name}/TA16/tail_slice/manual_x-point_location.lst")
-    plot_x_point(sim_data["time"],sim_data["rate"],sim_data["dist"],man_data["rate"],man_data["dist"],f"../{name}_x-point_location.png")
+  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024"]:
+    data = get_x_point_data(f"../../data/{name}/TS05/x-point_location.lst")
+    plot_x_point(data["time"],data["rate"],data["dist"],f"../{name}_x-point_location_TS05.png")

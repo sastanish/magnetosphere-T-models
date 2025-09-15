@@ -23,14 +23,9 @@ def get_omni_data(file):
 
     times.append(pd.to_datetime(str(line[0]) + "_" + str(line[1]) + "_" + str(line[2]) + "_" + str(line[3]), format="%Y_%j_%H_%M"))
 
-    SymHc.append(float(line[23]))
-    Nind.append(float(line[22]))
-    BZ.append(float(line[6]))
-    avg_BZ.append(float(line[21]))
-
   time = pd.to_datetime(times)
 
-  return {"time":time, "SymHc":SymHc, "Nind":Nind, "BZ":BZ, "avg_BZ":avg_BZ}
+  return {"time":time}
 
 
 if __name__ == "__main__":
@@ -50,8 +45,8 @@ if __name__ == "__main__":
   Itimes = [(222,280), (17,199),  (300,313), ( 43, 91), ( 55,187), (  1,103)]
   for name,inds in zip(Storms,Itimes):
     for ind in inds:
-      rate  = xr.open_dataarray(f"../../data/{name}/TA16/" + f"rate_{ind}.nc").isel(y=8)
-      field = xr.open_dataset(f"../../data/{name}/TA16/" + f"output_{ind}.nc").isel(y=8)
+      rate  = xr.open_dataarray(f"../../data/{name}/TS05/" + f"rate_{ind}.nc").isel(y=8)
+      field = xr.open_dataset(f"../../data/{name}/TS05/" + f"output_{ind}.nc").isel(y=8)
 
       rate.load()
       field.load()
@@ -59,7 +54,7 @@ if __name__ == "__main__":
       rate = rate.where(field.x**2+field.z**2 >= 0.9)
       field = field.where(field.x**2+field.z**2 >= 0.9)
 
-      omni_data = get_omni_data(f"../../data/{name}/omni/{name}_TA16_parameters.lst")
+      omni_data = get_omni_data(f"../../data/{name}/omni/{name}_TS05_parameters.lst")
 
       #pressure = field.bx**2 + field.by**2 + field.bz**2
 
@@ -88,7 +83,7 @@ if __name__ == "__main__":
       ax.set_title("")
       #plt.savefig(f"../{name}_slices/{name}_slice_{ind}.png")
       time_str = omni_data["time"][ind].strftime("%Y-%m-%d_%H-%M")
-      plt.savefig(f"../{name}_slice_{time_str}.png")
+      plt.savefig(f"../{name}_slice_TS05_{time_str}.png")
       plt.close()
       rate.close()
       field.close()

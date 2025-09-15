@@ -73,6 +73,6 @@ def plot_omni(data,width=5,height=5):
 
 if __name__=="__main__":
 
-  for name in ["Aug2018"]#, "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
+  for name in ["Aug2018"]:#, "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
     data = get_omni_data(f"../data/{name}/omni/{name}_TA16_parameters.lst")
     plot_omni(data)

@@ -75,6 +75,6 @@ def plot_neutrons(stations, times, neutrons, ofile, width=5, height=5):
 
 if __name__=="__main__":
 
-  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
+  for name in ["Aug2018"]#, "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
     (stations, times, data) = get_neutron_data(f"../data/{name}/nmdb/nmdb_data_{name}.lst")
     plot_neutrons(stations, times, np.array(data), f"../{name}_neutron_monitor_data.png")

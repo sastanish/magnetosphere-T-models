@@ -25,25 +25,33 @@ c
 c   Author:  N. A. Tsyganenko  USRA/NASA GSFC,    SPBGU
 c   Dates:                       01/29/2004,    09/09/2008
 c
-      use geopack, only : RECALC_08
+      USE geopack
       implicit real*8 (a-h,o-z)
       REAL*8 AAA,TILT,BBB,VXX,VYY,VZZ
-      INTEGER ARG_IND
 
-      CHARACTER*90 SWNAME,NAMEOUT,ARG_NAME
+      CHARACTER*80 IN_NAME,OUT_NAME,LISTNAME,ARG_NAME
       DIMENSION IDAY(105408),IHOUR(105408),MIN(105408),BXGSM(105408),
      * BYGSM(105408),BZGSM(105408),VXGSE(105408),VYGSE(105408),
      * VZGSE(105408),V_SW(105408),TEMP(105408),DEN(105408),SYMH(105408),
      * IMFFLAG(105408),ISWFLAG(105408)
 
+      INTEGER NLINES,ARG_IND,AE,IMFLAG,SWFLAG,IND
+
       DIMENSION A(69)
       DIMENSION INDBEG(500),INDEND(500)
 
       COMMON /GEOPACK1/ AAA(15),TILT,BBB(18)
-      DO 777 ARG_IND = 1,IARGC() !Loop through command line args
-      call getarg(ARG_IND,ARG_NAME)
-      SWNAME = trim(ARG_NAME) // '.lst'
-      NAMEOUT= trim(ARG_NAME) // '_with_TS05.lst'
+
+      DO 777 ARG_IND = 1,IARGC()
+
+      CALL GETARG(ARG_IND,ARG_NAME)
+      IN_NAME = TRIM(ARG_NAME)
+      IF (INDEX(IN_NAME,".lst").EQ.0) THEN
+      OUT_NAME = TRIM(ARG_NAME) // '_with_TS05.lst'
+      ELSE
+      OUT_NAME = TRIM(ARG_NAME(1:INDEX(IN_NAME,".lst")-1)) // 
+     & "_with_TS05.lst"
+      END IF
 
       OPEN (UNIT=1,FILE='Parameters.par')
       READ (1,200) (A(I),I=1,69)
@@ -63,49 +71,50 @@ C
 c
 C     READ THE INTERPLANETARY/DST DATA SET:
 C
-      OPEN (UNIT=1,FILE=SWNAME,STATUS='OLD')     !  filename for the solar wind/IMF/Sym-H data
- 505  FORMAT(2I4,2I3,3F8.2,3F8.1,F7.2,F9.0,F6.2,2I6,2I3,F8.4,F7.2)
+      OPEN (UNIT=1,FILE=TRIM(IN_NAME),STATUS='OLD')     !  filename for the solar wind/IMF/Sym-H data
+      NLINES = 0
+ 505  FORMAT(2I4,2I3,3F8.2,3F8.1,F7.2,F9.0,F6.2,I6,F6.0,2I3)
 
- 1    READ (1,*,END=2) IYEA,IDA,IHOU,MI,BX,BY,BZ,VX,VY,VZ,DE,T,Pressure,AEind
-     * DST5M,IMFLAG,ISFLAG,TILT,RAM
+ 1    READ (1,505,END=2) IYEA,IDA,IHOU,MI,BX,BY,BZ,VX,VY,VZ,DE,T,PA,AE,
+     * DST5M,IMFLAG,ISFLAG
+      NLINES = NLINES + 1
       MINYEAR=(IDA-1)*1440+IHOU*60+MI
       IND=MINYEAR/5+1
-      IDAY (IND)=IDA
-      IHOUR(IND)=IHOU
-      MIN  (IND)=MI
-      BXGSM(IND)=BX
-      BYGSM(IND)=BY
-      BZGSM(IND)=BZ
-      VXGSE(IND)=VX
-      VYGSE(IND)=VY
-      VZGSE(IND)=VZ
-      V_SW(IND)=DSQRT(VX**2+VY**2+VZ**2)
+      IDAY (NLINES)=IDA
+      IHOUR(NLINES)=IHOU
+      MIN  (NLINES)=MI
+      BXGSM(NLINES)=BX
+      BYGSM(NLINES)=BY
+      BZGSM(NLINES)=BZ
+      VXGSE(NLINES)=VX
+      VYGSE(NLINES)=VY
+      VZGSE(NLINES)=VZ
+      V_SW(NLINES)=DSQRT(VX**2+VY**2+VZ**2)
 C      VTH  (IND)=0.15745*SQRT(T)  !  SQRT(3kT/M_p) in km/s
-      TEMP (IND)=T
-      DEN  (IND)=DE
-      SYMH (IND)=DST5M
-      IMFFLAG(IND)=IMFLAG
-      ISWFLAG(IND)=ISFLAG
+      TEMP (NLINES)=T
+      DEN  (NLINES)=DE
+      SYMH (NLINES)=DST5M
+      IMFFLAG(NLINES)=IMFLAG
+      ISWFLAG(NLINES)=ISFLAG
       GOTO 1
 
  2    CLOSE(1)
 
       PRINT *, '  READING OF OMNI DATA FINISHED'
 C
-      Call get_num_lines(SWNAME,INDE)
-      INDB = 1
+      OPEN (UNIT=3,FILE=TRIM(OUT_NAME))
 C
 C  NOW FIND CORRESPONDING VALUES OF THE SOLAR WIND PARAMETERS W1 - W6
 C  BY GOING OVER THE ARRAYS, PREVIOUSLY READ IN THE RAM, AND WRITE THEM IN THE OUTPUT FILE:
 C
-      DO 41 IND=INDB,INDE
+      DO 41 IND=1,NLINES
 
          Pdyn=1.937D-6*DEN(IND)*V_SW(IND)**2
          By=BYGSM(IND)
          Bz=BZGSM(IND)
          DstSYM=SYMH(IND)
 
-      CALL RECALC_08 (IYEAR,IDAY(IND),IHOUR(IND),MIN(IND),0,VXX,VYY,VZZ)
+      CALL RECALC_08 (IYEA,IDAY(IND),IHOUR(IND),MIN(IND),0,VXX,VYY,VZZ)
 
 C    CALCULATE W1 - W6 INDICES:
 
@@ -123,7 +132,7 @@ C    CALCULATE W1 - W6 INDICES:
                 KEY5=1
                 KEY6=1
 
-            DO 42 KK=IND,INDB,-1
+            DO 42 KK=IND,1,-1
 
                    Vnorm=   V_SW(KK)/400.
                    Dennorm= DEN(KK)*1.16/5. !  ASSUME HeH=0.04, HENCE 1.16
@@ -212,7 +221,7 @@ C    CALCULATE W1 - W6 INDICES:
             W5=W5*DT5*5.
             W6=W6*DT6*5.
 
-      WRITE(3,444) IYEAR,IDAY(IND),IHOUR(IND),MIN(IND),BXGSM(IND),
+      WRITE(3,444) IYEA,IDAY(IND),IHOUR(IND),MIN(IND),BXGSM(IND),
      * BYGSM(IND),BZGSM(IND),VXGSE(IND),VYGSE(IND),VZGSE(IND),DEN(IND),
      * TEMP(IND),SYMH(IND),IMFFLAG(IND),ISWFLAG(IND),
      * TILT,Pdyn,W1,W2,W3,W4,W5,W6
@@ -225,32 +234,12 @@ C   solar wind VX_GSE, VY_GSE, VZ_GSE, proton density DEN, temperature TEMP,
 c   SYM-H index, IMF and SW data availability flags, dipole tilt angle (RADIANS),
 c   solar wind ram pressure (nPa), and 6 driving variables W1, W2, W3, W4, W5, W6.
 c
-  41   CONTINUE
- 555   CONTINUE
+  41  CONTINUE
 
       CLOSE(3)
 
  777  CONTINUE
 C
-      CONTAINS
-
-      subroutine get_num_lines(filename,nlines)
-        implicit none
-
-        character(*), intent(in) :: filename
-        integer, intent(out) :: nlines
-        integer :: file, i, stat
-
-        nlines = 0
-        open(newunit=file, file=filename, status='old', action='read')
-        do 
-          read(file, *, iostat=stat)
-          if (stat < 0) exit !checking for end of file
-          nlines = nlines + 1
-        end do
-        close(file)
-      end subroutine get_num_lines
-
-      END
-
+      END PROGRAM
 C**************************************************************************
+

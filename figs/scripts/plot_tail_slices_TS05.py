@@ -42,7 +42,7 @@ if __name__ == "__main__":
 # In figsize - (my_width, my_width/golden)
 
   Storms = ["Aug2018", "May2024", "Feb2022", "Jun2015", "Oct2024", "Mar2022"]
-  Itimes = [(222,280), (17,199),  (300,313), ( 43, 91), ( 55,187), (  1,103)]
+  Itimes = [(222,280), (1,599),  (300,313), ( 43, 91), ( 55,187), (  1,103)]
   for name,inds in zip(Storms,Itimes):
     for ind in inds:
       rate  = xr.open_dataarray(f"../../data/{name}/TS05/" + f"rate_{ind}.nc").isel(y=8)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
       rate = rate.where(field.x**2+field.z**2 >= 0.9)
       field = field.where(field.x**2+field.z**2 >= 0.9)
 
-      omni_data = get_omni_data(f"../../data/{name}/omni/{name}_TS05_parameters.lst")
+      omni_data = get_omni_data(f"../../data/{name}/TS05/input_data.lst")
 
       #pressure = field.bx**2 + field.by**2 + field.bz**2
 

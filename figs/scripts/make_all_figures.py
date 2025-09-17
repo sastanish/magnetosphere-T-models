@@ -45,13 +45,23 @@ def plot_flux(time, x, field, ofile, width=5, height=5, nlines=10):
     cmap = plt.cm.cividis(np.linspace(0,1,nlines))
 
     ## Plot of neutrons
+    handles = []
+    labels = []
     for i in range(nlines):
-        ax.plot(time,field[:,i*len(x)//nlines],color=cmap[i],label=f"$x$:{x[i*len(x)//nlines]}")
+        ax.plot(time,field[:,i*len(x)//nlines],color=cmap[i])[0]
+        handles.append(matplotlib.lines.Line2D([],[],color=cmap[i],marker=".",linestyle=""))
+        labels.append(f"${x[i*len(x)//nlines]}$")
     ax.set_ylabel("$\\int \\int |B_{\\rm x}| {\\rm d}y {\\rm d}z$")
-    ax.set_xlabel("time")
+    ax.set_xlabel("Time")
 
     box = ax.get_position()
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    leg = ax.legend(handles,labels,
+                    loc='upper left', bbox_to_anchor=(1, 1.05),title="$\\underline{x}$")
+    leg_title = leg.get_title()
+    leg_title.set_position( (32,0) )
+#    for l in leg.legend_handles:
+#      l.set_linestyle("")
+#      l.set_marker(".")
 
 #    fig.suptitle(f"Flux -- {time[0].strftime('%b')} ${time[0].strftime('%Y')}$",size="large")
     plt.xticks(rotation=45)
@@ -145,11 +155,11 @@ def plot_neutrons(stations, times, neutrons, ofile, width=5, height=5):
     ## Plot of neutrons
     for i,station in enumerate(stations):
         # Slicing to remove boundaries
-        ax.plot(times,moving_average(norm(neutrons[:,i]),10),alpha=0.3,color=colors[i])
+        ax.plot(times,moving_average(norm(neutrons[:,i]),6),alpha=0.3,color=colors[i])
         if i == 0:
-          mean = np.nan_to_num(norm(neutrons[:,i]))
+          mean = np.nan_to_num(moving_average(norm(neutrons[:,i]),6))
         else:
-          mean += np.nan_to_num(norm(neutrons[:,i]))
+          mean += np.nan_to_num(moving_average(norm(neutrons[:,i]),6))
 
     # Slicing to remove boundaries
     ax.plot(times,mean/len(stations),color="black",alpha=1)
@@ -185,15 +195,18 @@ def plot_x_point(time,srate,sdist,mrate,mdist,ofile,width=5,height=5):
 
     fig, ax = plt.subplots(nrows=2,figsize=(width,2*height),sharex=True)
 
+    b_cmap = plt.cm.cividis(np.linspace(0,1,10))
+
 #    ax[0].plot(time,srate,color="gray",linestyle="",marker=".",alpha=0.5)
-    ax[0].plot(time,srate,color="tab:blue",linestyle="",marker=".",label="rate")
+    ax[0].plot(time,srate,linestyle="",marker=".",label="rate",alpha=0.3,color=b_cmap[2])
+    ax[0].plot(time,moving_average(srate,6),color="black",linestyle="-",label="avg rate")
     ax[0].set_ylabel('$|\\boldsymbol{\\Sigma^*}|$')
     ax[0].set_yscale('log')
     ax[0].text(0.02, 0.92, "(a)", transform=ax[0].transAxes)#,size=20)
 
 #    ax[1].plot(time,sdist,color="tab:red",linestyle="",marker=".",alpha=0.5)
-    ax[1].plot(time,sdist,color="tab:red",linestyle="",marker=".")
-    ax[1].set_ylabel('reconnection location')
+    ax[1].plot(time,sdist,color=b_cmap[1],linestyle="",marker=".")
+    ax[1].set_ylabel('Reconnection Location')
     ax[1].text(0.02, 0.92, "(b)", transform=ax[1].transAxes)#,size=20)
 
     ax[1].set_ylim( (1,12) )
@@ -320,16 +333,16 @@ if __name__ == "__main__":
 # In figsize - (my_width, my_width/golden)
 
 
-  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
+  for name in ["Aug2018", "Jun2015", "May2024", "Mar2022"]:
     (times, x, data) = get_flux_data(f"../../data/{name}/TA16/flux.lst")
     plot_flux(times, x, data, f"../{name}_flux.png",width=fig_width,height=fig_width/golden)
-    (times, x, data) = get_pressure_data(f"../../data/{name}/TA16/pressure.lst")
-    plot_pressure(times, x, data, f"../{name}_pressure.png",width=fig_width,height=fig_width/golden)
+    #(times, x, data) = get_pressure_data(f"../../data/{name}/TA16/pressure.lst")
+    #plot_pressure(times, x, data, f"../{name}_pressure.png",width=fig_width,height=fig_width/golden)
     (stations, times, data) = get_neutron_data(f"../../data/{name}/nmdb/nmdb_data_{name}.lst")
     plot_neutrons(stations, times, np.array(data), f"../{name}_neutron_monitor_data.png",width=fig_width,height=fig_width/golden)
     sim_data = get_x_point_data(f"../../data/{name}/TA16/x-point_location.lst")
     man_data = get_x_point_data(f"../../data/{name}/TA16/manual_x-point_location.lst")
     plot_x_point(sim_data["time"],sim_data["rate"],sim_data["dist"],man_data["rate"],man_data["dist"],f"../{name}_x-point_location.png",width=fig_width,height=fig_width/golden)
     data = get_omni_data(f"../../data/{name}/omni/{name}_TA16_parameters.lst")
-    plot_omni(data, f"../{name}_omni_data.png",width=0.8*fig_width,height=0.8*fig_width/golden)
-    plot_omni_ae(data, f"../{name}_omni_data_ae.png",width=0.8*fig_width,height=0.8*fig_width/golden)
+    plot_omni(data, f"../{name}_omni_data.png",width=fig_width,height=fig_width/golden)
+    plot_omni_ae(data, f"../{name}_omni_data_ae.png",width=fig_width,height=fig_width/golden)

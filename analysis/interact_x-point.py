@@ -54,7 +54,7 @@ def plot_x_point(time,srate,sdist,mrate,mdist,ofile,width=5,height=5):
 
 if __name__=="__main__":
 
-  for name in ["Aug2018"]:#, "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
+  for name in ["May2024"]:#, "Feb2022", "Jun2015", "May2024", "Oct2024", "Mar2022"]:
     sim_data = get_x_point_data(f"../data/{name}/TA16/x-point_location.lst")
     man_data = get_x_point_data(f"../data/{name}/TA16/manual_x-point_location.lst")
     plot_x_point(sim_data["time"],sim_data["rate"],sim_data["dist"],man_data["rate"],man_data["dist"],f"../{name}_x-point_location.png")

@@ -82,6 +82,7 @@ program main
     end do
     !$OMP END DO
     !$OMP END PARALLEL
+    !$OMP BARRIER
 
     ! Write to file
     write( str_ind, '(I4)' ) n

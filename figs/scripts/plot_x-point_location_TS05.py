@@ -62,6 +62,6 @@ if __name__ == "__main__":
     'font.family': 'Helvetica'
   })
 
-  for name in ["Aug2018", "Feb2022", "Jun2015", "May2024", "Oct2024"]:
+  for name in ["Aug2018", "May2024", "Jun2015", "May2024", "Oct2024"]:
     data = get_x_point_data(f"../../data/{name}/TS05/x-point_location.lst")
     plot_x_point(data["time"],data["rate"],data["dist"],f"../{name}_x-point_location_TS05.png")

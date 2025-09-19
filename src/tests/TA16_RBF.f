@@ -102,7 +102,6 @@ C
 C                              (WHICH IS ACTUALLY MUCH LESS THAN 100)
 C
       DO 912 I=1,NLAT     ! I COUNTS THE LATITUDE CIRCLES (FROM NORTH POLE DOWN TO EQUATOR)
-        print *, i
 C
          XCOLATD=DLAT_DEG*(DFLOAT(I)-1.D0)  !  COLATITUDE OF THE Ith CIRCLE (in degs)
            NLON=4*(I-1)                     !  NUMBER OF RBF CENTERS ON THE ItH CIRCLE
@@ -177,12 +176,8 @@ C
       R0=A0*(PD_TR+PM)**A1*(1.D0+A2*(DEXP(A3*BZIMF_TR)-1.D0)/
      * (DEXP(A4*BZIMF_TR)+1.D0))
       RM=R0*F1+CN*DEXP(DN*PSIN**EN)+CS*DEXP(DS*PSIS**ES)    ! POSITION OF THE MODEL MAGNETOPAUSE
-      print *, RM
 C
-             IF (R.GT.RM) then
-             print *, "wtf"
-             GOTO 912
-             end if
+             IF (R.GT.RM) GOTO 912
              L=L+1                          !  COUNTER OF THE RBF CENTERS
 
              XX(L)=XXXX

@@ -25,7 +25,7 @@
 
     real(dp), parameter :: rh=8.0_dp,alpha=3.0_dp,pd_tr=0.5_dp
     real(dp), parameter :: psi=0.0_dp,pm=0.0_dp,Bzimf_tr=0.0_dp
-  real(dp), parameter :: pi=3.14159265359_dp !4.0_dp*atan(1.0_dp)
+  real(dp), parameter :: pi=4.0_dp*atan(1.0_dp)
 
   real(dp), dimension(22) :: An(0:21) = [12.544_dp,-0.194_dp,0.305_dp,0.0573_dp,2.178_dp,0.0571_dp,-0.999_dp,16.473_dp,0.00152_dp,0.382_dp,0.0431_dp,-0.00763_dp,-0.210_dp,0.0405_dp,-4.430_dp,-0.636_dp,-2.600_dp,0.832_dp,-5.328_dp,1.103_dp,-0.907_dp,1.45_dp]
 
@@ -48,10 +48,9 @@
   An(13) = 0.0_dp
   An(14) = 0.0_dp
   
-while_loop : do j = 1,100 ! This is a while loop for R<=Rhigh_grid. It is written this way to include the very last iteration once the local loop is broken
+  do while (Radius <= rhigh_grid)
 
-outer_loop : do i = 1,nlat
-      print *, i
+lat_loop : do i = 1,nlat
 
       nlon = 4*(i-1)
 
@@ -62,7 +61,7 @@ outer_loop : do i = 1,nlat
         dlon_deg = 0.0_dp
       end if
 
-inner_loop : do k = 1,nlon
+lon_loop : do k = 1,nlon
 
         ! Coordinate transform
         xlond = (k-1)*dlon_deg
@@ -115,13 +114,8 @@ inner_loop : do k = 1,nlon
 
         R0 = An(0)*(pd_tr+pm)**An(1) * ( 1.0_dp + An(2)*(exp(An(3)*Bzimf_tr)-1.0_dp)/(exp(An(4)*Bzimf_tr)+1.0_dp) )
         Rm = R0*f1 + cn*exp(dn*psin**An(21)) + cn*exp(ds*psis**An(21))
-        print *, Rm
 
-        if (Radius .GT. Rm) then
-          print *, "fuck"
-          cycle
-          !exit inner_loop
-        end if 
+        if (Radius .GT. Rm) cycle
 
         l = l+1
         x(l) = xp
@@ -133,15 +127,12 @@ inner_loop : do k = 1,nlon
         zcp(l) = z(l)*cos(xlon)
         rhbr(l) = rh/Radius * (1.0_dp - (1.0_dp + (Radius/rh)**alpha)**(1.0_dp/alpha))
 
-      end do inner_loop
-    end do outer_loop
+      end do lon_loop
+    end do lat_loop
 
-    print *, xcolat
     Radius = Radius*(nlat - 0.5_dp + pi/4.0_dp)/(nlat - 0.5_dp - pi/4.0_dp)
 
-    if (Radius .GT. rhigh_grid) exit while_loop
-
-  end do while_loop
+  end do
 
 end subroutine calculate_rbf_centers
 

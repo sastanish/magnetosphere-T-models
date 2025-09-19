@@ -26,10 +26,6 @@ contains
     call calculate_rbf_centers(nx,ny,nz,nst,nrho,nzsp,nzcp,nrhbr)
     call RBF_MODEL_2016(0,hold_parmod, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, hbx, hby, hbz)
 
-    do i = 1,size(rho)
-      print *, nrho(i), " ", RHO(i)
-    end do
-
     print *, "rbf centers subroutine errors;"
     print *, "  x -> ", sum(abs(nx-XX))
     print *, "  y -> ", sum(abs(ny-YY))

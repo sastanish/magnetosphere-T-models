@@ -7,8 +7,29 @@ program main
   integer, parameter :: dp=real64
 
   call test_rbf_centers
+  call test_ta16_calc
 
 contains
+
+  subroutine test_ta16_calc
+
+    use Original_TA16
+    use TA16
+
+    real(dp) :: hold_parmod(10), hbx,hby,hbz, nbx, nby, nbz
+    integer :: i
+
+    hold_parmod = 1.0_dp
+
+    call calculate_ta16_field(1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, nbx, nby, nbz)
+    call RBF_MODEL_2016(0,hold_parmod, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, hbx, hby, hbz)
+
+    print *, "ta16 field calculation errors"
+    print *, "  bx -> ", abs(nbx-hbx)
+    print *, "  by -> ", abs(nby-hby)
+    print *, "  bz -> ", abs(nbz-hbz)
+
+  end subroutine test_ta16_calc
 
   subroutine test_rbf_centers
     ! Tests new rbf_centers subroutine against the original 
@@ -16,25 +37,24 @@ contains
     ! in front. 
     
     use Original_TA16
-    use TA16, only : calculate_rbf_centers
+    use TA16
 
-    real(dp), dimension(1296) :: nx,ny,nz,nst,nrho,nzsp,nzcp,nrhbr
     real(dp) :: hold_parmod(10), hbx,hby,hbz
     integer :: i
 
     hold_parmod = 1.0_dp
-    call calculate_rbf_centers(nx,ny,nz,nst,nrho,nzsp,nzcp,nrhbr)
+    call calculate_rbf_centers
     call RBF_MODEL_2016(0,hold_parmod, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, hbx, hby, hbz)
 
     print *, "rbf centers subroutine errors;"
-    print *, "  x -> ", sum(abs(nx-XX))
-    print *, "  y -> ", sum(abs(ny-YY))
-    print *, "  z -> ", sum(abs(nz-ZZ))
-    print *, "  st -> ", sum(abs(nst-ST))
-    print *, "  rho -> ", sum(abs(nrho-RHO))
-    print *, "  zsp -> ", sum(abs(nzsp-ZSP))
-    print *, "  zcp -> ", sum(abs(nzcp-ZCP))
-    print *, "  rhbr -> ", sum(abs(nrhbr-RHBR))
+    print *, "  x -> ", sum(abs(xrb-XX))
+    print *, "  y -> ", sum(abs(yrb-YY))
+    print *, "  z -> ", sum(abs(zrb-ZZ))
+    print *, "  st -> ", sum(abs(strb-ST))
+    print *, "  rho -> ", sum(abs(rhorb-RHO))
+    print *, "  zsp -> ", sum(abs(zsprb-ZSP))
+    print *, "  zcp -> ", sum(abs(zcprb-ZCP))
+    print *, "  rhbr -> ", sum(abs(rhbrrb-RHBR))
 
   end subroutine test_rbf_centers
 

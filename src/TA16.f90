@@ -6,13 +6,12 @@
 
   integer, parameter :: dp=real64
 
-  !real(dp) :: A(23328)
+  real(dp) :: A(23328) ! These are the TA16 fitting parameters
+  real(dp), dimension(1296) :: xrb,yrb,zrb,strb,rhorb,zsprb,zcprb,rhbrrb !rbf coordinates
 
   contains
 
-  subroutine calculate_rbf_centers(x,y,z,st,rho,zsp,zcp,rhbr)
-
-    real(dp), intent(out), dimension(1296) :: x,y,z,st,rho,zsp,zcp,rhbr
+  subroutine calculate_rbf_centers
 
     integer :: klat, nlat, nlon
 
@@ -115,17 +114,17 @@ lon_loop : do k = 1,nlon
         R0 = An(0)*(pd_tr+pm)**An(1) * ( 1.0_dp + An(2)*(exp(An(3)*Bzimf_tr)-1.0_dp)/(exp(An(4)*Bzimf_tr)+1.0_dp) )
         Rm = R0*f1 + cn*exp(dn*psin**An(21)) + cn*exp(ds*psis**An(21))
 
-        if (Radius .GT. Rm) cycle
-
-        l = l+1
-        x(l) = xp
-        y(l) = yp
-        z(l) = zp
-        st(l) = sin(xcolat)
-        rho(l) = Radius*st(l)
-        zsp(l) = z(l)*sin(xlon)
-        zcp(l) = z(l)*cos(xlon)
-        rhbr(l) = rh/Radius * (1.0_dp - (1.0_dp + (Radius/rh)**alpha)**(1.0_dp/alpha))
+        if (Radius <= Rm) then
+          l = l+1
+          xrb(l) = xp
+          yrb(l) = yp
+          zrb(l) = zp
+          strb(l) = sin(xcolat)
+          rhorb(l) = Radius*strb(l)
+          zsprb(l) = zrb(l)*sin(xlon)
+          zcprb(l) = zrb(l)*cos(xlon)
+          rhbrrb(l) = rh/Radius * (1.0_dp - (1.0_dp + (Radius/rh)**alpha)**(1.0_dp/alpha))
+        end if
 
       end do lon_loop
     end do lat_loop
@@ -136,20 +135,141 @@ lon_loop : do k = 1,nlon
 
 end subroutine calculate_rbf_centers
 
-subroutine calculate_ta16_field
+subroutine calculate_ta16_field(pydn, symHc, Nind, Byimf, tilt, x, y, z, bx, by, bz)
+  
+  real(dp), intent(out) :: bx, by, bz
+  real(dp), intent(in) :: pydn, symHc, Nind, Byimf, tilt, x, y, z
+  real(dp) :: symH
+
+  real(dp) :: xsm, ysm, zsm, fpd, cps, sps, tps
+  real(dp) :: acp, act, ap, asp, ast, at, cdtm1, cm, cp, cpx, cpy, cpz, ctx, cty, ctz
+  real(dp) :: dcmx, dcmx2, dcmxy, dcmxz, dcmy, dcmy2, dcmyz, dcmz, dcmz2, dcpx, dcpx2, dcpxy, dcpxz, dcpy, dcpy2, dcpyz, dcpz, dcpz2
+  real(dp) :: delta_zr, dtheta, dxm, dxp, dym, dyp, dzm, dzp
+  real(dp) :: pxcm, pxcp, pycm, pycp, pzcm, pzcp, sdt, spx, spy, spz, stx, sty, stz
+  real(dp) :: txcm, txcp, tycm, tycp, tzcm, tzcp, xm, xp, ym, yp, zm, zp
+
+  integer :: i
+  real(dp), parameter :: d=4.0_dp
+
+  xsm = x*cos(tilt) - z*sin(tilt)
+  ysm = y
+  zsm = z*cos(tilt) + x*sin(tilt)
+
+  fpd = sqrt(pydn/2.0_dp) - 1.0_dp
+  symH = symHc/50.0_dp
+
+  cps = cos(tilt)
+  sps = sin(tilt)
+  tps = sps/cps
+
+  bx = 0.0_dp
+  by = 0.0_dp
+  bz = 0.0_dp
+
+  do i = 1,1296
+
+    xp = xrb(i)
+    yp = yrb(i)
+    zp = zrb(i)
+    xm = xp
+    ym = yp
+    zm =-zp
+
+    delta_zr=rhbrrb(i)*tps
+    dtheta =-asin(delta_zr)*strb(i)
+    sdt=sin(dtheta)
+    cdtm1=cos(dtheta)-1.0_dp
+    dxp=xp*cdtm1+sdt*zcprb(i)
+    dyp=yp*cdtm1+sdt*zsprb(i)
+    dzp=zp*cdtm1-rhorb(i)*sdt
+    dxm=xm*cdtm1-sdt*zcprb(i)
+    dym=ym*cdtm1-sdt*zsprb(i)
+    dzm=zm*cdtm1-rhorb(i)*sdt
+
+    cp=sqrt((xsm-xp-dxp)**2+(ysm-yp-dyp)**2+(zsm-zp-dzp)**2+d**2)    ! rbf ch_i+
+    cm=sqrt((xsm-xm-dxm)**2+(ysm-ym-dym)**2+(zsm-zm-dzm)**2+d**2)    ! rbf ch_i-
+    dcpx=(xsm-xp-dxp)/cp
+    dcmx=(xsm-xm-dxm)/cm
+    dcpy=(ysm-yp-dyp)/cp
+    dcmy=(ysm-ym-dym)/cm
+    dcpz=(zsm-zp-dzp)/cp
+    dcmz=(zsm-zm-dzm)/cm
+
+    dcpx2=1.0_dp/cp-dcpx**2/cp
+    dcmx2=1.0_dp/cm-dcmx**2/cm
+    dcpy2=1.0_dp/cp-dcpy**2/cp
+    dcmy2=1.0_dp/cm-dcmy**2/cm
+    dcpz2=1.0_dp/cp-dcpz**2/cp
+    dcmz2=1.0_dp/cm-dcmz**2/cm
+    dcpxy=-dcpx*dcpy/cp
+    dcmxy=-dcmx*dcmy/cm
+    dcpxz=-dcpx*dcpz/cp
+    dcmxz=-dcmx*dcmz/cm
+    dcpyz=-dcpy*dcpz/cp
+    dcmyz=-dcmy*dcmz/cm
+
+    txcp=zsm*dcpy-ysm*dcpz
+    tycp=xsm*dcpz-zsm*dcpx
+    tzcp=ysm*dcpx-xsm*dcpy
+    txcm=zsm*dcmy-ysm*dcmz
+    tycm=xsm*dcmz-zsm*dcmx
+    tzcm=ysm*dcmx-xsm*dcmy
+ 
+    pxcp=2.0_dp*dcpx-xsm*(dcpy2+dcpz2)+ysm*dcpxy+zsm*dcpxz
+    pycp=2.0_dp*dcpy-ysm*(dcpx2+dcpz2)+zsm*dcpyz+xsm*dcpxy
+    pzcp=2.0_dp*dcpz-zsm*(dcpx2+dcpy2)+xsm*dcpxz+ysm*dcpyz
+    pxcm=2.0_dp*dcmx-xsm*(dcmy2+dcmz2)+ysm*dcmxy+zsm*dcmxz
+    pycm=2.0_dp*dcmy-ysm*(dcmx2+dcmz2)+zsm*dcmyz+xsm*dcmxy
+    pzcm=2.0_dp*dcmz-zsm*(dcmx2+dcmy2)+xsm*dcmxz+ysm*dcmyz
+
+    ctx = cps*(txcp+txcm)
+    cty = cps*(tycp+tycm)
+    ctz = cps*(tzcp+tzcm)
+
+    stx = sps*(txcp-txcm)
+    sty = sps*(tycp-tycm)
+    stz = sps*(tzcp-tzcm)
+
+    cpx = cps*(pxcp-pxcm)
+    cpy = cps*(pycp-pycm)
+    cpz = cps*(pzcp-pzcm)
+
+    spx = sps*(pxcp+pxcm)
+    spy = sps*(pycp+pycm)
+    spz = sps*(pzcp+pzcm)
+
+    ! Total field calculation
+    act=A(i)+A(i+5184)*fpd+A(i+10368)*symH+A(i+15552)*Nind
+    ast=A(i+1296)+A(i+6480)*fpd+A(i+11664)*symH+A(i+16848)*Nind
+    at =A(i+20736)*Byimf
+    acp=A(i+2592)+A(i+7776)*fpd+A(i+12960)*symH+A(i+18144)*Nind
+    asp=A(i+3888)+A(i+9072)*fpd+A(i+14256)*symH+A(i+19440)*Nind
+    ap =A(i+22032)*Byimf
+
+    bx=bx+ctx*act+stx*ast+(txcp-txcm)*at+cpx*acp+spx*asp+(pxcp+pxcm)*ap
+    by=by+cty*act+sty*ast+(tycp-tycm)*at+cpy*acp+spy*asp+(pycp+pycm)*ap
+    bz=bz+ctz*act+stz*ast+(tzcp-tzcm)*at+cpz*acp+spz*asp+(pzcp+pzcm)*ap
+
+  end do
+
+  ! Convert back from SM to GSM
+  bx=bx*cps+bz*sps
+  by=by
+  bz=bz*cps-bx*sps
+
 end subroutine calculate_ta16_field
 
-!subroutine read_ta16_parameters(filename)
+subroutine read_ta16_parameters(filename)
 
-! character(*), intent(in) :: filename
-! integer :: ta_file, i
-!
-! open(newunit=ta_file,file=filename,action="read")
-! do i=1,size(A)
-!   read(ta_file,"(G15.6)") A(i)
-! end do
-! close(ta_file)
+  character(*), intent(in) :: filename
+  integer :: ta_file, i
 
-!end subroutine read_ta16_parameters
+  open(newunit=ta_file,file=filename,action="read")
+  do i=1,size(A)
+    read(ta_file,"(G15.6)") A(i)
+  end do
+  close(ta_file)
+
+end subroutine read_ta16_parameters
 
 end module TA16

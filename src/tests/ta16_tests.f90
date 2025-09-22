@@ -19,15 +19,23 @@ contains
     real(dp) :: hold_parmod(10), hbx,hby,hbz, nbx, nby, nbz
     integer :: i
 
-    hold_parmod = 1.0_dp
+    hold_parmod(1) = 1.82_dp
+    hold_parmod(2) = -16.5_dp
+    hold_parmod(3) = 0.0026_dp
+    hold_parmod(4) = 0.62_dp
 
-    call calculate_ta16_field(1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, nbx, nby, nbz)
-    call RBF_MODEL_2016(0,hold_parmod, 1.0_dp, 1.0_dp, 1.0_dp, 1.0_dp, hbx, hby, hbz)
+    call read_ta16_parameters('TA16_RBF.par')
+    call calculate_ta16_field(hold_parmod(1), hold_parmod(2), hold_parmod(3), hold_parmod(4), 0.0904_dp, -1.0_dp, 1.0_dp, 0.0_dp, nbx, nby, nbz)
+    call RBF_MODEL_2016(0,hold_parmod, 0.0904_dp, -1.0_dp, 1.0_dp, 0.0_dp, hbx, hby, hbz)
 
     print *, "ta16 field calculation errors"
     print *, "  bx -> ", abs(nbx-hbx)
     print *, "  by -> ", abs(nby-hby)
     print *, "  bz -> ", abs(nbz-hbz)
+    print *, "ta16 field calculation Mags"
+    print *, "old bx -> ", abs(hbx), "new bx -> ", abs(nbx)
+    print *, "old by -> ", abs(hby), "new by -> ", abs(nby)
+    print *, "old bz -> ", abs(hbz), "new bz -> ", abs(nbz)
 
   end subroutine test_ta16_calc
 

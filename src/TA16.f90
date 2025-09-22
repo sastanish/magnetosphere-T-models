@@ -11,19 +11,19 @@
 
   contains
 
-  subroutine calculate_rbf_centers
+subroutine calculate_rbf_centers
 
-    integer :: klat, nlat, nlon
+  integer :: klat, nlat, nlon
 
-    real(dp) :: rlow_grid, rhigh_grid
-    real(dp) :: dlat_deg, dlon_deg, xcolat
-    real(dp) :: Radius
-    real(dp) :: theta_n, theta_s, ctn, cts, stn, sts, sp, cp
-    real(dp) :: zp, yp, xp, xlond, xlon, T, stt, rm, R1, R0
-    real(dp) :: psin, psis, last_radius, f1, ds, dn, ctt, cn, b2, b0
+  real(dp) :: rlow_grid, rhigh_grid
+  real(dp) :: dlat_deg, dlon_deg, xcolat
+  real(dp) :: Radius
+  real(dp) :: theta_n, theta_s, ctn, cts, stn, sts, sp, cp
+  real(dp) :: zp, yp, xp, xlond, xlon, T, stt, rm, R1, R0
+  real(dp) :: psin, psis, last_radius, f1, ds, dn, ctt, cn, b2, b0
 
-    real(dp), parameter :: rh=8.0_dp,alpha=3.0_dp,pd_tr=0.5_dp
-    real(dp), parameter :: psi=0.0_dp,pm=0.0_dp,Bzimf_tr=0.0_dp
+  real(dp), parameter :: rh=8.0_dp,alpha=3.0_dp,pd_tr=0.5_dp
+  real(dp), parameter :: psi=0.0_dp,pm=0.0_dp,Bzimf_tr=0.0_dp
   real(dp), parameter :: pi=4.0_dp*atan(1.0_dp)
 
   real(dp), dimension(22) :: An(0:21) = [12.544_dp,-0.194_dp,0.305_dp,0.0573_dp,2.178_dp,0.0571_dp,-0.999_dp,16.473_dp,0.00152_dp,0.382_dp,0.0431_dp,-0.00763_dp,-0.210_dp,0.0405_dp,-4.430_dp,-0.636_dp,-2.600_dp,0.832_dp,-5.328_dp,1.103_dp,-0.907_dp,1.45_dp]

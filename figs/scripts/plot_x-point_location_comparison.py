@@ -70,7 +70,6 @@ if __name__ == "__main__":
   ax[1].text(0.02, 0.92, "(b)", transform=ax[1].transAxes)#,size=20)
 
   ax[1].set_ylim( (1,12) )
-  ax[0].set
 
   leg = ax[1].legend(
      [matplotlib.lines.Line2D([],[],color=cmap[2],marker=".",linestyle="-" ),

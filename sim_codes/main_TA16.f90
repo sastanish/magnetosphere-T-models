@@ -51,6 +51,7 @@ program main
     !$OMP DO COLLAPSE(3)
     do k = 1,size(z)
       do j = 1,size(y)
+        print *, j
         do i = 1,size(x)
 
           xx = x(i)

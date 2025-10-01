@@ -52,28 +52,40 @@ if __name__ == "__main__":
   fig, ax = plt.subplots(nrows=3,ncols=2,figsize=(2*width*0.8,0.8*3*width/golden),dpi=100)
   cmap = plt.cm.cividis(np.linspace(0,1,10))
 
-  ax[0,0].set_title('$|\\boldsymbol{\\Sigma^*}|$')
-  ax[0,1].set_title('Reconnection Location')
+  cmap = plt.cm.cividis(np.linspace(0,1,3))
+  vmap = plt.cm.viridis(np.linspace(0,1,4))
+  colors = ["black", cmap[1], vmap[1], cmap[2]]
+
+  ax[0,0].set_title('$\\mathcal{M}_1$')
+  ax[0,1].set_title('$\\mathcal{M}_2$')
 
   for i,name in enumerate(["Aug2018", "Mar2022", "May2024"]):
     TS05_data = get_x_point_data(f"../../data/{name}/TS05/x-point_location_for_all_rates.lst")
     TA16_data = get_x_point_data(f"../../data/{name}/TA16/x-point_location_for_all_rates.lst")
 
-    ax[i,0].plot(TA16_data["time"],TA16_data["total"],linestyle="",marker=".",label="rate",alpha=0.3,color=cmap[2])
-    ax[i,0].plot(TA16_data["time"],moving_average(TA16_data["total"],6),linestyle="-",marker="",label="avg rate",color=cmap[2])
-    ax[i,0].plot(TS05_data["time"],TS05_data["total"],linestyle="",marker="x",label="rate",alpha=0.3,color=cmap[8])
-    ax[i,0].plot(TS05_data["time"],moving_average(TS05_data["total"],6),linestyle="--",marker="",label="avg rate",color=cmap[8])
-    ax[i,0].set_yscale('log')
+    ax[i,0].plot(TA16_data["time"],moving_average(TA16_data["total"],6),linestyle="-",marker="",color=colors[0])
+    ax[i,0].plot(TA16_data["time"],moving_average(TA16_data["lorr"] ,6),linestyle="-",marker="",color=colors[1])
+    ax[i,0].plot(TA16_data["time"],moving_average(TA16_data["wind"] ,6),linestyle="-",marker="",color=colors[2])
+    ax[i,0].plot(TA16_data["time"],moving_average(TA16_data["alig"] ,6),linestyle="-",marker="",color=colors[3])
 
+    ax[i,0].set_yscale('log')
+    ax[i,1].set_yscale('log')
     ax[i,0].set_ylabel(TA16_data["time"][0].strftime("%B %Y"))
 
-    ax[i,1].plot(TA16_data["time"],TA16_data["dist"],linestyle="",marker=".",alpha=0.5,color=cmap[2])
-    ax[i,1].plot(TS05_data["time"],TS05_data["dist"],linestyle="",marker="x",alpha=0.5,color=cmap[8])
+    ax[i,1].plot(TS05_data["time"],moving_average(TS05_data["total"],6),linestyle="-",marker="",color=colors[0])
+    ax[i,1].plot(TS05_data["time"],moving_average(TS05_data["lorr"] ,6),linestyle="-",marker="",color=colors[1])
+    ax[i,1].plot(TS05_data["time"],moving_average(TS05_data["wind"] ,6),linestyle="-",marker="",color=colors[2])
+    ax[i,1].plot(TS05_data["time"],moving_average(TS05_data["alig"] ,6),linestyle="-",marker="",color=colors[3])
+
     ax[i,0].tick_params(axis="x",rotation=45)
     ax[i,1].tick_params(axis="x",rotation=45)
 
-    ax[i,1].set_ylim( (1,12) )
 
+
+  leg = ax[1,1].legend(
+     [matplotlib.lines.Line2D([],[],color=colors[i],linestyle="-") for i in range(4)],
+     ["$|\\boldsymbol{\\Sigma^{*}}|$","$|\\boldsymbol{\\Sigma^{*}_{1}}|$","$|\\boldsymbol{\\Sigma^{*}_{2}}|$","$|\\boldsymbol{\\Sigma^{*}_{3}}|$"]
+     )
 
   ax[0,0].text(0.02, 0.9, "(a)", transform=ax[0,0].transAxes)#,size=20)
   ax[0,1].text(0.02, 0.9, "(b)", transform=ax[0,1].transAxes)#,size=20)
@@ -82,13 +94,11 @@ if __name__ == "__main__":
   ax[2,0].text(0.02, 0.9, "(e)", transform=ax[2,0].transAxes)#,size=20)
   ax[2,1].text(0.02, 0.9, "(f)", transform=ax[2,1].transAxes)#,size=20)
 
-  leg = ax[0,1].legend(
-     [matplotlib.lines.Line2D([],[],color=cmap[2],marker=".",linestyle="-" ),
-      matplotlib.lines.Line2D([],[],color=cmap[8],marker="x",linestyle="--")],
-     ["$\\mathcal{M}_1$","$\\mathcal{M}_2$"],
-     loc="lower right"
+  leg = ax[1,1].legend(
+     [matplotlib.lines.Line2D([],[],color=colors[i],linestyle="-") for i in range(4)],
+     ["$|\\boldsymbol{\\Sigma^{*}}|$","$|\\boldsymbol{\\Sigma^{*}_{1}}|$","$|\\boldsymbol{\\Sigma^{*}_{2}}|$","$|\\boldsymbol{\\Sigma^{*}_{3}}|$"]
      )
 
   plt.tight_layout()
-  plt.savefig(f"../all_x-point_locations_comparison.png")
+  plt.savefig(f"../all_reconnection_rates_comparison.png")
   plt.close()

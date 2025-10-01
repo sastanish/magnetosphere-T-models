@@ -72,15 +72,15 @@ program main
       Jx(i,j,k) = 1/(2*hy) * (Bz(i,j+1,k) - Bz(i,j-1,k)) - 1/(2*hz) * (By(i,j,k+1) - By(i,j,k-1))
       Jy(i,j,k) = 1/(2*hz) * (Bx(i,j,k+1) - Bx(i,j,k-1)) - 1/(2*hx) * (Bz(i+1,j,k) - Bz(i-1,j,k))
       Jz(i,j,k) = 1/(2*hx) * (By(i+1,j,k) - By(i-1,j,k)) - 1/(2*hy) * (Bx(i,j+1,k) - Bx(i,j-1,k))
-      ! F = u x B
+      ! F = J x B
       Fx(i,j,k) = Jy(i,j,k)*Bz(i,j,k) - Jz(i,j,k)*By(i,j,k) 
       Fy(i,j,k) = Jz(i,j,k)*Bx(i,j,k) - Jx(i,j,k)*Bz(i,j,k) 
       Fz(i,j,k) = Jx(i,j,k)*By(i,j,k) - Jy(i,j,k)*Bx(i,j,k) 
       magF(i,j,k) = sqrt(Fx(i,j,k)**2 + Fy(i,j,k)**2 + Fz(i,j,k)**2)
       ! B_f = B x F/|F|
-      Bfx(i,j,k) = (By(i,j,k)*Fz(i,j,k) - Fz(i,j,k)*By(i,j,k) )/magF(i,j,k)
-      Bfy(i,j,k) = (Bz(i,j,k)*Fx(i,j,k) - Fx(i,j,k)*Bz(i,j,k) )/magF(i,j,k)
-      Bfz(i,j,k) = (Bx(i,j,k)*Fy(i,j,k) - Fy(i,j,k)*Bx(i,j,k) )/magF(i,j,k)
+      Bfx(i,j,k) = (By(i,j,k)*Fz(i,j,k) - Bz(i,j,k)*Fy(i,j,k) )/magF(i,j,k)
+      Bfy(i,j,k) = (Bz(i,j,k)*Fx(i,j,k) - Bx(i,j,k)*Fz(i,j,k) )/magF(i,j,k)
+      Bfz(i,j,k) = (Bx(i,j,k)*Fy(i,j,k) - By(i,j,k)*Fx(i,j,k) )/magF(i,j,k)
       ! alpha = j * b / |B|^2
       alpha(i,j,k) = (Jx(i,j,k)*Bx(i,j,k) + Jy(i,j,k)*By(i,j,k) + Jz(i,j,k)*Bz(i,j,k) )/magB(i,j,k)**2
       !lamb = j * B_f / |B|^2
@@ -120,7 +120,7 @@ program main
 
       Lorr_rate(i,j,k) = sqrt(lrate_x**2 + lrate_y**2 + lrate_z**2)
 
-      ! Lorr_rate = -1/|B| ( lamb (alph + w2)B_f )
+      ! Wind_rate = -1/|B| ( lamb (alph + w2)B_f )
       wrate_x = - 1/magB(i,j,k) * ( lambda(i,j,k) * (alpha(i,j,k) + omega2) * Bfx(i,j,k) )
       wrate_y = - 1/magB(i,j,k) * ( lambda(i,j,k) * (alpha(i,j,k) + omega2) * Bfy(i,j,k) )
       wrate_z = - 1/magB(i,j,k) * ( lambda(i,j,k) * (alpha(i,j,k) + omega2) * Bfz(i,j,k) )

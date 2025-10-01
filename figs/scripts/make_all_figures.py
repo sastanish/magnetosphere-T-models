@@ -174,38 +174,41 @@ def plot_neutrons(stations, times, neutrons, ofile, width=5, height=5):
 
     return 
 
-
 def get_x_point_data(file):
 
     times = []
-    rate  = []
+    total_rate  = []
+    Lorr_rate  = []
+    Wind_rate  = []
+    Alig_rate  = []
     dist  = []
 
     for line in np.genfromtxt(file,dtype=None,skip_header=6):
 
         times.append(str(line[0]) + '/' + str(line[1]) + '/' + str(line[2]) + '/' + str(line[3]))
-        rate.append( float(line[4]))
-        dist.append( float(line[5]))
+        total_rate.append( float(line[4]))
+        Lorr_rate.append( float(line[5]))
+        Wind_rate.append( float(line[6]))
+        Alig_rate.append( float(line[7]))
+        dist.append( float(line[8]))
 
     time = pd.to_datetime(times,format="%Y/%j/%H/%M")
 
-    return {"time":time, "rate":rate, "dist":dist}
+    return {"time":time, "total":total_rate, "lorr":Lorr_rate, "wind":Wind_rate, "alig":Alig_rate, "dist":dist}
 
-def plot_x_point(time,srate,sdist,mrate,mdist,ofile,width=5,height=5):
+def plot_x_point(time,rate,dist,ofile,width=5,height=5):
 
     fig, ax = plt.subplots(nrows=2,figsize=(width,2*height),sharex=True)
 
     b_cmap = plt.cm.cividis(np.linspace(0,1,10))
 
-#    ax[0].plot(time,srate,color="gray",linestyle="",marker=".",alpha=0.5)
-    ax[0].plot(time,srate,linestyle="",marker=".",label="rate",alpha=0.3,color=b_cmap[2])
-    ax[0].plot(time,moving_average(srate,6),color="black",linestyle="-",label="avg rate")
+    ax[0].plot(time,rate,linestyle="",marker=".",label="rate",alpha=0.3,color=b_cmap[2])
+    ax[0].plot(time,moving_average(rate,6),color="black",linestyle="-",label="avg rate")
     ax[0].set_ylabel('$|\\boldsymbol{\\Sigma^*}|$')
     ax[0].set_yscale('log')
     ax[0].text(0.02, 0.92, "(a)", transform=ax[0].transAxes)#,size=20)
 
-#    ax[1].plot(time,sdist,color="tab:red",linestyle="",marker=".",alpha=0.5)
-    ax[1].plot(time,sdist,color=b_cmap[1],linestyle="",marker=".")
+    ax[1].plot(time,dist,color=b_cmap[1],linestyle="",marker=".")
     ax[1].set_ylabel('Reconnection Location')
     ax[1].text(0.02, 0.92, "(b)", transform=ax[1].transAxes)#,size=20)
 
@@ -333,16 +336,16 @@ if __name__ == "__main__":
 # In figsize - (my_width, my_width/golden)
 
 
-  for name in ["Aug2018", "Jun2015", "May2024", "Mar2022"]:
+  for name in ["Aug2018", "May2024", "Mar2022"]:
     (times, x, data) = get_flux_data(f"../../data/{name}/TA16/flux.lst")
     plot_flux(times, x, data, f"../{name}_flux.png",width=fig_width,height=fig_width/golden)
     #(times, x, data) = get_pressure_data(f"../../data/{name}/TA16/pressure.lst")
     #plot_pressure(times, x, data, f"../{name}_pressure.png",width=fig_width,height=fig_width/golden)
     (stations, times, data) = get_neutron_data(f"../../data/{name}/nmdb/nmdb_data_{name}.lst")
     plot_neutrons(stations, times, np.array(data), f"../{name}_neutron_monitor_data.png",width=fig_width,height=fig_width/golden)
-    sim_data = get_x_point_data(f"../../data/{name}/TA16/x-point_location.lst")
-    man_data = get_x_point_data(f"../../data/{name}/TA16/manual_x-point_location.lst")
-    plot_x_point(sim_data["time"],sim_data["rate"],sim_data["dist"],man_data["rate"],man_data["dist"],f"../{name}_x-point_location.png",width=fig_width,height=fig_width/golden)
+    data = get_x_point_data(f"../../data/{name}/TA16/x-point_location_for_all_rates.lst")
+#   man_data = get_x_point_data(f"../../data/{name}/TA16/manual_x-point_location.lst")
+    plot_x_point(data["time"],data["total"],data["dist"],f"../{name}_x-point_location.png",width=fig_width,height=fig_width/golden)
     data = get_omni_data(f"../../data/{name}/omni/{name}_TA16_parameters.lst")
     plot_omni(data, f"../{name}_omni_data.png",width=fig_width,height=fig_width/golden)
     plot_omni_ae(data, f"../{name}_omni_data_ae.png",width=fig_width,height=fig_width/golden)

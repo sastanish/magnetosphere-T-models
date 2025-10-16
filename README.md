@@ -30,7 +30,7 @@ This directory contains:
 
 # How to compile/install
 
-This code is required to be compiled the fortran [NET-CDF library](https://docs.unidata.ucar.edu/netcdf-fortran/current/). Below are compilation commands for the Intel and GNU compilers.
+This code requires the fortran [NET-CDF library](https://docs.unidata.ucar.edu/netcdf-fortran/current/). Below are compilation commands for the Intel and GNU compilers.
 
 ## Intel
 ```

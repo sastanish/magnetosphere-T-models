@@ -3,6 +3,7 @@ program main
   use TA16, only : RBF_MODEL_2016,CALCULATE_RBF_CENTERS,READ_TA16_PARS
   use geopack, only : RECALC_08, IGRF_GSW_08
   use inputOutput, only : save_field_to_netcdf
+  use OMP_LIB
 
   implicit none
 
@@ -46,6 +47,9 @@ program main
     parmod(3) = nind(n)
     parmod(4) = aby(n)
 
+    !$OMP PARALLEL SHARED(Bx,By,Bz) PRIVATE(xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz)
+
+    !$OMP DO collapse(3)
     do k = 1,size(z)
       do j = 1,size(y)
         do i = 1,size(x)
@@ -73,6 +77,8 @@ program main
         end do
       end do
     end do
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! Write to file
     write( str_ind, '(I4)' ) n

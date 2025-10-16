@@ -1,3 +1,0 @@
- - s06 has a plasmoid chain! So the metric jumps back and forth.
- - Decide if the first bump of s07 is actually real.
- - s08 also has plasmoids!

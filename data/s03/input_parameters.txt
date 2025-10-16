@@ -1,2 +1,0 @@
- xmin  xmax  ymin  ymax  zmin  zmax nx  ny  nz
--12   0     -0.08     0.08    -6     6    300 5 300

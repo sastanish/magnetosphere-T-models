@@ -4,7 +4,6 @@ program main
   use TS05, only : T04_s
   use geopack, only : RECALC_08, IGRF_GSW_08
   use inputOutput, only : save_field_to_netcdf
-  !$ use omp_lib
 
   implicit none
 
@@ -43,13 +42,11 @@ program main
 
     call RECALC_08(year(n), day(n), hour(n), mint(n), 0, ivx(n), ivy(n), ivz(n))
 
-    !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(n,x,y,z,Bx,By,Bz)
     parmod(1) = pydn(n)
     parmod(2) = symhc(n)
     parmod(3) = nind(n)
     parmod(4) = aby(n)
 
-    !$OMP DO COLLAPSE(3)
     do k = 1,size(z)
       do j = 1,size(y)
         do i = 1,size(x)
@@ -77,8 +74,6 @@ program main
         end do
       end do
     end do
-    !$OMP END DO
-    !$OMP END PARALLEL
 
     ! Write to file
     write( str_ind, '(I4)' ) n

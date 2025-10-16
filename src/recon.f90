@@ -75,9 +75,9 @@ program main
       Fz(i,j,k) = Jx(i,j,k)*By(i,j,k) - Jy(i,j,k)*Bx(i,j,k) 
       magF(i,j,k) = sqrt(Fx(i,j,k)**2 + Fy(i,j,k)**2 + Fz(i,j,k)**2)
       ! B_f = B x F/|F|
-      Bfx(i,j,k) = (By(i,j,k)*Fz(i,j,k) - Fz(i,j,k)*By(i,j,k) )/magF(i,j,k)
-      Bfy(i,j,k) = (Bz(i,j,k)*Fx(i,j,k) - Fx(i,j,k)*Bz(i,j,k) )/magF(i,j,k)
-      Bfz(i,j,k) = (Bx(i,j,k)*Fy(i,j,k) - Fy(i,j,k)*Bx(i,j,k) )/magF(i,j,k)
+      Bfx(i,j,k) = (By(i,j,k)*Fz(i,j,k) - Fy(i,j,k)*Bz(i,j,k) )/magF(i,j,k)
+      Bfy(i,j,k) = (Bz(i,j,k)*Fx(i,j,k) - Fz(i,j,k)*Bx(i,j,k) )/magF(i,j,k)
+      Bfz(i,j,k) = (Bx(i,j,k)*Fy(i,j,k) - Fx(i,j,k)*By(i,j,k) )/magF(i,j,k)
       ! alpha = j * b / |B|^2
       alpha(i,j,k) = (Jx(i,j,k)*Bx(i,j,k) + Jy(i,j,k)*By(i,j,k) + Jz(i,j,k)*Bz(i,j,k) )/magB(i,j,k)**2
       !lamb = j * B_f / |B|^2

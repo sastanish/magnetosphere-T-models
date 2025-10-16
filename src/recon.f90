@@ -1,7 +1,6 @@
 program main
 
   use inputOutput, only : save_rate_to_netcdf, load_field_from_netcdf
-  !$ use omp_lib
 
   implicit none
 
@@ -58,8 +57,6 @@ program main
     hx = abs(x(2)-x(1))
     hy = abs(y(2)-y(1))
     hz = abs(z(2)-z(1))
-    !$OMP Parallel shared(Bx,By,Bz,magB,Fx,Fy,Fz,Jx,Jy,Jz,Bfx,Bfy,Bfz,lambda,alpha) private(i,j,k)
-    !$OMP DO COLLAPSE(3)
     do k=2,nz-1
     do j=2,ny-1
     do i=2,nx-1
@@ -85,11 +82,6 @@ program main
     end do
     end do
     end do
-    !$OMP END DO
-    !$OMP END PARALLEL
-
-    !$OMP Parallel shared(rate) private(i,j,k,cBfx,cBfy,cBfz,omega1,omega2,rate_x,rate_y,rate_z,Gax,Gay,Gaz)
-    !$OMP DO COLLAPSE(3)
     do k=3,nz-2
     do j=3,ny-2
     do i=3,nx-2
@@ -122,15 +114,10 @@ program main
                                  + lambda(i,j,k) * (alpha(i,j,k) + omega2) * Bfz(i,j,k) &
                                  + ( Gax * By(i,j,k) - Gay * Bx(i,j,k) ) &
                                  )
-      ! Rate = sqrt( ratex^2 + ratey^2 + ratez^2)
       rate(i,j,k) = sqrt(rate_x**2 + rate_y**2 + rate_z**2)
     end do
     end do
     end do
-    !$OMP END DO
-    !$OMP END PARALLEL
-
-    ! Write to file
     print *, 'Writing '//'rate_'//trim(adjustl(str_ind))//'.nc'
     call save_rate_to_netcdf(x,y,z,rate,'rate_'//trim(adjustl(str_ind))//'.nc')
 

@@ -1,4 +1,4 @@
-This tutorial will walk you through how to use the TA16 model and attached reconnection metrics program. First, compile both the *recon.f90* and *main.f90* programs in the *src/* directory and copy their binaries to this directory. These programs will be referred to as *ta16.out* and *recon.out*. To run these programs, 
+This tutorial will walk you through how to use the TA16 model and attached reconnection metrics program. First, compile both the *recon.f90* and *main.f90* programs in the *src/* directory and copy their binaries to this directory. These programs will be referred to as *main.out* and *recon.out*. To run these programs, 
 
   - 1) Write an *input_parameters.txt* file which contains the grid info. See the example here.
 
@@ -6,9 +6,9 @@ This tutorial will walk you through how to use the TA16 model and attached recon
 
   - 3) Ensure that the *TA16_RBF.par* parameter file is in the same directory you will run the scripts from
 
-  - 5) Run the *ta16.out* program. This will generate a series of netcdf files named *output_1.nc*, *output_2.nc*, etc. Each of these contains the 3 components of the magnetic field. You must specify the start and end line numbers for the TA16 model from the command line. Input two integers for the line to start and end the computation on in the *input_data.lst* file. For example,
+  - 5) Run the *main.out* program. This will generate a series of netcdf files named *output_1.nc*, *output_2.nc*, etc. Each of these contains the 3 components of the magnetic field. You must specify the start and end line numbers for the TA16 model from the command line. Input two integers for the line to start and end the computation on in the *input_data.lst* file. For example,
   ```
-  ./ta16.out 1 100
+  ./main.out 1 100
   ```
   This will execute the ta16 model on lines 1-100 and output files *output_1.nc* - *output_100.nc*
 

@@ -6,12 +6,12 @@ This code is required to be compiled with the fortran NET-CDF library. Depending
 ## Gnu
 
 ```
-gfortran inout.f90 geopack.f TA16_RBF.f main.f90 -o ta16.out `nf-config --fflags --flibs`
+gfortran inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out `nf-config --fflags --flibs`
 ```
 
 ## Intel
 ```
-ifort inout.f90 geopack.f TA16_RBF.f main.f90 -o ta16.out `nf-config --fflags --flibs`
+ifort inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out `nf-config --fflags --flibs`
 ```
 ---
 

@@ -1,6 +1,7 @@
 program main
 
   use inputOutput, only : save_rate_to_netcdf, load_field_from_netcdf
+  use OMP_LIB
 
   implicit none
 
@@ -23,6 +24,8 @@ program main
   read(start_str,'(I5)') start_ind
   read(end_str,'(I5)') end_ind
 
+  !Embarrisingly parralel.
+  !$OMP PARALLEL DO SHARED(start_ind,end_ind)
   do fileind = start_ind,end_ind
 
     write( str_ind, '(I4)' ) fileind
@@ -144,5 +147,6 @@ program main
     deallocate(rate)
 
   end do
+  !$OMP END PARALLEL DO
 
 end program main

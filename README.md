@@ -30,15 +30,15 @@ This directory contains:
 
 # How to compile/install
 
-This code requires the fortran [NET-CDF library](https://docs.unidata.ucar.edu/netcdf-fortran/current/). Below are compilation commands for the Intel and GNU compilers.
+This code requires the fortran [NET-CDF library](https://docs.unidata.ucar.edu/netcdf-fortran/current/) and [OPENMP](https://www.openmp.org/). Below are compilation commands for the Intel and GNU compilers.
 
 ## Intel
 ```
-ifort inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out `nf-config --fflags --flibs`
+ifort inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out -qopenmp `nf-config --fflags --flibs`
 ```
 ## Gnu Compilers
 ```
-gfortran inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out `nf-config --fflags --flibs`
+gfortran inout.f90 geopack.f TA16_RBF.f main.f90 -o main.out -fopenmp `nf-config --fflags --flibs`
 ```
 
 Running the models require three files, 
@@ -52,9 +52,9 @@ For an example of how to use this script, see the example directory, example/
 To compile the reconnection code, the following work:
 ## Intel
 ```
-ifort inout.f90 recon.f90 -o recon.out `nf-config --fflags --flibs`
+ifort inout.f90 recon.f90 -o recon.out -qopenmp `nf-config --fflags --flibs`
 ```
 ## Gnu Compilers
 ```
-gfortran inout.f90 recon.f90 -o recon.out `nf-config --fflags --flibs`
+gfortran inout.f90 recon.f90 -o recon.out -fopenmp `nf-config --fflags --flibs`
 ```

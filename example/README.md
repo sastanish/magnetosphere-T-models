@@ -6,6 +6,11 @@ This tutorial will walk you through how to use the TA16 model and attached recon
 
   - 3) Ensure that the *TA16_RBF.par* parameter file is in the same directory you will run the scripts from
 
+  - 4) Set the number of processors that OpenMP has access to by exporting ``OMP_NUM_THREADS``. e.x. 
+  ```
+  export OMP_NUM_THREADS=10
+  ```
+
   - 5) Run the *main.out* program. This will generate a series of netcdf files named *output_1.nc*, *output_2.nc*, etc. Each of these contains the 3 components of the magnetic field. You must specify the start and end line numbers for the TA16 model from the command line. Input two integers for the line to start and end the computation on in the *input_data.lst* file. For example,
   ```
   ./main.out 1 100

@@ -1,6 +1,6 @@
 # Compilation
 
-This code is required to be compiled with the fortran NET-CDF library. Depending on your compiler of choice, the following command should take care of linking this code with it's dependencies as long as these are installed on your machine.
+This code is required to be compiled with the fortran NET-CDF library and OpenMP. Depending on your compiler of choice, the following command should take care of linking this code with it's dependencies as long as these are installed on your machine.
 
 ---
 ## Gnu

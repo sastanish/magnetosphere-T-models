@@ -79,16 +79,16 @@ contains
     
   end subroutine TS05
 
-  subroutine reconnection(x,y,z,bx,by,bz,nx,ny,nz,recon)
-
-    integer :: nx, ny, nz
-
-    real(8), intent(in) :: x(nx), y(ny), z(nz)
-    real(8), dimension(nx,ny,nz), intent(in) :: bx, by, bz
-    real(8), intent(out) :: Mout(23,nx,ny,nz)
-
-    call compute_all_metrics(x,y,z,bx,by,bz,Mout)
-
-  end subroutine reconnection
+! subroutine reconnection(x,y,z,bx,by,bz,nx,ny,nz,recon)
+!
+!   integer :: nx, ny, nz
+!
+!   real(8), intent(in) :: x(nx), y(ny), z(nz)
+!   real(8), dimension(nx,ny,nz), intent(in) :: bx, by, bz
+!   real(8), intent(out) :: Mout(23,nx,ny,nz)
+!
+!   call compute_all_metrics(x,y,z,bx,by,bz,Mout)
+!
+! end subroutine reconnection
 
 end module compute

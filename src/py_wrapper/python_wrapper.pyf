@@ -1,0 +1,41 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module magnetosphere-T-models ! in 
+    interface  ! in :magnetosphere-T-models
+        module compute ! in :magnetosphere-T-models:python_wrapper.f90
+            subroutine ta16(date,data,x,y,z,bx,by,bz,nx,ny,nz) ! in :magnetosphere-T-models:python_wrapper.f90:compute
+                use control, only: calculate_ta16,setup_ta16_model
+                integer dimension(4),intent(in) :: date
+                real(kind=8) dimension(8),intent(in) :: data
+                real(kind=8) dimension(nx),intent(in) :: x
+                real(kind=8) dimension(ny),intent(in) :: y
+                real(kind=8) dimension(nz),intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bz
+                integer, optional,intent(in),check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
+                integer, optional,intent(in),check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
+                integer, optional,intent(in),check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
+            end subroutine ta16
+            subroutine ts05(date,data,x,y,z,bx,by,bz,nx,ny,nz) ! in :magnetosphere-T-models:python_wrapper.f90:compute
+                use control, only: calculate_ta16,setup_ta16_model
+                integer dimension(4),intent(in) :: date
+                real(kind=8) dimension(14),intent(in) :: data
+                real(kind=8) dimension(nx),intent(in) :: x
+                real(kind=8) dimension(ny),intent(in) :: y
+                real(kind=8) dimension(nz),intent(in) :: z
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bx
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: by
+                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bz
+                integer, optional,intent(in),check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
+                integer, optional,intent(in),check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
+                integer, optional,intent(in),check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
+            end subroutine ts05
+        end module compute
+    end interface 
+end python module magnetosphere-T-models
+
+! This file was auto-generated with f2py (version:2.4.2).
+! See:
+! https://web.archive.org/web/20140822061353/http://cens.ioc.ee/projects/f2py2e

@@ -150,7 +150,7 @@ contains
 
   end subroutine setup_TA16_model
 
-  subroutine setup_grid(x,y,z,Bx,By,Bz)
+  subroutine setup_grid(InFileName,x,y,z,Bx,By,Bz)
 
     implicit none
 
@@ -161,8 +161,10 @@ contains
     real(8), dimension(:), allocatable, intent(inout) :: x,y,z
     real(8), dimension(:,:,:), allocatable, intent(inout) :: Bx, By, Bz
 
+    character(*), intent(in) :: InFileName
+
     ! Get input parameters for grid
-    open(newunit=file, file='input_parameters.txt', status='old', action='read')
+    open(newunit=file, file=InFileName, status='old', action='read')
     read(file, *) !skip the header line
     read(file, *) xmin, xmax, ymin, ymax, zmin, zmax, nx, ny, nz
     close(file)

@@ -16,7 +16,8 @@ contains
     real(8), intent(in), dimension(:) :: x,y,z
     ! Input File params
     integer, intent(in) :: year,day,hour,mint
-    real(8), intent(in) :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+    real(8), intent(in) :: ivx,ivz,tilt,pydn,symhc,nind,aby
+    real(8), intent(inout) :: ivy
 
     !! Outputs !!
     real(8), intent(out), dimension(:,:,:) :: Bx, By, Bz
@@ -82,7 +83,8 @@ contains
   real(8), intent(in), dimension(:) :: x,y,z
   ! Input File params
   integer, intent(in) :: year,day,hour,mint
-  real(8), intent(in) :: ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6
+  real(8), intent(in) :: ivx,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6
+  real(8), intent(inout) :: ivy
 
   !! Outputs !!
   real(8), intent(out), dimension(:,:,:) :: Bx, By, Bz

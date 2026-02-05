@@ -1,25 +1,30 @@
 module compute
 
   implicit none
-
+  
 contains
 
-  subroutine TA16(date,data,x,y,z,Bx,By,Bz,nx,ny,nz)
+  subroutine TA16(date,data,x,y,z,Bx,By,Bz,nx,ny,nz) bind(c, name="ta16")
 
     use control, only : calculate_TA16, setup_TA16_model
+    use iso_c_binding
 
     !! Input !!
-    integer, intent(in) :: nx, ny, nz
-    real(8), intent(in) :: x(nx), y(ny), z(nz)
-    real(8), intent(in) :: data(8)
-    integer, intent(in) :: date(4)
+    integer(c_int), intent(in) :: nx, ny, nz
+    real(c_double), intent(in), dimension(nx) :: x
+    real(c_double), intent(in), dimension(ny) :: y
+    real(c_double), intent(in), dimension(nz) :: z
+    real(c_double), intent(in), dimension(8) :: data
+    integer(c_int), intent(in), dimension(4) :: date
 
     !! Output !!
-    real(8), intent(out) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
+    real(c_double), intent(out) :: Bx(nx,ny,nz), By(nx,ny,nz), Bz(nx,ny,nz)
 
     !! Vars for exploding arrays !!
     integer :: year,day,hour,mint
     real(8) :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
+
+    print *, "un-exploding data"
 
     year = date(1)
     day = date(2)
@@ -34,12 +39,16 @@ contains
     nind = data(7)
     aby = data(8)
 
+    print *, "calling setup"
+
     call setup_TA16_model()
-    call calculate_TA16(year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby,x,y,z,Bx,By,Bz)
+    print *, "calling calculate"
+    call calculate_TA16(year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,&
+                        aby,x,y,z,Bx,By,Bz)
     
   end subroutine TA16
 
-! subroutine TS05(date,data,x,y,z,Bx,By,Bz,nx,ny,nz)
+! subroutine TS05(date,data,x,y,z,Bx,By,Bz,nx,ny,nz) bind(c, name='ts05')
 
 !   use control, only : calculate_TA16, setup_TA16_model
 
@@ -75,7 +84,8 @@ contains
 !   w5 = data(13)
 !   w6 = data(14)
 
-!   call calculate_TS05(year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6,x,y,z,Bx,By,Bz)
+!   call calculate_TS05(year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symh,iby,&
+!                       ibz,w1,w2,w3,w4,w5,w6,x,y,z,Bx,By,Bz)
 !   
 ! end subroutine TS05
 

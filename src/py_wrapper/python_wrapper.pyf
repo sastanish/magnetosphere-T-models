@@ -1,40 +1,396 @@
 !    -*- f90 -*-
 ! Note: the context of this file is case sensitive.
 
-python module magnetosphere-T-models ! in 
-    interface  ! in :magnetosphere-T-models
-        module compute ! in :magnetosphere-T-models:python_wrapper.f90
-            subroutine ta16(date,data,x,y,z,bx,by,bz,nx,ny,nz) ! in :magnetosphere-T-models:python_wrapper.f90:compute
-                use control, only: calculate_ta16,setup_ta16_model
-                integer dimension(4),intent(in) :: date
-                real(kind=8) dimension(8),intent(in) :: data
-                real(kind=8) dimension(nx),intent(in) :: x
-                real(kind=8) dimension(ny),intent(in) :: y
-                real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bz
-                integer, optional,intent(in),check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
-                integer, optional,intent(in),check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
-                integer, optional,intent(in),check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
-            end subroutine ta16
-            subroutine ts05(date,data,x,y,z,bx,by,bz,nx,ny,nz) ! in :magnetosphere-T-models:python_wrapper.f90:compute
-                use control, only: calculate_ta16,setup_ta16_model
-                integer dimension(4),intent(in) :: date
-                real(kind=8) dimension(14),intent(in) :: data
-                real(kind=8) dimension(nx),intent(in) :: x
-                real(kind=8) dimension(ny),intent(in) :: y
-                real(kind=8) dimension(nz),intent(in) :: z
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bx
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: by
-                real(kind=8) dimension(nx,ny,nz),intent(out),depend(nx,ny,nz) :: bz
-                integer, optional,intent(in),check(shape(x, 0) == nx),depend(x) :: nx=shape(x, 0)
-                integer, optional,intent(in),check(shape(y, 0) == ny),depend(y) :: ny=shape(y, 0)
-                integer, optional,intent(in),check(shape(z, 0) == nz),depend(z) :: nz=shape(z, 0)
-            end subroutine ts05
-        end module compute
+python module magnetoTmodels ! in 
+    interface  ! in :magnetoTmodels
+        subroutine calculate_rbf_centers ! in :magnetoTmodels:unknown_interface
+        end subroutine calculate_rbf_centers
+        subroutine read_ta16_pars ! in :magnetoTmodels:unknown_interface
+        end subroutine read_ta16_pars
+        subroutine rbf_model_2016(iopt,parmod,ps,x,y,z,bx,by,bz) ! in :magnetoTmodels:unknown_interface
+            integer :: iopt
+            real*8 dimension(10) :: parmod
+            real*8 :: ps
+            real*8 :: x
+            real*8 :: y
+            real*8 :: z
+            real*8 :: bx
+            real*8 :: by
+            real*8 :: bz
+        end subroutine rbf_model_2016
     end interface 
-end python module magnetosphere-T-models
+    subroutine t04_s(iopt,parmod,ps,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        integer :: iopt
+        real*8 dimension(10) :: parmod
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+    end subroutine t04_s
+    subroutine extern_bn(iopgen,iopt,iopb,iopr,a,ntot,pdyn,dst,bximf,byimf,bzimf,w1,w2,w3,w4,w5,w6,ps,x,y,z,bxcf,bycf,bzcf,bxt1,byt1,bzt1,bxt2,byt2,bzt2,bxsrc,bysrc,bzsrc,bxprc,byprc,bzprc,bxr11,byr11,bzr11,bxr12,byr12,bzr12,bxr21,byr21,bzr21,bxr22,byr22,bzr22,hximf,hyimf,hzimf,bx,by,bz) ! in :../core/TS05.f
+        integer :: iopgen
+        integer :: iopt
+        integer :: iopb
+        integer :: iopr
+        real dimension(ntot) :: a
+        integer, optional,check(shape(a, 0) == ntot),depend(a) :: ntot=shape(a, 0)
+        real :: pdyn
+        real :: dst
+        real :: bximf
+        real :: byimf
+        real :: bzimf
+        real :: w1
+        real :: w2
+        real :: w3
+        real :: w4
+        real :: w5
+        real :: w6
+        real :: ps
+        real :: x
+        real :: y
+        real :: z
+        real :: bxcf
+        real :: bycf
+        real :: bzcf
+        real :: bxt1
+        real :: byt1
+        real :: bzt1
+        real :: bxt2
+        real :: byt2
+        real :: bzt2
+        real :: bxsrc
+        real :: bysrc
+        real :: bzsrc
+        real :: bxprc
+        real :: byprc
+        real :: bzprc
+        real :: bxr11
+        real :: byr11
+        real :: bzr11
+        real :: bxr12
+        real :: byr12
+        real :: bzr12
+        real :: bxr21
+        real :: byr21
+        real :: bzr21
+        real :: bxr22
+        real :: byr22
+        real :: bzr22
+        real :: hximf
+        real :: hyimf
+        real :: hzimf
+        real :: bx
+        real :: by
+        real :: bz
+        real :: dxshift1
+        real :: dxshift2
+        real :: d
+        real :: deltady
+        real :: xkappa1
+        real :: xkappa2
+        real :: sc_sy
+        real :: sc_as
+        real :: phi
+        real :: g
+        real, optional :: rh0=7.5d0
+        common /tail/ dxshift1,dxshift2,d,deltady
+        common /birkpar/ xkappa1,xkappa2
+        common /rcpar/ sc_sy,sc_as,phi
+        common /g/ g
+        common /rh0/ rh0
+    end subroutine extern_bn
+    subroutine shlcar3x3(x,y,z,ps,bx,by,bz) ! in :../core/TS05.f
+        real :: x
+        real :: y
+        real :: z
+        real :: ps
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine shlcar3x3
+    subroutine deformed(iopt,ps,x,y,z,bx1,by1,bz1,bx2,by2,bz2) ! in :../core/TS05.f
+        integer :: iopt
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx1
+        real*8 :: by1
+        real*8 :: bz1
+        real*8 :: bx2
+        real*8 :: by2
+        real*8 :: bz2
+        real*8 :: rh0
+        common /rh0/ rh0
+    end subroutine deformed
+    subroutine warped(iopt,ps,x,y,z,bx1,by1,bz1,bx2,by2,bz2) ! in :../core/TS05.f
+        integer :: iopt
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx1
+        real*8 :: by1
+        real*8 :: bz1
+        real*8 :: bx2
+        real*8 :: by2
+        real*8 :: bz2
+        real*8 :: g
+        common /g/ g
+    end subroutine warped
+    subroutine unwarped(iopt,x,y,z,bx1,by1,bz1,bx2,by2,bz2) ! in :../core/TS05.f
+        integer :: iopt
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx1
+        real*8 :: by1
+        real*8 :: bz1
+        real*8 :: bx2
+        real*8 :: by2
+        real*8 :: bz2
+        real*8 :: dxshift1
+        real*8 :: dxshift2
+        real*8 :: d0
+        real*8 :: deltady
+        common /tail/ dxshift1,dxshift2,d0,deltady
+    end subroutine unwarped
+    subroutine taildisk(d0,deltadx,deltady,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real*8 :: d0
+        real*8 :: deltadx
+        real*8 :: deltady
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+    end subroutine taildisk
+    subroutine shlcar5x5(a,x,y,z,dshift,hx,hy,hz) ! in :../core/TS05.f
+        real dimension(60) :: a
+        real :: x
+        real :: y
+        real :: z
+        real :: dshift
+        real :: hx
+        real :: hy
+        real :: hz
+    end subroutine shlcar5x5
+    subroutine birk_tot(iopb,ps,x,y,z,bx11,by11,bz11,bx12,by12,bz12,bx21,by21,bz21,bx22,by22,bz22) ! in :../core/TS05.f
+        integer :: iopb
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx11
+        real*8 :: by11
+        real*8 :: bz11
+        real*8 :: bx12
+        real*8 :: by12
+        real*8 :: bz12
+        real*8 :: bx21
+        real*8 :: by21
+        real*8 :: bz21
+        real*8 :: bx22
+        real*8 :: by22
+        real*8 :: bz22
+        real*8 :: xkappa1
+        real*8 :: xkappa2
+        real*8 :: dphi
+        real*8 :: b
+        real*8 :: rho_0
+        real*8 :: xkappa
+        common /birkpar/ xkappa1,xkappa2
+        common /dphi_b_rho0/ dphi,b,rho_0,xkappa
+    end subroutine birk_tot
+    subroutine birk_1n2(numb,mode,ps,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        integer :: numb
+        integer :: mode
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+        integer :: m
+        real*8 :: dtheta
+        real*8 :: dphi
+        real*8 :: b
+        real*8 :: rho_0
+        real*8 :: xkappa
+        common /modenum/ m
+        common /dtheta/ dtheta
+        common /dphi_b_rho0/ dphi,b,rho_0,xkappa
+    end subroutine birk_1n2
+    subroutine twocones(a,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real*8 dimension(31) :: a
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+    end subroutine twocones
+    subroutine one_cone(a,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real*8 dimension(31) :: a
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+        real*8 :: dtheta
+        integer :: m
+        common /dtheta/ dtheta
+        common /modenum/ m
+    end subroutine one_cone
+    function r_s(a,r,theta) ! in :../core/TS05.f
+        real*8 dimension(31) :: a
+        real*8 :: r
+        real*8 :: theta
+        double precision :: r_s
+    end function r_s
+    function theta_s(a,r,theta) ! in :../core/TS05.f
+        real*8 dimension(31) :: a
+        real*8 :: r
+        real*8 :: theta
+        double precision :: theta_s
+    end function theta_s
+    subroutine fialcos(r,theta,phi,btheta,bphi,n,theta0,dt) ! in :../core/TS05.f
+        real*8 :: r
+        real*8 :: theta
+        real*8 :: phi
+        real*8 :: btheta
+        real*8 :: bphi
+        integer :: n
+        real*8 :: theta0
+        real*8 :: dt
+    end subroutine fialcos
+    subroutine birk_shl(a,ps,x_sc,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real dimension(86) :: a
+        real :: ps
+        real :: x_sc
+        real :: x
+        real :: y
+        real :: z
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine birk_shl
+    subroutine full_rc(iopr,ps,x,y,z,bxsrc,bysrc,bzsrc,bxprc,byprc,bzprc) ! in :../core/TS05.f
+        integer :: iopr
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bxsrc
+        real*8 :: bysrc
+        real*8 :: bzsrc
+        real*8 :: bxprc
+        real*8 :: byprc
+        real*8 :: bzprc
+        real*8 :: sc_sy
+        real*8 :: sc_pr
+        real*8 :: phi
+        common /rcpar/ sc_sy,sc_pr,phi
+    end subroutine full_rc
+    subroutine src_prc(iopr,sc_sy,sc_pr,phi,ps,x,y,z,bxsrc,bysrc,bzsrc,bxprc,byprc,bzprc) ! in :../core/TS05.f
+        integer :: iopr
+        real*8 :: sc_sy
+        real*8 :: sc_pr
+        real*8 :: phi
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bxsrc
+        real*8 :: bysrc
+        real*8 :: bzsrc
+        real*8 :: bxprc
+        real*8 :: byprc
+        real*8 :: bzprc
+    end subroutine src_prc
+    subroutine rc_symm(x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real :: x
+        real :: y
+        real :: z
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine rc_symm
+    function ap(r,sint,cost) ! in :../core/TS05.f
+        real :: r
+        real :: sint
+        real :: cost
+        double precision :: ap
+    end function ap
+    subroutine prc_symm(x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real :: x
+        real :: y
+        real :: z
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine prc_symm
+    function apprc(r,sint,cost) ! in :../core/TS05.f
+        real :: r
+        real :: sint
+        real :: cost
+        double precision :: apprc
+    end function apprc
+    subroutine prc_quad(x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real :: x
+        real :: y
+        real :: z
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine prc_quad
+    function br_prc_q(r,sint,cost) ! in :../core/TS05.f
+        real :: r
+        real :: sint
+        real :: cost
+        double precision :: br_prc_q
+    end function br_prc_q
+    function bt_prc_q(r,sint,cost) ! in :../core/TS05.f
+        real :: r
+        real :: sint
+        real :: cost
+        double precision :: bt_prc_q
+    end function bt_prc_q
+    subroutine ffs(a,a0,da,f,fa,fs) ! in :../core/TS05.f
+        real :: a
+        real :: a0
+        real :: da
+        real :: f
+        real :: fa
+        real :: fs
+    end subroutine ffs
+    subroutine rc_shield(a,ps,x_sc,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real dimension(86) :: a
+        real :: ps
+        real :: x_sc
+        real :: x
+        real :: y
+        real :: z
+        real :: bx
+        real :: by
+        real :: bz
+    end subroutine rc_shield
+    subroutine dipole(ps,x,y,z,bx,by,bz) ! in :../core/TS05.f
+        real*8 :: ps
+        real*8 :: x
+        real*8 :: y
+        real*8 :: z
+        real*8 :: bx
+        real*8 :: by
+        real*8 :: bz
+    end subroutine dipole
+end python module magnetoTmodels
 
 ! This file was auto-generated with f2py (version:2.4.2).
 ! See:

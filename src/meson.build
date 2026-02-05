@@ -1,17 +1,21 @@
 project('magnetosphere-T-models', 'fortran',
         version : '1.0',
-        default_options : ['warning_level=3']
+        default_options : ['warning_level=1']
        )
 
 # Vars
 
 netcdf_dep = dependency('netcdf', language: 'fortran')
 
+omp_dep = dependency('openmp', required: false)
+
 fortran_sources = files('core/geopack.f', 'core/inout.f90', 'core/TA16_RBF.f', 'core/TS05.f', 'core/control.f90', 'main_program.f90')
 
 # Fortran main
 add_languages('fortran')
-executable('main_ta16.out', fortran_sources, dependencies : netcdf_dep)
+executable('main_ta16.out',
+           fortran_sources,
+           dependencies : [netcdf_dep, omp_dep])
 
 # Python module
 #py_mod = import('python')

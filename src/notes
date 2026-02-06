@@ -1,0 +1,3 @@
+compile the core as a shared lib.
+Then link this lib to the python wrapper via f90wrap
+f90wra- --direct-c

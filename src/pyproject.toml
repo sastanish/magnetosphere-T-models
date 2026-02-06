@@ -1,0 +1,14 @@
+[build-system]
+build-backend = 'mesonpy'
+requires = ['meson-python', 'numpy']
+
+[project]
+name = 'magneotTmodels'
+version = '0.1'
+description = 'magnetosphere models'
+readme = 'README.md'
+requires-python = '>=3.8'
+license = {file = 'LICENSE.txt'}
+authors = [
+  {name = 'Sage Stanish', email = 'sage.stanish@glasgow.ac.uk'},
+]

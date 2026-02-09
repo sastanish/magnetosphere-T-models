@@ -12,7 +12,7 @@ netcdf_dep = dependency('netcdf', language: 'fortran')
 
 omp_dep = dependency('openmp', required: false)
 
-core_sources = files('core/geopack.f', 'core/inout.f90', 'core/TA16_RBF.f', 'core/TS05.f', 'core/control.f90', 'py_wrapper/ctype_wrapper.f90')
+core_sources = files('core/geopack.f', 'core/inout.f90', 'core/TA16_RBF.f', 'core/TS05.f', 'core/control.f90', 'python_wrapper/ctype_wrapper.f90')
 core = library('magnetomodels', 
                core_sources, 
                dependencies : [netcdf_dep, omp_dep],

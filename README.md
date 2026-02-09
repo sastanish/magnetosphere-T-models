@@ -1,4 +1,6 @@
-# Summary
+# Magnetosphere T. Models
+
+Magnetosphere T. Models are a collection of fortran and python source that computes the magnetic field of Earth's magnetosphere . 
 
 This collection of files is a fortran wrapper of the magnetosphere field models of N. A. Tsyganenko. See his [website](https://geo.phys.spbu.ru/~tsyganenko/empirical-models/) for the original fortran codes and documentation.  This project extends Tsyganenko's original codes with parallelized helper functions. These use the magnetosphere models to efficiently generate full-field data stored in standard netcdf format. Included with the original magnetosphere modelling functionallity, is a small program that can calculate the local reconnection rate as defined in [this](https://arxiv.org/abs/2502.01251) paper.
 

@@ -1,7 +1,6 @@
 program main
 
-  use control, only : setup_grid, setup_TA16_model, read_TA16_input_data, calculate_TA16
-!  use control, only : setup_grid,  read_TS05_input_data, calculate_TS05
+  use control, only : setup_grid, setup_TA16_model, read_TA16_input_data, calculate_TA16, progress_bar
   use inputOutput, only : save_field_to_netcdf
 
   implicit none
@@ -14,8 +13,6 @@ program main
 
   ! TA16 params
   real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symhc,nind,aby
-  ! TS05 params
-  !real(8), dimension(:), allocatable :: ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6
 
   ! vars
   integer :: n
@@ -33,22 +30,16 @@ program main
 
   call setup_grid('input_parameters.txt',x,y,z,Bx,By,Bz)
 
-  !! TA16 Version !!
   call setup_TA16_model()
   call read_TA16_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symhc,nind,aby)
-
-  !! TS05 Version !!
-  !!call read_TS05_input_data('input_data.lst',year,day,hour,mint,ivx,ivy,ivz,tilt,pydn,symh,iby,ibz,w1,w2,w3,w4,w5,w6)
 
   do n = start_ind,end_ind
 
     call calculate_TA16(year(n),day(n),hour(n),mint(n),ivx(n),ivy(n),ivz(n),tilt(n),pydn(n),symhc(n),nind(n),aby(n),x,y,z,Bx,By,Bz)
-    !call calculate_TS05(year(n),day(n),hour(n),mint(n),ivx(n),ivy(n),ivz(n),tilt(n),pydn(n),symh(n),iby(n),ibz(n),w1(n),w2(n),w3(n),w4(n),w5(n),w6(n),x,y,z,Bx,By,Bz)
 
-    ! Write to file
     write( str_ind, '(I4)' ) n
-    print *, 'Writing '//'output_'//trim(adjustl(str_ind))//'.nc'
     call save_field_to_netcdf(x,y,z,Bx,By,Bz,'output_'//trim(adjustl(str_ind))//'.nc')
+    call progress_bar(n,end_ind-start_ind,'output_'//trim(adjustl(str_ind))//'.nc')
 
   end do
 

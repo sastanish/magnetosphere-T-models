@@ -1,5 +1,6 @@
 module control
   implicit none
+  integer, parameter :: dp = kind(0.0d0)
 
 contains
 
@@ -98,7 +99,6 @@ contains
 
   call RECALC_08(year, day, hour, mint, 0, ivx, ivy, ivz)
 
-  !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(x,y,z,Bx,By,Bz)
   parmod(1) = pydn
   parmod(2) = symh
   parmod(3) = iby
@@ -110,6 +110,7 @@ contains
   parmod(9) = w5
   parmod(10) = w6
 
+  !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(x,y,z,Bx,By,Bz)
   !$OMP DO COLLAPSE(3)
   do k = 1,size(z)
     do j = 1,size(y)
@@ -285,5 +286,23 @@ contains
     end do
     close(file)
   end subroutine get_num_lines
+
+  subroutine progress_bar(current_num,total_num,message)
+
+    integer, intent(in) :: current_num,total_num
+    character(*), intent(in), optional :: message
+
+    real :: percentage_complete
+    integer :: i
+    character(12) :: bar="[----------]"
+
+    percentage_complete = (1.0_dp*current_num)/(1.0_dp*total_num)
+    do i = 1,int(percentage_complete*10.0)
+      bar(i+1:i+1) = "="
+    end do
+
+    write (*,'("Calculating: ",A,X,A,X,f5.1,"%",A)', advance='no') message, bar, percentage_complete*100, char(13)
+
+  end subroutine progress_bar
 
 end module control

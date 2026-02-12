@@ -97,8 +97,6 @@ contains
 
   ivy = ivy + 29.78 !velocity correction
 
-  call RECALC_08(year, day, hour, mint, 0, ivx, ivy, ivz)
-
   parmod(1) = pydn
   parmod(2) = symh
   parmod(3) = iby
@@ -109,6 +107,8 @@ contains
   parmod(8) = w4
   parmod(9) = w5
   parmod(10) = w6
+
+  call RECALC_08(year, day, hour, mint, 0, ivx, ivy, ivz)
 
   !$OMP PARALLEL PRIVATE(parmod,xx,yy,zz,hhx,hhy,hhz,bbx,bby,bbz,i,j,k) SHARED(x,y,z,Bx,By,Bz)
   !$OMP DO COLLAPSE(3)

@@ -1,29 +1,36 @@
-project('magnetomodels', 'fortran',
-        version : '1.0',
-        default_options : ['warning_level=1', 'python.install_env=auto']
+project('magnetosphere-T-models', 'fortran',
+        version : '0.1',
+        default_options : ['warning_level=1']
        )
 
 add_languages('fortran')
-add_languages('c')
 
 # Vars
-
 netcdf_dep = dependency('netcdf', language: 'fortran')
-
 omp_dep = dependency('openmp', required: false)
+lib_install_dir = join_paths(meson.global_source_root(), 'lib')
+bin_install_dir = join_paths(meson.global_source_root(), 'bin')
 
-core_sources = files('core/geopack.f', 'core/inout.f90', 'core/TA16_RBF.f', 'core/TS05.f', 'core/control.f90', 'magnetomodels/ctype_wrapper.f90')
-core = library('magnetomodels', 
-               core_sources, 
+# Main Fortran Library
+core_files = files('src/core/geopack.f', 'src/core/inout.f90', 'src/core/TA16_RBF.f', 'src/core/TS05.f', 'src/core/control.f90')
+core = static_library('magnetosphere-T-models', 
+               core_files, 
                dependencies : [netcdf_dep, omp_dep],
-               install : true)
+               install : true,
+               install_dir : lib_install_dir)
 
-# Fortran main
-executable('main_ta16.out',
-           'main_program.f90',
+# Fortran Main Files
+executable('run_ta16.out',
+           'src/main/run_ta16.f90',
            link_with: core,
-           dependencies : [netcdf_dep, omp_dep]
+           dependencies : [netcdf_dep, omp_dep],
+           install : true,
+           install_dir : bin_install_dir
            )
-
-# Python module
-
+executable('run_ts05.out',
+           'src/main/run_ts05.f90',
+           link_with: core,
+           dependencies : [netcdf_dep, omp_dep],
+           install : true,
+           install_dir : bin_install_dir
+           )

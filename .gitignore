@@ -22,3 +22,8 @@
 # Exclude custom python env
 .env/
 activate_py_env
+
+# Build files
+build/*
+lib/*
+bin/*

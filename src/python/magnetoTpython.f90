@@ -1,4 +1,4 @@
-module magnetomodels
+module magnetoTpython
   use iso_c_binding
   implicit none
   contains
@@ -37,4 +37,4 @@ subroutine TA16(date,data,x,y,z,Bx,By,Bz,nx,ny,nz) bind(c, name='ta16')
   
 end subroutine TA16
 
-end module magnetomodels
+end module magnetoTpython

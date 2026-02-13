@@ -27,25 +27,26 @@ def ta16(date,data,x,y,z):
   return (bx, by, bz)
 
 if __name__=="__main__":
-  lib_name = 'magnetomodels'
+
+  lib_name = 'magnetoTpython'
+  install_path = os.path.dirname(os.path.realpath(__file__))
+  print(install_path)
 
   if os.name == 'posix': # Linux or macOS
     if os.uname().sysname == 'Darwin': # macOS
-      lib_path = util.find_library(lib_name) or os.path.join(os.path.expanduser('~/.local/lib'), f'lib{lib_name}.dylib')
+      lib_path = install_path + f'../../lib/lib{lib_name}.dylib'
     else: # Linux
-      lib_path = util.find_library(lib_name) or os.path.join(os.path.expanduser('~/.local/lib'), f'lib{lib_name}.so')
+      lib_path = install_path + f'../../lib/lib{lib_name}.so'
   elif os.name == 'nt': # Windows
-      lib_path = util.find_library(lib_name) or os.path.join(os.environ['LOCALAPPDATA'], 'Programs', 'Python', 'Python3X', 'Lib', 'site-packages', f'{lib_name}.dll')
+      lib_path = install_path + f'../../lib/{lib_name}.dll')
   else:
     raise RuntimeError("Unsupported operating system")
 
   if not lib_path:
-    raise FileNotFoundError(f"Could not find shared library '{lib_name}'. Make sure it's installed or in your system's library path.")
+    raise FileNotFoundError(f"Could not find shared library '{lib_name}'. Make sure it's installed.")
 
   try:
     fortran_lib = CDLL(lib_path)
   except OSError as e:
     print(f"Error loading library: {e}")
     print(f"Attempted path: {lib_path}")
-
-

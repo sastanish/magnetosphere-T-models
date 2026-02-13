@@ -3,7 +3,7 @@ build-backend = 'mesonpy'
 requires = ['meson-python', 'numpy']
 
 [project]
-name = 'magnetomodels'
+name = 'magnetoTmodels'
 version = '0.1'
 description = 'magnetosphere models'
 readme = 'README.md'

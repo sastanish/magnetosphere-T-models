@@ -34,3 +34,21 @@ executable('run_ts05.out',
            install : true,
            install_dir : bin_install_dir
            )
+
+# Python Wrapper
+
+py_wrapper_files = files('src/core/geopack.f', 'src/core/TA16_RBF.f', 'src/core/TS05.f', 'src/core/control.f90', 'src/python/magnetoTpython.f90')
+py_wrapper = static_library('magnetoTpython',
+                            py_wrapper_files, 
+                            dependencies : [omp_dep],
+                            install : true,
+                            install_dir : lib_install_dir)
+
+# Python Library
+py_mod = import('python')
+py = py_mod.find_installation(pure : false)
+
+py.install_sources(['src/python/magnetoTmodels.py'],
+                   install_dir : join_paths(bin_install_dir,'python')
+                   )
+

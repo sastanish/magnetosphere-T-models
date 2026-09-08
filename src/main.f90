@@ -158,7 +158,8 @@ contains
 
     open(newunit=file, file=filename, status='old', action='read')
     do i = 1,nlines
-      read(file,*) year(i),day(i),hour(i),mint(i),ibx,iby,ibz,ivx(i),ivy(i),ivz(i),den,temp,pydn(i),aeind,symh,imf,sw,tilt(i),rp,abx,aby(i),abz,nind(i),symhc(i)
+      read(file,*) year(i),day(i),hour(i),mint(i),ibx,iby,ibz,ivx(i),ivy(i),ivz(i),&
+                   den,temp,pydn(i),aeind,symh,imf,sw,tilt(i),rp,abx,aby(i),abz,nind(i),symhc(i)
     end do
     close(file)
   end subroutine read_input_data
